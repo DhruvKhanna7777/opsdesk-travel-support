@@ -1,0 +1,68 @@
+# OpsDesk demo and submission
+
+This is a synthetic, local prototype. Start from a fresh clone with Node.js 22.23.x:
+
+```sh
+npm ci
+npm run ops:preview
+```
+
+Open `http://127.0.0.1:3000` and sign in as `manager@opsdesk.demo` with the password in the [demo account guide](../OPSDESK_README.md#demo-accounts). The first launch creates local secrets, initializes PostgreSQL, applies migrations and seeds 60 cases. It can take longer than later starts. Wait for both `/health/ready` and `/health/worker` to return 200 before testing.
+
+## Reset and verification
+
+Use a **new disposable clone** to reset the demo. The launcher intentionally preserves an existing `.opsdesk/postgres` database, so restarting the app does not reset records. Do not run the inherited generic reset endpoint; it refuses travel profiles. Keep any existing checkout or local database until its owner has explicitly decided whether to retain it.
+
+The Linux validation workflow starts from a fresh GitHub checkout with Node 22.23.x and an isolated PostgreSQL 18 service. It applies migrations, seeds synthetic data and runs recovery, API, load, Chromium, Firefox and production dependency checks. [TBO integration run](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43251910212) passed all of those steps. The local fresh checkout passed `npm ci` under the host's Node 24, then ran the preview and `node scripts/tbo-workflow-smoke.mjs` (39 checks) and `node scripts/browser-smoke.mjs` (manager, agent, agency, customer and supplier journey) under Node 22.23.0. The first embedded database startup exceeded the previous 20-second launcher wait; the separate database start and preview then succeeded. The accompanying change extends the wait to 60 seconds. A fresh embedded-database launch with that change still needs a rerun.
+
+## Demo journeys
+
+The two-iteration finish plan calls for journeys A-E but does not define them. These are the current repository's five demonstrable paths; replace this mapping if a separate acceptance brief defines A-E.
+
+| Journey | Show | Observable check |
+| --- | --- | --- |
+| A. Intake and booking context | Manager finds `OPS-1042`, opens its verified booking reference (TBOH), earlier case and saved case brief. | Booking and related case are linked; the brief cites saved records. |
+| B. Supplier coordination | Staff opens the case's separate supplier thread, sends a question, and Aster's supplier account replies. | Supplier sees only shared threads; customer and agency views hide the supplier exchange. |
+| C. Ownership and deadlines | Manager views owner, priority, cancellation cutoff (LCD) and deadline; show routing and the demo clock in a disposable workspace. | Saved deadlines and audit history remain visible after staff actions. |
+| D. EM escalation | Scoped staff uses **Escalate to EM** with a reason. Manager filters **Needs attention** to EM escalations and acknowledges the notification. | Urgent priority, one audit event on retry and an acknowledged alert. |
+| E. Insights and export | Filter the queue by intent, open a weekly theme example, then use **Export all**. | Filtered, role-scoped rows extend beyond the visible page. |
+
+The [TBO workflow](OPSDESK_TBO_WORKFLOW.md) and [Iteration 1 workflow](OPSDESK_ITERATION_ONE.md) give the exact role and data boundaries. The browser and HTTP suites automate parts of each path; a recorded end-to-end manual walkthrough of these five mapped journeys remains to be captured.
+
+## 3-5 minute walkthrough script
+
+| Time | Narration and action |
+| --- | --- |
+| 0:00-0:35 | Sign in as manager. Explain that the workspace shows synthetic, role-scoped travel cases. Find `OPS-1042`. |
+| 0:35-1:15 | Open the case. Point out TBOH/booking context, saved brief, earlier case and LCD. The brief is generated from records, without an external AI call. |
+| 1:15-2:00 | Open supplier threads. Show the private conversation and explain that recipients are independently editable and survive case transfer. Switch to Aster's supplier login to show the reply scope. |
+| 2:00-2:45 | Return as staff. Escalate to EM with a reason; open the manager's EM queue and acknowledge the notification. Point to the activity record and unchanged case owner/deadline. |
+| 2:45-3:30 | Filter by intent, open Insights and a linked weekly theme example, then export all matching cases. Explain agency scope and streamed rows beyond one page. |
+| 3:30-4:10 | Switch to Maya or the agency account. Show that staff notes and supplier threads are absent. Close with the local-only deployment boundary. |
+
+Record this on a reset synthetic clone. Do not advance the demo clock on a shared workspace. A screen recording has not been produced in this increment.
+
+## Architecture and cost comparison
+
+```text
+Browser (Next.js) -> /api/backend proxy -> NestJS /ops routes
+                                      -> PostgreSQL (cases, sessions, audit, mail outbox)
+                                      -> optional Redis in production
+```
+
+The local demo runs Next.js, NestJS and embedded PostgreSQL on one machine. It uses records-based summaries and keyword suggestions; no LLM, booking provider or outbound email fee is required. The optional mail pilot remains disabled by default. A live deployment would need managed database and Redis, HTTPS hosting, secrets, mail, monitoring, backups and the owner approvals listed in the [handoff](OPSDESK_HANDOFF.md). No provider or workload has been approved, so a hosted OpsDesk monthly estimate is not yet defensible.
+
+| Option | Published or known cost basis | What the comparison includes |
+| --- | --- | --- |
+| Local OpsDesk demo | No paid API or hosted service is required; machine, electricity and staff time are excluded. | Synthetic workflow demonstration only. |
+| Hosted OpsDesk | Application compute, PostgreSQL, Redis, storage, mail, monitoring and support labor must be quoted for a chosen workload and region. | Custom TBO workflow and operational ownership; no production price claim. |
+| Zendesk Support Team | [Zendesk lists $19 per agent/month, paid yearly](https://www.zendesk.com/pricing/), as viewed 12 Nov 2026. Five agent seats would be $95/month before add-ons and taxes. | Vendor ticketing baseline, not a feature-equivalent TBO implementation or a migration quote. |
+| Zendesk Suite Team | [Zendesk lists $55 per agent/month, paid yearly](https://www.zendesk.com/pricing/), as viewed 12 Nov 2026. Five agent seats would be $275/month before add-ons and taxes. | Broader vendor support channels; custom integration and data migration are separate. |
+
+## Evidence and open decisions
+
+- [Synthetic case screenshot](assets/tbo-case-evidence.png) from the fresh local preview.
+- [Linux TBO integration CI](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43251910212): fresh setup, API, recovery, load, Chromium, Firefox and audit passed.
+- [Local TBO/API and browser detail](OPSDESK_VALIDATION.md#tbo-workflow).
+- A fresh embedded-database launch after the 60-second wait change, an A-E walkthrough recording and acceptance against any separate A-E brief remain open.
+- Live retention approval, external workspace compatibility, live booking/mail, scanner monitoring and authorized staging recovery remain open. Deployment stays paused.
