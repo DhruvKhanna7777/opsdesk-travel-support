@@ -5,6 +5,7 @@ import {
   HttpCode,
   HttpStatus,
   Ip,
+  NotFoundException,
   UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
@@ -20,6 +21,8 @@ export class AuthController {
   @Post('register')
   @UseGuards(TurnstileGuard)
   register(@Body() dto: RegisterDto) {
+    if (process.env.OPSDESK_HOSTED_DEMO === 'true')
+      throw new NotFoundException();
     return this.authService.register(
       dto.email,
       dto.password,

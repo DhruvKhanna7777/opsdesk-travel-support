@@ -3,6 +3,7 @@ import { ValidationPipe } from '@nestjs/common';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
 import type { NestExpressApplication } from '@nestjs/platform-express';
+import { hostedDemoGate } from './hosted-demo-gate';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
@@ -30,6 +31,10 @@ async function bootstrap() {
   // underlying Express instance.
   const expressApp = app.getHttpAdapter().getInstance();
   expressApp.set('trust proxy', 1);
+  if (process.env.OPSDESK_HOSTED_DEMO === 'true')
+    expressApp.use(
+      hostedDemoGate(process.env.OPSDESK_HOSTED_DEMO_GATE_SECRET!),
+    );
   // A 2 MiB attachment becomes roughly 2.8 MiB when encoded as JSON base64.
   app.useBodyParser('json', { limit: '3mb' });
 

@@ -1,4 +1,9 @@
-import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Request } from 'express';
 import { TurnstileService } from '../../common/services/turnstile.service';
 import { InvalidTurnstileTokenException } from '../exceptions/invalid-turnstile-token.exception';
@@ -21,6 +26,8 @@ export class TurnstileGuard implements CanActivate {
   constructor(private turnstile: TurnstileService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    if (process.env.OPSDESK_HOSTED_DEMO === 'true')
+      throw new NotFoundException();
     const request = context.switchToHttp().getRequest<Request>();
     const body = request.body as unknown;
     const token =
