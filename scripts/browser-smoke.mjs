@@ -191,7 +191,7 @@ try {
   await manager.getByRole("heading", { name: subject }).waitFor();
   await manager.getByRole("button", { name: "Edit recipients" }).click();
   await manager
-    .getByLabel("Aster Reservations", { exact: true })
+    .getByRole("combobox", { name: "Aster Reservations", exact: true })
     .selectOption("TO");
   await manager.getByRole("button", { name: "Save recipients" }).click();
   await manager
@@ -235,7 +235,6 @@ try {
     await customerThread.getByText(draft, { exact: true }).count(),
     0,
   );
-  const fileButton = replyRow.getByRole('button', { name: /browser-fixture.txt/ });
   assert(
     await manager.getByRole("button", { name: "Send reply" }).isDisabled(),
   );
@@ -249,6 +248,7 @@ try {
   await replyRow.locator('input[type=file]').setInputFiles({
     name: 'browser-fixture.txt', mimeType: 'text/plain', buffer: attachmentBytes,
   });
+  const fileButton = replyRow.getByRole('button', { name: /browser-fixture.txt/ });
   await fileButton.waitFor();
   const downloadEvent = manager.waitForEvent('download');
   await fileButton.click();

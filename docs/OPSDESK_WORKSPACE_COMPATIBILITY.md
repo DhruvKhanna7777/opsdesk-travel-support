@@ -195,6 +195,8 @@ and mutating suites remain sequential. [Verified summary checks](OPSDESK_VALIDAT
 
 ## Evidence required before retirement
 
+The Iteration 1 CSV export reads the authenticated queue scope directly in bounded batches. It does not consume or replace either workspace response mode. Recipient editing and themes use dedicated scoped endpoints. The owner evidence below still applies to full-workspace retirement.
+
 1. Have the application/integration owner identify callers and environments,
    response fields used, maintainer, replacement routes and migration state.
    Record an explicit owner attestation even if the inventory is empty.
