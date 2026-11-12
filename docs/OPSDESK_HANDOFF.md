@@ -1,5 +1,13 @@
 # OpsDesk developer handoff
 
+## Workspace observation summary continuation
+
+Starting main `c99ca5b` includes merged PR #70; zero PRs were open at the initial check. [Post-merge CI 43226554929](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43226554929) passed builds, API, Chromium, Firefox, synthetic recovery, load/startup and audit before this follow-up was edited. Earlier merge/open-PR descriptions below are historical.
+
+`npm run --silent ops:summarize-workspace-observations -- --input LOG` now prepares a fixed-schema aggregate from a frozen local observation log, with raw-byte provenance, role/mode counts and optional inclusive-start/exclusive-end UTC filtering. It supports standard Nest/JSON lines and BOM-tagged Windows encodings, rejects malformed recognized records, and emits only line-number/error-code diagnostics. Reports omit raw content and filenames, always leave retirement unassessed, and cannot prove collection coverage or identify clients. [Procedure and limits](OPSDESK_WORKSPACE_COMPATIBILITY.md#summarize-a-frozen-observation-log) · [Validation](OPSDESK_VALIDATION.md#workspace-observation-summary).
+
+The captured synthetic 156-record log reproduced 21 full / 135 compact counts. A bounded view reproduced the known 10 full / 9 compact probe, excluding 137 other records. This is tooling evidence, not external usage acceptance. The full response remains supported; owner inventory, authorized observation coverage and consumer migration acceptance are still required. Deployment remains paused; leave merges to collaborators.
+
 ## Workspace usage observation continuation
 
 Starting main `169d4be` includes merged PR #69, with zero open PRs at this increment's initial check. [Post-merge CI 43222335689](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43222335689) passed API, Chromium, Firefox, synthetic recovery, load/startup and audit. Earlier statements that #69 is open are historical.

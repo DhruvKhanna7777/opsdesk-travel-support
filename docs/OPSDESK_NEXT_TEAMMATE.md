@@ -1,5 +1,13 @@
 # OpsDesk continuation checkpoint — 12 November 2026
 
+## Workspace observation summary continuation
+
+PR #70 is merged at starting main `c99ca5b`, with zero open PRs at the initial check. [Post-merge validation](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43226554929) passed both browsers, API, recovery, load/startup and audit. Older open-PR wording below is historical.
+
+Review the offline workspace-observation summary increment. It adds strict parsing, role/mode aggregates, raw-byte provenance and optional UTC bounds; malformed input fails and all reports keep retirement unassessed. Nine standalone test groups and the previously captured 156-record synthetic log passed. [Use and limitations](OPSDESK_WORKSPACE_COMPATIBILITY.md#summarize-a-frozen-observation-log) · [Verified results](OPSDESK_VALIDATION.md#workspace-observation-summary).
+
+> Fetch latest main and inspect open PRs and actual CI before editing. Review the observation-summary PR and leave merging to collaborators. Obtain an owner-attested external caller inventory, an authorized observation period with collection/duplicate checks, and consumer migration acceptance before retirement. Keep observation disabled by default and preserve the full response, compact metadata, authorization, redaction, isolation, sessions, saved deadlines, idempotency and audits. Use Node 22.23.x, npm ci and isolated synthetic data; run mutating suites sequentially. Performance/workload/cold-cache acceptance, human classifier labels, observable speech, live booking/mail, scanner monitoring, retention and authorized staging recovery remain pending. No live booking provider is selected. Deployment stays paused.
+
 ## Workspace usage observation continuation
 
 PR #69 is merged at starting main `169d4be`; zero PRs were open at the initial check. [Post-merge CI](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43222335689) passed API, Chromium, Firefox, synthetic recovery, load/startup and audit. Earlier open-PR statements below are historical.

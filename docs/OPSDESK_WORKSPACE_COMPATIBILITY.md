@@ -14,6 +14,12 @@ owner reported that no access-log format or external caller inventory is
 available. Optional observation below prepares future evidence collection;
 external compatibility remains unconfirmed.
 
+PR #70 is now merged at `c99ca5b360827b79ebf6732ebcd4d042fafa3400`.
+[Its post-merge CI](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43226554929)
+passed builds, API, Chromium, Firefox, synthetic recovery, load/startup and audit.
+The continuation below adds an offline summary of the emitted records; it does
+not establish external usage or consumer acceptance.
+
 This follow-up starts from main `527931d27471971405d5aa7b48c9487532b1f34b`,
 with PRs #65–#68 merged and zero open PRs at the initial check. Main run
 [43187098916](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43187098916)
@@ -126,6 +132,66 @@ dates, environments, collector availability and known synthetic traffic, then
 combine that evidence with the owner-attested inventory and consumer acceptance
 below. This increment only exercises synthetic local traffic; it does not enable
 logging in a deployed environment or approve retention, deployment or retirement.
+
+## Summarize a frozen observation log
+
+After stopping collection, keep a frozen local copy and run:
+
+```powershell
+npm run --silent ops:summarize-workspace-observations -- --input .opsdesk/workspace-observation.log > .opsdesk/workspace-observation-summary.json
+```
+
+Use `--silent` when redirecting npm output so the report contains only JSON.
+The equivalent direct command is
+`node scripts/workspace-observation-summary.mjs --input LOG`.
+This tool reads a local file without starting the application or contacting a
+database/service. Keep raw logs and generated reports under ignored `.opsdesk/`;
+they are not automatically published or committed.
+
+To select a UTC interval, supply both bounds in canonical millisecond ISO form:
+
+```powershell
+npm run --silent ops:summarize-workspace-observations -- --input .opsdesk/workspace-observation.log --from 2026-11-12T12:00:00.000Z --to 2026-11-13T12:00:00.000Z > .opsdesk/workspace-observation-window.json
+```
+
+The start is inclusive, the end exclusive, and the start must precede the end.
+All recognized records are validated, including records outside the selected
+interval. Without bounds, all valid recognized records are included. The report
+gives included/excluded/invalid counts, full/compact counts by allowlisted role,
+earliest/latest included timestamps, encoding, line/byte counts and a SHA-256 of
+the original file bytes. It contains no filename, raw event, request or error
+content. Diagnostics contain only line numbers and fixed error codes, capped at
+50 entries while retaining the total invalid-record count.
+
+Supported input is one producer JSON object per line, either plain or with the
+standard Nest prefix/ANSI colors. CRLF and UTF-8 (with or without BOM) work;
+UTF-16 LE/BE requires a BOM. Invalid encoding, NUL-containing input and lines
+over 1,048,576 decoded code units fail without a partial report. Collector JSON
+wrappers with nested events need local normalization into this supported format;
+unrelated lines are ignored. Recognized malformed JSON, duplicate/extra fields,
+unknown versions, invalid UTC timestamps, modes or roles mark the report invalid.
+Future event versions need explicit parser support.
+
+| Result                                                                    | Status / exit code                                                      |
+| ------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| Full-mode records included                                                | `legacy-reads-observed` / 0                                             |
+| Only compact records included                                             | `compact-only-observed` / 0                                             |
+| No records included, including an empty or out-of-window file             | `no-events` / 0                                                         |
+| Any invalid recognized record                                             | `invalid-input` / 1; do not use its partial counts as accepted evidence |
+| Invalid arguments/window, unreadable file, encoding or line-limit failure | No JSON report / 2; redacted fixed-code diagnostic on stderr            |
+
+Exit 0 means the summary was usable, **not compatibility acceptance**. Every
+report fixes `retirement` to `not-assessed` and `collectionCoverage` to
+`unverified`. Counts describe log rows, not proven delivered requests or unique
+clients. Identical rows are retained because the event has no request ID; a
+collector replay or duplicated export can inflate counts. The hash identifies
+the bytes read, not their authenticity or completeness. Freeze the export before
+reading and verify collector coverage/duplicates separately. Empty or compact-only
+reports cannot establish that external full-response consumers are absent.
+
+Run `npm run ops:test:workspace-observations` for the standalone offline tests.
+The same tests run first in `npm run ops:test`; existing authorization/redaction
+and mutating suites remain sequential. [Verified summary checks](OPSDESK_VALIDATION.md#workspace-observation-summary).
 
 ## Evidence required before retirement
 
