@@ -195,10 +195,9 @@ try {
   }
   async function open() {
     await page.reload();
-    await page.getByLabel("Search conversations", { exact: true }).fill(reason);
     await page
-      .getByRole("button", { name: reason + " refund", exact: true })
-      .click();
+      .getByRole("heading", { name: reason + " refund", exact: true })
+      .waitFor();
   }
   await advance(1);
   await open();
