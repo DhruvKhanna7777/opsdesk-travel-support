@@ -35,6 +35,7 @@ import {
   BookingScheduleDto,
   ConversationStatusDto,
   ClockDto,
+  EscalateToEmDto,
   NewConversationDto,
   NewTravelTicketDto,
   SupplierReplyDto,
@@ -173,6 +174,13 @@ export class TravelController {
     @Param('alertId') alertId: string,
   ) {
     return this.travel.acknowledgeAlert(req.user.userId, id, alertId);
+  }
+  @Post('tickets/:id/escalate-to-em') escalateToEm(
+    @Req() req: AuthenticatedRequest,
+    @Param('id') id: string,
+    @Body() dto: EscalateToEmDto,
+  ) {
+    return this.travel.escalateToEm(req.user.userId, id, dto);
   }
   @Get('tickets/:id/related') related(
     @Req() req: AuthenticatedRequest,

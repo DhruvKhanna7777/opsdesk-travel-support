@@ -45,6 +45,7 @@ import {
 import {
   AgentSpecialtiesDto,
   BookingScheduleDto,
+  EscalateToEmDto,
   NewConversationDto,
   NewTravelTicketDto,
   SupplierReplyDto,
@@ -56,6 +57,7 @@ import {
   CHECK_IN_HIGH_HOURS,
   chooseAgent,
   classify,
+  EM_ALERT_KIND,
   effectiveDeadline,
   PRIORITIES,
   RESPONSE_WINDOW_MS,
@@ -65,7 +67,7 @@ import {
 type Tx = Prisma.TransactionClient;
 type Profile = Prisma.TravelProfileGetPayload<{ include: { user: true } }>;
 type Case = Prisma.TravelTicketGetPayload<object>;
-const ALERT_KINDS = ['ESCALATED', 'SUPPLIER_OVERDUE'];
+const ALERT_KINDS = ['ESCALATED', 'SUPPLIER_OVERDUE', EM_ALERT_KIND];
 @Injectable()
 export class TravelService implements OnApplicationBootstrap, OnModuleDestroy {
   private timer: ReturnType<typeof setInterval>;
@@ -225,7 +227,7 @@ export class TravelService implements OnApplicationBootstrap, OnModuleDestroy {
   }
   async queue(userId: string, query: TravelQueueDto) {
     const p = await this.profile(userId);
-    if (query.attention) this.staff(p);
+    if (query.attention || query.em) this.staff(p);
     const page = await readTravelQueue(
       this.db,
       this.scope(p),
@@ -298,7 +300,7 @@ export class TravelService implements OnApplicationBootstrap, OnModuleDestroy {
     const profile = await this.profile(userId);
     if (profile.kind === 'SUPPLIER')
       throw new ForbiddenException('Case export is unavailable to suppliers.');
-    if (query.attention) this.staff(profile);
+    if (query.attention || query.em) this.staff(profile);
     return this.exportRows(profile, query, await this.now());
   }
 
@@ -936,6 +938,11 @@ export class TravelService implements OnApplicationBootstrap, OnModuleDestroy {
                     { agentId: null },
                     { deadline: { lte: now } },
                     {
+                      events: {
+                        some: { kind: EM_ALERT_KIND, acknowledgedAt: null },
+                      },
+                    },
+                    {
                       conversations: {
                         some: { status: 'AWAITING_REPLY', dueAt: { lte: now } },
                       },
@@ -1150,6 +1157,49 @@ export class TravelService implements OnApplicationBootstrap, OnModuleDestroy {
         now,
       );
       return { acknowledgedAt: now };
+    });
+  }
+  async escalateToEm(userId: string, ticketId: string, dto: EscalateToEmDto) {
+    return this.ticketLocked(ticketId, async (tx) => {
+      const profile = await this.profile(userId, tx);
+      this.staff(profile);
+      const ticket = await this.ticket(profile, ticketId, tx);
+      const uniqueKey = `em:${ticketId}:${dto.requestId.toLowerCase()}`;
+      const retry = await tx.travelEvent.findUnique({
+        where: { uniqueKey },
+        select: { id: true },
+      });
+      if (retry) return { alertId: retry.id };
+      if (!active(ticket.status))
+        throw new BadRequestException(
+          'Reopen the case before escalating to EM.',
+        );
+      const outstanding = await tx.travelEvent.findFirst({
+        where: { ticketId, kind: EM_ALERT_KIND, acknowledgedAt: null },
+        select: { id: true },
+      });
+      if (outstanding)
+        throw new BadRequestException(
+          'This case already has an outstanding EM escalation.',
+        );
+      const now = await this.now(tx);
+      const alert = await tx.travelEvent.create({
+        data: {
+          ticketId,
+          uniqueKey,
+          kind: EM_ALERT_KIND,
+          actorId: userId,
+          createdAt: now,
+          text: `Escalated to EM. Previous priority ${ticket.priority}. Reason ${dto.reason.trim()}`,
+        },
+        select: { id: true },
+      });
+      await tx.travelTicket.update({
+        where: { id: ticketId },
+        data: { priority: 'URGENT', updatedAt: now },
+      });
+      await this.refreshEscalationOwner(tx, ticket, now);
+      return { alertId: alert.id };
     });
   }
   async create(userId: string, dto: NewTravelTicketDto) {
