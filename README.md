@@ -2,6 +2,8 @@
 
 The TBO workflow labels the verified booking reference and cancellation cutoff, adds a case intent filter and lets scoped staff send audited EM escalations to the existing manager queue. [Workflow and prototype retention policy](docs/OPSDESK_TBO_WORKFLOW.md)
 
+For the reset procedure, five mapped demo journeys, short walkthrough, architecture/cost comparison and current evidence, see the [demo submission guide](docs/OPSDESK_SUBMISSION.md).
+
 Iteration 1 adds editable recipients on supplier threads, staff-managed case themes with linked weekly Insights examples, and **Export all** for the current case filters. Recipient changes preserve the case owner, supplier, and saved deadlines. CSV exports use the caller's queue scope and stream matching rows in bounded batches. [Workflow, scope and test commands](docs/OPSDESK_ITERATION_ONE.md)
 
 Workspace compatibility remains supported while external consumer migration is unconfirmed. The browser and CI authentication probe use compact metadata; dedicated HTTP tests retain full-response scope and requester redaction coverage. [Caller inventory, paged replacement routes and retirement gates](docs/OPSDESK_WORKSPACE_COMPATIBILITY.md).

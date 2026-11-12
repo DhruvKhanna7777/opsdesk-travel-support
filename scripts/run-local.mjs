@@ -53,7 +53,9 @@ try {
     connectionTimeoutMillis: 1000,
   });
   let ready = false;
-  for (let i = 0; i < 40; i++) {
+  // First-time embedded PostgreSQL initialization can outlast the 20-second
+  // readiness window on slower Windows hosts.
+  for (let i = 0; i < 120; i++) {
     try {
       await pool.query("SELECT 1");
       ready = true;
@@ -65,7 +67,7 @@ try {
   await pool.end();
   if (!ready)
     throw new Error(
-      "Local PostgreSQL did not become ready. Check the database output above.",
+      "Local PostgreSQL did not become ready within 60 seconds. Check the database output above.",
     );
   await run(["run", "prisma:generate", "--workspace=backend"]);
   await run([
