@@ -28,6 +28,10 @@ Main `0310cd5` includes the startup profiler. Both PR and main CI passed, includ
 
 > Continue from latest main. Check open PRs and CI. Run the local blind form with `npm run ops:review-classifier`, then ask a human reviewer to complete and adjudicate labels, save and freeze the exported JSON under ignored `.opsdesk/`, and run the evaluator in `--dataset` mode. Obtain observable spoken screen-reader evidence using the acceptance guide. Continue representative booking/identity workloads and controlled-cache testing. Use Node 22.23.x and isolated synthetic data. Keep deployment paused and leave merging to collaborators.
 
+## Continue after the independent directory fixture PR
+
+> Continue OpsDesk in DhruvKhanna7777/opsdesk-travel-support. Fetch main and inspect open PRs and their Chromium/Firefox steps. Main d378ca0 and open PRs #65–#67 had both browsers passing at the start of this increment. Read the handoff, backlog, validation and acceptance guides. Review the codex/independent-directory-fixtures PR. The pagination and directory suites use fixture counts and exact scoped IDs from the synthetic database. Combined with #67 this removes full-workspace reads from the core, pagination and directory workflows. The legacy route still has a deliberate rotation compatibility check and an unauthenticated CI probe. Confirm external consumer compatibility before retiring the full response. Use Node 22.23.x, npm ci and an isolated ops:preview. Run mutating suites sequentially and preserve authorization, agency isolation, sessions, deadlines, idempotency and audit history. Approved workloads and targets, cold-cache evidence, human classifier labels, spoken accessibility, live booking and mail, scanner monitoring, retention and authorized staging recovery remain pending. No provider is selected. Leave merge decisions to collaborators and deployment paused.
+
 ## API process-start continuation
 
 Use the startup profiler procedure to reproduce the local measurements and interpret their scope. [Procedure and limits](OPSDESK_STARTUP_PROFILE.md)

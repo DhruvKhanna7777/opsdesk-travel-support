@@ -90,6 +90,14 @@ The CI-equivalent rerun passed with the default 30-second readiness limit. Suppl
 
 The three startup guard tests and six classifier tooling tests passed. Syntax, formatting and whitespace checks passed. The loopback blind review form served 18 unlabelled examples. Human labels and spoken screen-reader acceptance remain pending. The populated probe exercises the supplier list. Representative traffic, supplier history reads and controlled caches remain open. Deployment remains paused.
 
+## Independent pagination and directory fixtures
+
+Main `d378ca0` and open PRs #65–#67 all passed both Chromium and Firefox at the start of this increment. This branch is based on main and changes neither the application nor the legacy endpoint. The pagination test reads the seeded case and booking from the database and independently counts baseline cases in the customer's agency scope. Directory tests compare complete paged result IDs with expected fixture relationships for eight identities. The fixtures cover agency ownership, regional access, booking and case customers, staff profiles and supplier-thread participants. Search counts, booking order, page validation and agent filters remain covered.
+
+Local Windows verification on Node 22.23.0 reused the pinned npm ci installation. The shared, backend and frontend builds passed. The complete API regression command exited zero, including 91 backend unit tests, 121 core HTTP checks, 123 pagination checks, 190 directory checks and all other sequential suites. A separate rerun on the final directory script passed 190 HTTP checks plus its optional Chromium test for booking and owner search, second-page selection and retained selection. An independent SQL check found zero remaining pagination-prefixed bookings, cases, messages, conversations, profiles and users. Script formatting, syntax and whitespace checks passed. The full browser suites are tracked by the hosted run on this PR.
+
+The CI probe uses the workspace route without authentication and checks only HTTP 401. The rotation suite still deliberately checks requester redaction in the compatibility response. Confirm external caller compatibility before retiring the full workspace response.
+
 # API process-start profile - 11 November 2026
 
 Started from main `8c1d546925ff67400f59d1c946ab57ff1ab96d1f` after PR #56 merged. Both its [PR validation](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43071338763) and [post-merge main run](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43071756560) passed, including Chromium, Firefox, the reviewer form, API/recovery/load and audit.

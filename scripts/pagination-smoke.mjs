@@ -65,13 +65,26 @@ try {
     europe = await login("europe"),
     supplier = await login("supplier"),
     wrongSupplier = await login("skyline");
-  const workspace = await call("/ops/workspace", manager);
-  const source = workspace.tickets.find((t) => t.reference === "OPS-1042");
-  const booking = workspace.bookings.find((b) => b.id === source.bookingId);
+  const {
+    rows: [source],
+  } = await pool.query(
+    `SELECT t."agencyId", t."customerId", t."bookingId", t.region, b."supplierId"
+     FROM "TravelTicket" t JOIN "TravelBooking" b ON b.id = t."bookingId"
+     WHERE t.reference = 'OPS-1042'`,
+  );
+  assert(source, "Missing seeded OPS-1042 case and booking");
+  const {
+    rows: [baseline],
+  } = await pool.query(
+    `SELECT count(*)::int AS total, count(*) FILTER (
+       WHERE "bookingId" = $1 AND "agencyId" = $2 AND "customerId" = $3
+     )::int AS related FROM "TravelTicket"`,
+    [source.bookingId, source.agencyId, source.customerId],
+  );
   const supplierProfile = (
     await pool.query(
       'SELECT "userId" FROM "TravelProfile" WHERE "supplierId" = $1 LIMIT 1',
-      [booking.supplierId],
+      [source.supplierId],
     )
   ).rows[0];
   assert(supplierProfile);
@@ -95,7 +108,7 @@ try {
     const conversationId = `${prefix}-thread-${i}`;
     await pool.query(
       `INSERT INTO "TravelConversation" (id,"ticketId","supplierId",subject,status,"dueAt","createdAt") VALUES ($1,$2,$3,'Pagination supplier thread','CLOSED',$4,$4)`,
-      [conversationId, ticketId, booking.supplierId, date],
+      [conversationId, ticketId, source.supplierId, date],
     );
     for (const visibility of ["CUSTOMER", "INTERNAL", "SUPPLIER"]) {
       await pool.query(
@@ -118,7 +131,7 @@ try {
   const compact = await call("/ops/workspace?compact=1", manager);
   assert.deepEqual(compact.tickets, []);
   assert.deepEqual(compact.conversations, []);
-  assert.equal(compact.counts.total, workspace.tickets.length + 45);
+  assert.equal(compact.counts.total, baseline.total + 45);
   const queue = await call("/ops/queue?tab=all", manager);
   assert.equal(queue.items.length, queue.ids.length);
   assert(
@@ -159,14 +172,15 @@ try {
     45,
   );
   assert(publicEvents.items.every((e) => !e.text.includes("private reason")));
-  const related = workspace.tickets.filter(
-    (t) => t.bookingId === source.bookingId,
-  ).length;
-  await allPages(`/ops/tickets/${ticketId}/related`, customer, related + 44);
+  await allPages(
+    `/ops/tickets/${ticketId}/related`,
+    customer,
+    baseline.related + 44,
+  );
   await allPages(
     `/ops/bookings/${source.bookingId}/tickets`,
     customer,
-    related + 45,
+    baseline.related + 45,
   );
   for (const suffix of ["", "/messages", "/events", "/related"]) {
     for (const token of [other, europe, supplier])
@@ -186,7 +200,7 @@ try {
   const supplierThreads = await call("/ops/conversations", supplier);
   assert(
     supplierThreads.items.every(
-      (c) => c.supplierId === booking.supplierId && c.messages.length === 0,
+      (c) => c.supplierId === source.supplierId && c.messages.length === 0,
     ),
   );
   await call("/ops/conversations?page=0", supplier, 400);

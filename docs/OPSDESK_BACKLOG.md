@@ -199,6 +199,10 @@ The primary HTTP workflow suite uses compact workspace metadata, paged directori
 
 The optional query profiler now compares targeted PostgreSQL shared-buffer eviction with immediate warm repeats for a deep synthetic message page. OS-cache control, representative traffic and owner-approved performance targets remain open. [Procedure](OPSDESK_QUERY_PROFILE.md#message-shared-buffer-experiment)
 
+### Independent pagination and directory fixtures
+
+Pagination setup reads the seeded case and booking from the synthetic database. Directory coverage compares paged results to exact fixture IDs for eight identities, including both suppliers. The CI authentication probe and deliberate rotation compatibility assertion still reference the legacy workspace path. Confirm external caller compatibility before retiring its full response. [Verification](OPSDESK_VALIDATION.md#independent-pagination-and-directory-fixtures)
+
 ## [P2] Add grounded optional AI with a measured evaluation
 
 [GitHub issue #8](https://github.com/DhruvKhanna7777/opsdesk-travel-support/issues/8)

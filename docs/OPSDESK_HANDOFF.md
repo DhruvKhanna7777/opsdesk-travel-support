@@ -52,6 +52,10 @@ PR #57 is merged at `0310cd5` with passing PR and post-merge CI. The supplier st
 
 Independent human labels and spoken screen-reader acceptance remain pending. Use the [acceptance review guide](OPSDESK_ACCEPTANCE_REVIEW.md). Deployment remains paused.
 
+## Independent pagination and directory fixtures
+
+Pagination and directory smoke now use synthetic database rows for setup and expectations. Directory checks compare exact scoped booking and people IDs, retain filtering and compact metadata coverage, and exercise both supplier identities. The legacy full response remains available for compatibility. The CI authentication probe and rotation redaction test still reference that path. [Verification and next work](OPSDESK_VALIDATION.md#independent-pagination-and-directory-fixtures)
+
 ## API process-start continuation
 
 The startup profiler records readiness, login and scoped reads using a fresh API process and disposable database clone for each probe. [Profiler procedure](OPSDESK_STARTUP_PROFILE.md)
