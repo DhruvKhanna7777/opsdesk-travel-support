@@ -1,5 +1,11 @@
 # OpsDesk developer handoff
 
+## TBO workflow
+
+This follow-up uses the Iteration 1 export and is stacked on [PR #72](https://github.com/DhruvKhanna7777/opsdesk-travel-support/pull/72). The parent [hosted validation](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43242581733) passed, including Chromium and Firefox. The TBO follow-up adds TBOH/LCD labels, intent filtering, and a scoped EM escalation action and manager queue filter. It documents prototype ticket retention. [Workflow](OPSDESK_TBO_WORKFLOW.md) · [Validation](OPSDESK_VALIDATION.md#tbo-workflow)
+
+Next complete the demo and submission work. Live retention approval, external workspace retirement evidence and other live acceptance remain open. Leave merges to collaborators. Deployment stays paused.
+
 ## Iteration 1
 
 Starting main `3b969be` includes PR #71. Both [PR CI](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43229442639) and [post-merge main CI](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43229536644) passed, including API, Chromium, Firefox, synthetic recovery, load, startup and production audit. No PRs were open when this increment started.
