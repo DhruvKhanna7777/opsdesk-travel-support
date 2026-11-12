@@ -52,7 +52,7 @@ Managers can configure supplier response hours, weekly schedules, local holidays
 
 A local travel-support prototype that connects complaints to agencies, customers, bookings, earlier cases and private supplier conversations. Built with Next.js, NestJS, Prisma and PostgreSQL on the [IT Helpdesk foundation](https://github.com/Molnar-Zoltan/it-helpdesk).
 
-Start with the [next-teammate checkpoint](docs/OPSDESK_NEXT_TEAMMATE.md), [developer handoff](docs/OPSDESK_HANDOFF.md), [full setup and demo guide](OPSDESK_README.md), and [prioritized backlog](docs/OPSDESK_BACKLOG.md). Development and pull requests belong to [DhruvKhanna7777/opsdesk-travel-support](https://github.com/DhruvKhanna7777/opsdesk-travel-support).
+Start with the [next-teammate checkpoint](docs/OPSDESK_NEXT_TEAMMATE.md), [developer handoff](docs/OPSDESK_HANDOFF.md), [full setup and demo guide](OPSDESK_README.md), and [prioritized backlog](docs/OPSDESK_BACKLOG.md). Development and pull requests belong to [KrishChadha001/opsdesk-travel-support](https://github.com/KrishChadha001/opsdesk-travel-support).
 
 ## Screenshots
 
@@ -69,7 +69,7 @@ Real local screenshots using synthetic records. Select an image to open it at fu
 Use **Node.js 22.23.x** and npm. The local demo uses embedded PostgreSQL; Docker, an external database account and an AI API key are not required.
 
 ```sh
-git clone https://github.com/DhruvKhanna7777/opsdesk-travel-support.git
+git clone https://github.com/KrishChadha001/opsdesk-travel-support.git
 cd opsdesk-travel-support
 npm ci
 npm run ops:preview
