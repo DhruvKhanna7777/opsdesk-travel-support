@@ -60,7 +60,7 @@ jobs:
           for attempt in $(seq 1 240); do
             if ! kill -0 "$preview_pid" 2>/dev/null; then break; fi
             web_status=$(curl --max-time 2 -s -o /dev/null -w '%{http_code}' http://127.0.0.1:3000 || true)
-            api_status=$(curl --max-time 2 -s -o /dev/null -w '%{http_code}' http://127.0.0.1:3001/ops/workspace || true)
+            api_status=$(curl --max-time 2 -s -o /dev/null -w '%{http_code}' 'http://127.0.0.1:3001/ops/workspace?compact=1' || true)
             ready_status=$(curl --max-time 2 -s -o /dev/null -w '%{http_code}' http://127.0.0.1:3001/health/ready || true)
             worker_status=$(curl --max-time 2 -s -o /dev/null -w '%{http_code}' http://127.0.0.1:3001/health/worker || true)
             if [ "$web_status" = 200 ] && [ "$api_status" = 401 ] && [ "$ready_status" = 200 ] && [ "$worker_status" = 200 ]; then ready=true; break; fi

@@ -1,0 +1,90 @@
+# Workspace response compatibility
+
+## Decision
+
+Keep `GET /ops/workspace` available. Repository callers have been inventoried,
+but external caller compatibility is **unconfirmed**. A source search and passing
+synthetic tests cannot establish that no external clients exist. No retirement
+date, changed default or production rollout is authorized. Deployment stays paused.
+
+This follow-up starts from main `527931d27471971405d5aa7b48c9487532b1f34b`,
+with PRs #65–#68 merged and zero open PRs at the initial check. Main run
+[43187098916](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43187098916)
+passed the API suite, Chromium, Firefox, synthetic recovery and dependency audit.
+Earlier documents describing these PRs as open are historical.
+
+## Repository caller inventory
+
+Reproduce from the repository root with
+`rg -n 'ops/workspace|workspace\?compact|request\("workspace' .github scripts frontend backend/src`.
+Also inspect the frontend request helper and backend controller: the browser uses
+a relative route through the BFF rather than a literal `/ops/workspace` URL.
+
+| Caller                                       | Mode and migration status                                                                                                                                                                       |
+| -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `frontend/components/opsdesk/workspace.tsx`  | `workspace?compact=1`; case and directory content comes from separate paged routes.                                                                                                             |
+| `.github/workflows/opsdesk-ci.yml`           | Authentication readiness probe now uses `?compact=1`, still requiring HTTP 401. Separate health and worker probes remain.                                                                       |
+| `scripts/smoke-test.mjs`                     | Compact metadata plus paged/case-specific reads, including unauthenticated denial and session refresh checks.                                                                                   |
+| Pagination, directory and membership scripts | Compact metadata; pagination/directory expectations come from independent synthetic database fixtures.                                                                                          |
+| Browser and membership-browser scripts       | Verify compact browser requests and session authorization.                                                                                                                                      |
+| `scripts/rotation-smoke.mjs`                 | Intentional full-response compatibility test for requester escalation-field redaction. Keep until replacement compatibility policy is approved. Detail and queue redaction also remain covered. |
+| `scripts/workspace-compatibility-smoke.mjs`  | Intentional compatibility consumer. Tests full and compact HTTP behavior against independent fixture IDs for nine identities, including both suppliers. Included sequentially in `ops:test`.    |
+| External clients, scripts or integrations    | Unknown. No owner inventory, access-log observation or consumer migration acceptance was supplied.                                                                                              |
+
+## Supported behavior and migration map
+
+The controller opts into compact mode only for `compact=1`. An omitted flag or
+`compact=0` still returns the legacy authorized arrays. Do not silently change
+that default. Both modes require an active authenticated travel profile.
+
+Compact metadata retains identity, effective time/demo-clock fields, assistant
+mode, scoped agencies, counts and notifications. Its `tickets`, `conversations`,
+`bookings` and `people` arrays stay empty. Full-response counts currently contain
+zero placeholders; consumers needing counts must use compact metadata. Full
+arrays are compatibility data, not a substitute for bounded paged reads.
+
+| Full response dependency                         | Supported replacement                                                                     |
+| ------------------------------------------------ | ----------------------------------------------------------------------------------------- |
+| Identity, clock, counts, agencies, notifications | `/ops/workspace?compact=1`                                                                |
+| Cases and case context                           | `/ops/queue`, `/ops/tickets/:id`                                                          |
+| Customer messages, activity and related history  | `/ops/tickets/:id/messages`, `/ops/tickets/:id/events`, `/ops/tickets/:id/related`        |
+| Bookings and people                              | `/ops/bookings`, `/ops/people`                                                            |
+| Booking case history                             | `/ops/bookings/:id/tickets`                                                               |
+| Supplier threads and messages                    | `/ops/conversations`, `/ops/tickets/:id/conversations`, `/ops/conversations/:id/messages` |
+
+Walk each paged response using its returned page metadata; do not assume page one
+contains the full workspace. Continue to enforce authorization on every read.
+Requester messages/events and escalation fields remain redacted. Supplier
+identities receive only their shared conversations, with no case or booking
+snapshot. People directories retain their existing staff/context visibility;
+this increment does not redefine that policy.
+
+## Evidence required before retirement
+
+1. Have the application/integration owner identify callers and environments,
+   response fields used, maintainer, replacement routes and migration state.
+   Record an explicit owner attestation even if the inventory is empty.
+2. In an authorized environment, agree an observation period covering normal and
+   infrequent jobs. Review existing access logs or approved instrumentation for
+   requests without `compact=1`. The current repository has no verified
+   production observation; do not treat local test traffic as evidence.
+3. Obtain each consumer owner's acceptance of paging, empty compact arrays,
+   scoped counts, authorization/session handling and redaction. Preserve saved
+   deadlines, idempotency and audit behavior through end-to-end workflows.
+4. Record the inventory, observation dates/environment, evidence location,
+   consumer acceptance and owner decision in the handoff. Keep credentials,
+   customer content and private logs out of Git.
+5. Propose retirement separately with an approved compatibility notice, rollback
+   procedure and retained positive/negative authorization and redaction tests.
+   Full-response removal is blocked until the preceding evidence exists.
+
+The compatibility suite adds resolved synthetic cases with customer/internal
+messages, private status reasons, escalation fields and separate threads for both
+supplier login accounts. Expectations come from database rows rather than API
+parity. It removes its cases and verifies cascading case/thread/message/event
+cleanup in `finally`, including after a failed assertion.
+
+Run `node scripts/workspace-compatibility-smoke.mjs` only against the isolated
+synthetic preview, or run `npm run ops:test` for this test plus the session,
+rotation, paged-read and other regression suites. Run mutating API, browser and
+load commands sequentially. See [verified results](OPSDESK_VALIDATION.md#workspace-compatibility-continuation).

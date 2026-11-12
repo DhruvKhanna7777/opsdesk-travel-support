@@ -1,5 +1,13 @@
 # OpsDesk developer handoff
 
+## Workspace compatibility continuation
+
+Verified starting main is `527931d27471971405d5aa7b48c9487532b1f34b`, with PRs #65–#68 merged and no open PRs at the initial check. [Main run 43187098916](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43187098916) passed API, Chromium, Firefox, synthetic recovery and dependency audit. This supersedes earlier merge/open-PR descriptions below.
+
+The CI authentication probe now requests compact metadata while retaining its 401 assertion. A dedicated full/compact HTTP compatibility suite checks independent fixture scopes across nine identities, including both suppliers, requester message/event and escalation-field redaction, and empty compact arrays. The rotation suite retains its deliberate legacy requester-redaction assertion. The full response remains supported; **external compatibility is unconfirmed and retirement is blocked** pending consumer inventory, authorized traffic evidence and owner migration acceptance. See the [inventory and migration guide](OPSDESK_WORKSPACE_COMPATIBILITY.md) and [verified validation](OPSDESK_VALIDATION.md#workspace-compatibility-continuation).
+
+Approved workloads/targets, controlled cold-cache evidence, independent human classifier labels/adjudication, observable screen-reader speech, live booking/email, production scanner monitoring, retention and an authorized staging restore remain pending. No live booking provider is selected. Leave merges to collaborators and keep deployment paused.
+
 ## Supplier profiler checkpoint
 
 PR #64 merged at main `d378ca0`. Hosted Chromium and Firefox passed on both its PR and post-merge main. The supplier profiler follow-up was tested from `e699fd3` and then brought onto the merged baseline. It changes diagnostic tooling and documentation. [Main CI](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43176748730)

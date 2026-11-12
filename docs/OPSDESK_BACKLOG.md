@@ -1,5 +1,13 @@
 # OpsDesk — prioritized remaining work
 
+## Current workspace compatibility checkpoint
+
+PRs #65–#68 are merged at verified starting main `527931d`; zero PRs were open at the initial check. [Main CI](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43187098916) passed API, Chromium, Firefox, synthetic recovery and audit. Earlier state descriptions are historical.
+
+Repository callers have been inventoried, the CI authentication probe migrates to compact mode, and `ops:test` gains independent-fixture full/compact compatibility coverage. Preserve the full response and the rotation requester-redaction assertion. **External consumer compatibility remains unconfirmed.** Before retirement, obtain an owner-attested caller inventory, approved observation evidence, consumer migration acceptance and an approved compatibility/rollback plan. [Inventory, replacement routes and evidence requirements](OPSDESK_WORKSPACE_COMPATIBILITY.md).
+
+Owner-approved workloads/targets, controlled cold caches, independent human labels/adjudication, observable speech, live booking/mail, scanner monitoring, retention and authorized staging recovery remain pending. No live booking provider is selected; deployment remains paused.
+
 The shared-buffer profiler now covers the supplier history statement as well as the existing manager case statement. Representative workload and cache assumptions and owner-approved targets remain open. Human labels and spoken screen-reader evidence still require reviewer input. [Profile scope](OPSDESK_QUERY_PROFILE.md#supplier-conversation-history)
 
 ## Supplied load-target follow-up — 12 November 2026
@@ -182,7 +190,7 @@ Start: backend/src/travel/travel.rules.ts, service locks, profiles and ticket-de
 The inbox returns authorized case rows, and Insights, assignment load counts and deadline candidate filtering run in PostgreSQL. The case-read follow-up loads individual cases on demand and pages messages, activity, related cases and supplier threads. The browser uses compact workspace metadata instead of the complete case snapshot. Booking and people directories now use server-filtered 20-row pages with search and deterministic ID tie breakers; selectors and routing settings page independently. Automatic routing retains its capacity lock. Ticket-local operations and escalation use per-ticket row locks.
 
 Acceptance:
-- Retire the legacy full-workspace endpoint after migrating compatibility/test callers. Booking and people directory pagination is implemented; realistic-volume query plans and load measurements remain open.
+- Retire the legacy full-workspace endpoint only after owner-confirmed external consumer migration and authorized observation evidence. Repository functional callers use compact/paged reads; intentional compatibility tests remain. Follow the [retirement evidence requirements](OPSDESK_WORKSPACE_COMPATIBILITY.md#evidence-required-before-retirement). Booking and people directory pagination is implemented; representative query plans and load acceptance remain open.
 - The query profile and covering message index are implemented. The synthetic HTTP rehearsal now covers sustained concurrent reads and writes, skew toward a shared case, deep pages and a long thread. Representative booking diversity, a cold-cache run and owner-approved performance targets remain open. See [query profile](OPSDESK_QUERY_PROFILE.md).
 - Replace global contention with appropriately scoped locks and robust worker/outbox scheduling.
 - Define reporting metrics/timezones and incremental data updates.
@@ -193,7 +201,7 @@ Keep privacy filtering server-side. Case and conversation pages are capped at 20
 
 ### Paged core HTTP smoke
 
-The primary HTTP workflow suite uses compact workspace metadata, paged directories and case-specific reads. Migrate the pagination fixture setup and CI authentication probe next. The directory suite still compares against the legacy workspace for parity, and the rotation suite checks its requester redaction. Replace the parity expectations with independent fixture assertions and check external caller compatibility before retiring the legacy response. [Verification](OPSDESK_VALIDATION.md#paged-core-http-smoke).
+The primary HTTP workflow suite uses compact workspace metadata, paged directories and case-specific reads. Pagination and directory fixture setup/expectations are independent of the legacy response following merged PR #68. The CI authentication probe now uses compact mode. The rotation and workspace compatibility suites deliberately retain full-response authorization/redaction checks. Confirm external caller migration before retirement. [Verification](OPSDESK_VALIDATION.md#workspace-compatibility-continuation).
 
 ### Message buffer experiment
 
@@ -201,7 +209,7 @@ The optional query profiler now compares targeted PostgreSQL shared-buffer evict
 
 ### Independent pagination and directory fixtures
 
-Pagination setup reads the seeded case and booking from the synthetic database. Directory coverage compares paged results to exact fixture IDs for eight identities, including both suppliers. The CI authentication probe and deliberate rotation compatibility assertion still reference the legacy workspace path. Confirm external caller compatibility before retiring its full response. [Verification](OPSDESK_VALIDATION.md#independent-pagination-and-directory-fixtures)
+Pagination setup reads the seeded case and booking from the synthetic database. Directory coverage compares paged results to exact fixture IDs for eight identities, including both suppliers. The rotation compatibility assertion retains the legacy response; the CI probe has migrated to compact mode in this continuation. Confirm external caller compatibility before retiring the full response. [Fixture verification](OPSDESK_VALIDATION.md#independent-pagination-and-directory-fixtures) · [Current inventory](OPSDESK_WORKSPACE_COMPATIBILITY.md)
 
 ## [P2] Add grounded optional AI with a measured evaluation
 

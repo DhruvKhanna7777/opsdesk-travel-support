@@ -1,5 +1,13 @@
 # OpsDesk continuation checkpoint — 12 November 2026
 
+## Workspace compatibility continuation
+
+Start from verified main `527931d27471971405d5aa7b48c9487532b1f34b`. PRs #65–#68 are merged; zero PRs were open at this increment's initial check. Main run [43187098916](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43187098916) passed API, Chromium, Firefox, synthetic recovery and the dependency audit. Earlier open-PR statements below are historical.
+
+This increment migrates the CI authentication probe to compact mode and adds an independent-fixture full/compact compatibility suite. The legacy response and intentional rotation requester-redaction assertion remain. External callers are **unconfirmed**, so full-response retirement is blocked. Use the [caller inventory, migration map and owner evidence requirements](OPSDESK_WORKSPACE_COMPATIBILITY.md) and [new validation record](OPSDESK_VALIDATION.md#workspace-compatibility-continuation).
+
+> Continue from latest main, inspect open PRs and actual CI steps before editing, and review the workspace compatibility PR. Confirm external consumer owners, response dependencies, authorized traffic observation and migration acceptance before proposing retirement. Preserve compact metadata, authorization, requester redaction and supplier isolation. Use Node 22.23.x, npm ci and an isolated synthetic preview; run mutating API, browser and load suites sequentially. Owner-approved workloads/targets, controlled cold caches, independent human classifier labels/adjudication, observable screen-reader speech, live booking/mail acceptance, scanner monitoring, retention and authorized staging recovery remain pending. No live booking provider is selected. Open PRs only in this repository, leave merging to collaborators and keep deployment paused.
+
 ## Current continuation
 
 > Continue OpsDesk in DhruvKhanna7777/opsdesk-travel-support. Fetch main and check open PRs and CI, including Firefox. PR #64 merged at main d378ca0 and its PR and combined main Chromium and Firefox steps passed. Review PR #65 for the supplier shared-buffer profiler. Configurable load limits are available through OPSDESK_LOAD_TARGETS. Owner-approved thresholds and representative workload assumptions remain pending.
