@@ -1,5 +1,9 @@
 # OpsDesk - connected travel support
 
+## Hosted synthetic demo
+
+Open **[opsdesk-synthetic-demo.vercel.app](https://opsdesk-synthetic-demo.vercel.app/)**. Anyone with the link can reach the login screen. Choose a role button, then use the demo password below. The [hosted walkthrough](docs/OPSDESK_HOSTED_WALKTHROUGH.md) explains each feature, the checks actually completed, screenshots and remaining gaps. Use only synthetic information. Production deployment remains paused.
+
 A working local prototype built on [Molnar-Zoltan/it-helpdesk](https://github.com/Molnar-Zoltan/it-helpdesk). The original application and its documentation remain in the repository. OpsDesk's entry point is `/`; its API is `/ops/*`.
 
 ## Developer handoff
@@ -48,7 +52,7 @@ All accounts use **OpsDeskDemo!2026**. These are explicit synthetic demo account
 - Customer replies, staff-only notes and separate supplier conversations with dedicated supplier login.
 - Response deadlines, check-in urgency, manager notifications, idempotent escalation and a persistent manager-only demo clock.
 - Connected booking history, source-labelled record briefs and event timelines.
-- Searchable, paginated booking and people directories, operational Insights, inbox filters and current-page case CSV export.
+- Searchable, paginated booking and people directories, operational Insights, inbox filters and scoped, all-matching case CSV export.
 - On-demand case details, paginated histories and compact workspace metadata.
 - Responsive interface, server-side validation, JWT/HTTP-only-cookie login and inherited token rotation/revocation.
 
@@ -61,7 +65,7 @@ The demo starts with 3 agencies, 20 travelers, 30 bookings, 60 cases, 4 agents, 
 3. Open **Supplier threads**, then **Contact supplier**. Send a question to Aster Hotels.
 4. Sign out and sign in as **supplier@opsdesk.demo**. Only Aster's shared conversations are visible. Reply with a confirmation.
 5. Return as manager. The case moves back to In progress; the supplier response stays in its own thread.
-6. Open **Demo clock**, then advance **16h**. The seeded booking begins about 20 hours after initial seeding, so the unresolved case enters the six-hour urgent window. If the seed is old, it may already be overdue; the queue shows the actual persisted deadlines.
+6. In a disposable local copy only, open **Demo clock**, then advance **16h**. The seeded booking begins about 20 hours after initial seeding, so the unresolved case enters the six-hour urgent window. Do not advance the clock on the shared hosted site.
 7. Record the resolution, then open **Insights** and export the case list.
 8. Sign in as Maya or the agency to verify that supplier threads and internal notes are hidden.
 
@@ -97,6 +101,6 @@ For query-plan measurements, generate Prisma and build the backend, then supply 
 
 ## Deployment boundary
 
-This delivery runs on localhost and sends no real supplier/customer emails. It has not been published. Production deployment needs managed PostgreSQL, Redis, secure runtime secrets, HTTPS, real user onboarding, appropriately scoped teams, an email integration, monitoring, backups and a review of inherited account-management behavior against travel data retention requirements. Do not seed shared demo accounts into production; the travel seeder rejects `NODE_ENV=production`.
+The local launcher runs on localhost, and the separate hosted synthetic demo is public at the URL above. Neither sends real supplier/customer emails. Production deployment needs durable managed PostgreSQL and Key Value, secure runtime secrets, HTTPS, real user onboarding, appropriately scoped teams, an email integration, monitoring, backups and a review of inherited account-management behavior against travel data retention requirements. Do not seed shared demo accounts into production; the travel seeder rejects `NODE_ENV=production`.
 
 In the local demo, rate limits and revoked-session markers use a durable PostgreSQL adapter because Redis is unavailable on this machine. Production rejects this development mode and retains the upstream Redis client. The demo clock is disabled unless `OPSDESK_DEMO=true`.

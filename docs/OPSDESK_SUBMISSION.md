@@ -2,17 +2,17 @@
 
 ## Hosted synthetic demo (12 November 2026)
 
-- URL: [opsdesk-synthetic-demo.vercel.app](https://opsdesk-synthetic-demo.vercel.app/). Access requires a named member of the `tth14` Vercel team through Vercel Authentication; the app's seeded demo roles then use the accounts in the [demo account guide](../OPSDESK_README.md#demo-accounts). Do not share a bypass link or publish this workspace without the outer access control.
+- URL: [opsdesk-synthetic-demo.vercel.app](https://opsdesk-synthetic-demo.vercel.app/). Anyone with the link can open it. Use a seeded role and the password in the [hosted walkthrough](OPSDESK_HOSTED_WALKTHROUGH.md). All data is synthetic. Vercel Authentication was disabled at the user's request; the Render API gate remains enabled.
 - Source: deployment commit `5068ea20e7ae5e16bddee6318a404b2581d790c1` on `main`, merged by [PR #79](https://github.com/DhruvKhanna7777/opsdesk-travel-support/pull/79). [Post-merge CI](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43266598103) passed.
 - Hosting: Vercel Hobby frontend (`opsdesk-synthetic-demo`, `iad1` deployment region) linked to the limited-access [demo fork](https://github.com/KrishChadha001/opsdesk-travel-support); Render free API, PostgreSQL 18 and Key Value in Singapore under [the paused Blueprint](https://dashboard.render.com/blueprint/exs-dbqv1q4ipgvc73cso96g). The API has automatic deploys disabled. This is separate from production.
 - Configuration: HTTPS frontend origin and server-only API URL; matching generated gate secrets in Vercel and Render environment settings; Render-generated JWT and attachment secrets; internal database and Key Value connections with no external IP allowlist. Secrets are absent from Git. Live booking, email and AI providers are disabled; the database contains synthetic seed data.
-- Observed: Vercel production deployment ready; web sign-in and manager queue rendered 36 active and 60 total seeded cases. Render API and worker health returned HTTP 200; direct case API access without the gate returned HTTP 401. Manager opened `OPS-1042`: saved brief cites `OPS-1072`, TBOH booking `BK-1042`, Aster Hotels, Asia owner Riya Sharma, deadline and cancellation cutoff. See [manager queue](assets/hosted-manager-queue.jpg) and [booking context](assets/hosted-booking-context.jpg).
-- Remaining acceptance work: the hosted supplier exchange, EM escalation, insights/export, all five-role and agency isolation, session/idempotency checks, reset rehearsal, and a recorded walkthrough have not yet been observed. Local and CI checks described below do not replace those hosted checks.
+- Observed: the public web URL, API and worker health returned HTTP 200; direct case API access without the gate returned HTTP 401. All five roles signed in. Manager, Asia agent, Atlas agency, Maya and Aster showed role-scoped views. The manager and supplier exchanged synthetic messages; the agency/traveler views hid supplier and staff-only content. The Asia agent escalated `OPS-1042`, the manager acknowledged its alert, Insights linked a weekly theme, and manager/agency exports contained 60/22 case rows respectively. See the [step-by-step hosted walkthrough and screenshots](OPSDESK_HOSTED_WALKTHROUGH.md).
+- Remaining acceptance work: exact hosted cross-agency denial, session revocation, duplicate EM retry, reset rehearsal and a video recording were not completed. Local and CI checks described below do not replace those hosted checks.
 - Cost: current services use $0 Hobby/free tiers, subject to usage limits. Render free PostgreSQL expires after 30 days and has no managed backups; free Key Value is memory-only and loses data on restart. The shared Render workspace also has an unrelated free web service, so free compute hours are shared. Reset by provisioning a new isolated database and Key Value instance, applying the same merged commit and synthetic seed, switching the demo service to them, and rechecking health before retiring the old resources; do not use the inherited generic reset endpoint. This reset procedure remains untested on the hosted deployment.
 
 Production deployment remains paused. This hosted demo is disposable and does not establish production readiness.
 
-This is a synthetic, local prototype. Start from a fresh clone with Node.js 22.23.x:
+To run a separate local synthetic copy, start from a fresh clone with Node.js 22.23.x:
 
 ```sh
 npm ci
@@ -41,7 +41,7 @@ The two-iteration finish plan calls for journeys A-E but does not define them. T
 | D. EM escalation | Scoped staff uses **Escalate to EM** with a reason. Manager filters **Needs attention** to EM escalations and acknowledges the notification. | Urgent priority, one audit event on retry and an acknowledged alert. |
 | E. Insights and export | Filter the queue by intent, open a weekly theme example, then use **Export all**. | Filtered, role-scoped rows extend beyond the visible page. |
 
-The [TBO workflow](OPSDESK_TBO_WORKFLOW.md) and [Iteration 1 workflow](OPSDESK_ITERATION_ONE.md) give the exact role and data boundaries. The browser and HTTP suites automate parts of each path; a recorded end-to-end manual walkthrough of these five mapped journeys remains to be captured.
+The [TBO workflow](OPSDESK_TBO_WORKFLOW.md) and [Iteration 1 workflow](OPSDESK_ITERATION_ONE.md) give the exact role and data boundaries. The browser and HTTP suites automate parts of each path. A hosted browser walkthrough is recorded as written observations and screenshots above; a video remains to be captured.
 
 ## 3-5 minute walkthrough script
 

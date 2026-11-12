@@ -1,5 +1,11 @@
 # OpsDesk - connected travel support
 
+## Try the hosted synthetic demo
+
+Open **[opsdesk-synthetic-demo.vercel.app](https://opsdesk-synthetic-demo.vercel.app/)**. Anyone with the link can view the login page. Choose **Manager**, **Asia agent**, **Agency**, **Traveler** or **Supplier**; each role button fills its synthetic account. The shared demo password is **`OpsDeskDemo!2026`**. [Follow the five-feature walkthrough, role guide and verified results](docs/OPSDESK_HOSTED_WALKTHROUGH.md). Use synthetic information only. Real booking, email and external AI providers are disabled; production deployment remains paused.
+
+The hosted walkthrough records what was observed and what remains untested. The older local setup and validation records below are retained as development history.
+
 The TBO workflow labels the verified booking reference and cancellation cutoff, adds a case intent filter and lets scoped staff send audited EM escalations to the existing manager queue. [Workflow and prototype retention policy](docs/OPSDESK_TBO_WORKFLOW.md)
 
 For the reset procedure, five mapped demo journeys, short walkthrough, architecture/cost comparison and current evidence, see the [demo submission guide](docs/OPSDESK_SUBMISSION.md).
