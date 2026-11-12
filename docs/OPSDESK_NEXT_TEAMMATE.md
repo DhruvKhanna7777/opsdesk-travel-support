@@ -1,24 +1,12 @@
 # OpsDesk continuation checkpoint — 12 November 2026
 
-## Current continuation — 12 November 2026
+## Current continuation
 
-> Continue OpsDesk in DhruvKhanna7777/opsdesk-travel-support. Fetch latest main, inspect open PRs and actual CI (including Firefox), then read this file, handoff, backlog, validation, acceptance review and supplied load-target guides. This increment starts from main e699fd3 with PRs #58–#63 merged and zero open PRs at the initial check. Latest main CI and recorded #60–#62 runs were queued, not passed. Review the codex/opsdesk-acceptance-followup PR and its actual checks before depending on it. The user confirmed no approved performance targets exist and requested configurable checks; OPSDESK_LOAD_TARGETS now compares supplied aggregate/per-role sample and latency limits, optional throughput/duration limits, and fails after verified cleanup. No configuration means not-configured, not a target pass. Read the exact validation results and do not treat synthetic tooling thresholds as approved targets. Next agree representative traffic and performance targets, have humans label/adjudicate/freeze the classifier export, and obtain actual spoken screen-reader evidence. No booking provider is selected; live booking/mail acceptance, scanner monitoring, retention approval and an authorized staging restore with named owners/targets remain open. Use Node 22.23.x, npm ci and isolated synthetic ops:preview. Run mutating API, browser and load suites sequentially; preserve unrelated work, authorization, agency isolation, sessions, saved deadlines, idempotency and audit history. Commit verified work and publish a PR targeting main, leaving merge to collaborators. Deployment remains paused.
-
-Earlier continuation messages below are historical. Use this section and its [validation record](OPSDESK_VALIDATION.md#supplied-load-targets--12-november-2026) for current status.
-
-## Current continuation message
-
-> Continue OpsDesk in `DhruvKhanna7777/opsdesk-travel-support`. Fetch latest main, check open PRs and their CI, then read the handoff, backlog, validation record, acceptance review guide and README.
+> Continue OpsDesk in DhruvKhanna7777/opsdesk-travel-support. Fetch main and check open PRs and CI, including Firefox. PR #64 merged at main d378ca0 and its PR and combined main Chromium and Firefox steps passed. Review PR #65 for the supplier shared-buffer profiler. Configurable load limits are available through OPSDESK_LOAD_TARGETS. Owner-approved thresholds and representative workload assumptions remain pending.
 >
-> **Finished and merged.** The application baseline is `b1b97ab` through PR #62. It includes the scoped customer portal, classifier review tools, populated supplier startup probes, 12-identity synthetic load, message shared-buffer profiling and truncated-backup recovery. PRs #58 and #59 passed hosted CI. Local checks passed for #60–#62. The combined main validation through #62 was queued at handoff.
+> Read this document, the handoff, backlog, validation, acceptance review, query profiler and load target guides, and README. The optional profiler exercises a deep supplier message page and verifies a 404 for a second supplier. Keep shared-buffer, OS-cache and full application latency evidence distinct.
 >
-> **Partially complete.** Synthetic evidence still needs representative data and traffic, approved performance targets, full cold-cache testing and operational recovery validation.
->
-> **Next.** Recheck main CI, including Firefox. Have a human label and adjudicate the blind classifier pack in `npm run ops:review-classifier`, freeze the export, and score it with `--dataset`. Obtain observable screen-reader speech. Live booking and mail acceptance, production scanner monitoring, retention approval, and an authorized staging restore with named owners and targets remain open. No booking provider has been selected.
->
-> Use Node 22.23.x and an isolated synthetic preview. Run mutating API, browser and load suites sequentially. Preserve authorization, agency isolation, sessions, saved deadlines, idempotency and audit history. Keep private exports and credentials out of Git. Push verified work for collaborator review. Deployment remains paused.
-
-Use the [current handoff](OPSDESK_HANDOFF.md#current-merged-checkpoint) for PR links and checked CI states. The sections below record earlier checkpoints.
+> Next obtain owner-reviewed workloads and thresholds, human labels and adjudication through the blind review form, and observable screen-reader speech. Live booking and mail, scanner monitoring, retention approval and operational recovery remain open. Use Node 22.23.x and isolated synthetic data. Run mutating suites sequentially and preserve agency isolation, sessions, deadlines, idempotency and audits. Keep private exports and credentials out of Git. Leave merges to collaborators. Deployment remains paused.
 
 ## Supplier message-history continuation
 

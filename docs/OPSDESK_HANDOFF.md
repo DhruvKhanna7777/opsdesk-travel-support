@@ -1,5 +1,11 @@
 # OpsDesk developer handoff
 
+## Supplier profiler checkpoint
+
+PR #64 merged at main `d378ca0`. Hosted Chromium and Firefox passed on both its PR and post-merge main. The supplier profiler follow-up was tested from `e699fd3` and then brought onto the merged baseline. It changes diagnostic tooling and documentation. [Main CI](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43176748730)
+
+Set `OPSDESK_PROFILE_MESSAGE_SCOPE=supplier` in the isolated shared-buffer experiment to measure the authorized supplier thread page. Use the validation record for exact results. Approved thresholds, representative traffic, independent labels and observable speech remain pending. Deployment remains paused. [Profile procedure](OPSDESK_QUERY_PROFILE.md#supplier-conversation-history)
+
 ## Supplied load targets — 12 November 2026
 
 Started from main `e699fd33ef1d29e815f6b664e7f37fb7ab554da9`, after PRs #58–#63 merged. No PRs were open at the initial check. Latest combined [main validation](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43098403977) and the recorded #60–#62 runs were still queued, not passed. The previous status tables below are historical snapshots.

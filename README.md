@@ -1,5 +1,7 @@
 # OpsDesk - connected travel support
 
+The optional shared-buffer query experiment can profile a deep supplier message page after checking thread ownership. [Run the supplier probe](docs/OPSDESK_QUERY_PROFILE.md#supplier-conversation-history)
+
 The load rehearsal can check supplied latency, throughput, duration and per-role sample targets using `OPSDESK_LOAD_TARGETS`. No targets are enabled or approved by default. [Configuration, failure behavior and acceptance limits](docs/OPSDESK_LOAD_TARGETS.md).
 
 Use `npm run ops:startup-profile` for isolated fresh-API process experiments with first/repeat read timings, a populated supplier conversation list, a deep supplier-history probe and verified cleanup. [Setup, observations and cache limits](docs/OPSDESK_STARTUP_PROFILE.md). Database/OS cold-cache acceptance and performance targets remain open.

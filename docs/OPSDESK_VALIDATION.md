@@ -1,3 +1,16 @@
+# Supplier history shared-buffer comparison — 12 November 2026
+
+The profiling runs used main `e699fd3` through PR #63. PR #64 subsequently merged at `d378ca0`. The [PR Chromium and Firefox steps passed](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43102297300). The [post-merge main Chromium and Firefox steps also passed](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43176748730). The earlier main validation and historical PR #61/#62 validations were queued at the initial check. GitHub marked [PR #60 run 43090996154](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43090996154) failed while its job record showed queued with no executed steps. That result provides no Firefox evidence. [Latest main at check](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43098403977) · [PR #61](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43095738307) · [PR #62](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43096512227)
+
+Node 22.23.0 dependency install, shared/backend builds and Prisma generation passed. Seven existing load-profile and startup-profile tests, script syntax, formatting and whitespace checks passed. With local PostgreSQL 18, two disposable runs each added 6,000 synthetic bookings and captured 20 rows on page 60. The manager page had 1,203 messages. The supplier page had 1,200 thread messages, all scoped to the owning supplier. A second supplier received 404.
+
+| Statement | Shared blocks read after eviction, three runs | Shared blocks read on repeats | Execution after eviction (ms) | Repeat execution (ms) |
+| --- | --- | --- | --- | --- |
+| Manager case page | 37, 37, 37 | 0, 0, 0 | 3.561, 2.098, 1.708 | 1.301, 0.708, 0.723 |
+| Supplier thread page | 49, 49, 49 | 0, 0, 0 | 3.021, 1.943, 1.824 | 0.709, 0.816, 0.907 |
+
+No buffer evictions were skipped. Each run verified the original app counts of 60 cases, 192 messages and 12 conversations after cleanup, and both generated profiler databases were removed. Reports are in ignored .opsdesk files. This run measured statement execution with relation-level shared-buffer control. OS caches, network transport, auth and the rest of the application workload were outside the measurement. Local frontend, browser and full API suites were not rerun for this diagnostic-only change. Representative performance, owner-approved targets, independent labels and observable spoken output remain open. Deployment remains paused. [Reproduction](OPSDESK_QUERY_PROFILE.md#supplier-conversation-history)
+
 # Supplied load targets — 12 November 2026
 
 Started from fetched main `e699fd33ef1d29e815f6b664e7f37fb7ab554da9`, with PRs #58–#63 merged and no open PRs. PR #58 run `43088904262` and #59 run `43088962237` passed historically. The recorded #60 (`43090996154`), #61 (`43095738307`), #62 (`43096512227`) and combined main (`43098403977`) workflows were still **queued**, not passed, at this continuation's checks. The latest combined main run exposed no jobs yet. No cause for that queue state was established. Hosted Firefox acceptance for this combined checkpoint remains unverified.

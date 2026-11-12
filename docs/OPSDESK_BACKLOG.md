@@ -1,5 +1,7 @@
 # OpsDesk — prioritized remaining work
 
+The shared-buffer profiler now covers the supplier history statement as well as the existing manager case statement. Representative workload and cache assumptions and owner-approved targets remain open. Human labels and spoken screen-reader evidence still require reviewer input. [Profile scope](OPSDESK_QUERY_PROFILE.md#supplier-conversation-history)
+
 ## Supplied load-target follow-up — 12 November 2026
 
 Latest fetched main is `e699fd3` through merged PR #63; no PRs were open at the initial check. PRs #60–#62 and combined main CI were still queued, not passed. The user confirmed there are no agreed performance targets and requested configurable checks. The load harness now supports supplied aggregate/per-role latency and sample limits, aggregate duration/throughput checks, explicit `not-configured` status and nonzero failure after verified cleanup. [Procedure](OPSDESK_LOAD_TARGETS.md).

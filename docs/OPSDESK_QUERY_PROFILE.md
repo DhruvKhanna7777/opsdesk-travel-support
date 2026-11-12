@@ -53,3 +53,9 @@ npm run ops:profile
 The profiler adds 1,200 messages to one disposable synthetic case and captures the actual manager page-60 SQL after installing the current covering index. For each of three pairs it evicts only the message table and its indexes in that generated database, checks that a second eviction removes zero blocks, and explains the same SQL twice. The JSON report includes shared reads, hits, row counts and execution time. It records the number of skipped and flushed buffers. A skipped eviction or an evicted run with no shared reads fails the experiment.
 
 The operating-system page cache and unrelated PostgreSQL relations stay outside this measurement. Query capture and fixture preparation happen before eviction. Execution timing covers one SQL statement and excludes authentication, HTTP and the rest of the application workload. [PostgreSQL buffer eviction](https://www.postgresql.org/docs/18/pgbuffercache.html) · [Observed results](OPSDESK_VALIDATION.md#message-shared-buffer-experiment)
+
+### Supplier conversation history
+
+Set `OPSDESK_PROFILE_MESSAGE_SCOPE=supplier` along with `OPSDESK_PROFILE_MESSAGE_BUFFERS=1` to measure page 60 of a 1,200-message supplier conversation. The setup uses a seeded supplier identity and assigns the fixture booking and thread to that supplier. It verifies that every returned item belongs to the thread and that another supplier receives a 404 before capturing the page SQL. The default scope remains `manager`.
+
+The supplier and manager runs each create a disposable database. Results describe one paged SQL statement after shared-buffer eviction and on immediate repeats. They leave the operating-system cache uncontrolled and exclude authorization, count, sender lookup, transport and other application work from timing.
