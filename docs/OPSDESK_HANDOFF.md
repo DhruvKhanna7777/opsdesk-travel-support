@@ -1,5 +1,11 @@
 # OpsDesk developer handoff
 
+## 12 November checkpoint
+
+This profiler follow-up starts at main `e699fd3` through PR #63. PR #64 is open and its hosted Chromium and Firefox steps passed. The latest main run and the historical PR #61/#62 runs were queued when checked. GitHub marked the historical PR #60 run failed while its job record still showed queued with no completed steps. See the validation record for run IDs and recheck GitHub before reporting current status. The profiler does not depend on PR #64.
+
+Run the isolated shared-buffer experiment with `OPSDESK_PROFILE_MESSAGE_SCOPE=supplier` to capture a page from the authorized supplier thread. The default manager probe remains available. Approved performance thresholds, representative traffic, human labels and observable speech remain pending. Deployment remains paused. [Profile procedure](OPSDESK_QUERY_PROFILE.md#supplier-conversation-history)
+
 ## Current merged checkpoint
 
 **Finished and merged.** The application baseline for this handoff is main `b1b97ab`, with PRs #58–#62 merged. It includes the scoped customer portal, synthetic five-role load, classifier evaluator and blind review form, fresh API-process profiling and the follow-ups below. Main validation passed at the earlier PR #57 checkpoint. The combined application run through #62 was queued when this handoff was prepared. [PR #57 main validation](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43076744463) · [PR #62 main validation](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43098229155)

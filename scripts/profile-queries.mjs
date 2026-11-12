@@ -23,6 +23,12 @@ assert(
   "Connection options and fragments are not permitted.",
 );
 const messageBuffers = process.env.OPSDESK_PROFILE_MESSAGE_BUFFERS;
+const messageScope = process.env.OPSDESK_PROFILE_MESSAGE_SCOPE ?? "manager";
+assert(
+  ["manager", "supplier"].includes(messageScope),
+  "OPSDESK_PROFILE_MESSAGE_SCOPE must be manager or supplier.",
+);
+
 assert(
   [undefined, "0", "1"].includes(messageBuffers),
   "OPSDESK_PROFILE_MESSAGE_BUFFERS must be 0 or 1.",
@@ -211,22 +217,70 @@ try {
       "Message buffer profiling requires PostgreSQL 18 pg_buffercache.",
     );
     const ticket = "profile-ticket-1";
+    const supplierHistory = messageScope === "supplier";
+    const conversation = supplierHistory ? "profile-supplier-history" : null;
+    if (supplierHistory) {
+      // Match the booking's supplier as in a normal supplier conversation.
+      const supplier = await db.travelProfile.findUniqueOrThrow({
+        where: { userId: "supplier-user" },
+        select: { supplierId: true },
+      });
+      assert(supplier.supplierId, "Expected the seeded supplier identity.");
+      const booking = await db.travelTicket.findUniqueOrThrow({
+        where: { id: ticket },
+        select: { bookingId: true },
+      });
+      await db.travelBooking.update({
+        where: { id: booking.bookingId },
+        data: { supplierId: supplier.supplierId },
+      });
+      await db.travelConversation.create({
+        data: {
+          id: conversation,
+          ticketId: ticket,
+          supplierId: supplier.supplierId,
+          subject: "Synthetic deep supplier history",
+          dueAt: new Date(Date.now() + 86400000),
+        },
+      });
+    }
     const added = await pool.query(
       `
-      INSERT INTO "TravelMessage" (id, "ticketId", "senderId", visibility, content, "createdAt")
-      SELECT $1 || '-deep-' || i, $1, 'manager', 'CUSTOMER',
+      INSERT INTO "TravelMessage" (id, "ticketId", "conversationId", "senderId", visibility, content, "createdAt")
+      SELECT $1 || '-deep-' || i, $1, $2, 'manager', $3,
              'Synthetic deep history ' || i, now() - i * interval '1 minute'
       FROM generate_series(1, 1200) i
     `,
-      [ticket],
+      [ticket, conversation, supplierHistory ? "SUPPLIER" : "CUSTOMER"],
     );
     assert.equal(added.rowCount, 1200);
     await pool.query('VACUUM ANALYZE "TravelMessage"');
 
+    if (supplierHistory) {
+      await assert.rejects(
+        service.conversationMessages("supplier-other", conversation, {
+          page: 60,
+        }),
+        (error) => error?.getStatus?.() === 404,
+        "Other suppliers must not read the synthetic conversation.",
+      );
+    }
     queries = [];
-    const sample = await service.messages("manager", ticket, { page: 60 });
-    assert.equal(sample.total, 1203);
+    const sample = supplierHistory
+      ? await service.conversationMessages("supplier-user", conversation, {
+          page: 60,
+        })
+      : await service.messages("manager", ticket, { page: 60 });
+    assert.equal(sample.total, supplierHistory ? 1200 : 1203);
     assert.equal(sample.items.length, 20);
+    if (supplierHistory)
+      assert(
+        sample.items.every(
+          (message) =>
+            message.conversationId === conversation &&
+            message.visibility === "SUPPLIER",
+        ),
+      );
     const reads = queries.filter(
       ({ sql }) =>
         sql.includes('"TravelMessage"') &&
@@ -301,7 +355,10 @@ try {
     output.messageBufferExperiment = {
       page: sample.page,
       items: sample.items.length,
-      messagesInCase: sample.total,
+      role: messageScope,
+      ...(supplierHistory
+        ? { messagesInThread: sample.total, crossSupplierStatus: 404 }
+        : { messagesInCase: sample.total }),
       relationCount: relations.length,
       scope: "TravelMessage table and its indexes in the disposable database",
       osCache: "not reset",

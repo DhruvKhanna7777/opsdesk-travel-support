@@ -1,5 +1,7 @@
 # OpsDesk — prioritized remaining work
 
+The shared-buffer profiler now covers the supplier history statement as well as the existing manager case statement. Representative workload and cache assumptions and owner-approved targets remain open. Human labels and spoken screen-reader evidence still require reviewer input. [Profile scope](OPSDESK_QUERY_PROFILE.md#supplier-conversation-history)
+
 ## Supplier history startup rehearsal
 
 The synthetic profiler covers page 12 of a populated supplier history and verifies that another supplier thread is denied. Representative traffic, controlled-cache runs, agreed thresholds, human classifier labels and spoken screen-reader evidence remain open. [Validation](OPSDESK_VALIDATION.md#supplier-message-history-startup)
