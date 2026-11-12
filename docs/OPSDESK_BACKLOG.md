@@ -191,6 +191,10 @@ Acceptance:
 
 Keep privacy filtering server-side. Case and conversation pages are capped at 20 rows; composite indexes support booking and supplier history reads, but realistic-volume query-plan evidence is still needed.
 
+### Paged core HTTP smoke
+
+The primary HTTP workflow suite uses compact workspace metadata, paged directories and case-specific reads. Migrate the pagination fixture setup and CI authentication probe next. The directory suite still compares against the legacy workspace for parity, and the rotation suite checks its requester redaction. Replace the parity expectations with independent fixture assertions and check external caller compatibility before retiring the legacy response. [Verification](OPSDESK_VALIDATION.md#paged-core-http-smoke).
+
 ### Message buffer experiment
 
 The optional query profiler now compares targeted PostgreSQL shared-buffer eviction with immediate warm repeats for a deep synthetic message page. OS-cache control, representative traffic and owner-approved performance targets remain open. [Procedure](OPSDESK_QUERY_PROFILE.md#message-shared-buffer-experiment)

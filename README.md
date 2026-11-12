@@ -125,6 +125,8 @@ The query-scaling follow-up adds `npm run ops:profile`. It requires an explicit 
 
 Historical query-scaling local validation used Windows, Node.js 22.23.0 and PostgreSQL 18.6. Both builds, the migration, unit/HTTP/browser checks and changed-file lint passed. Existing full-backend lint errors in inherited files remain documented in the [validation notes](docs/OPSDESK_VALIDATION.md). Query timings are local synthetic measurements, not production performance targets.
 
+The core HTTP smoke test exercises the same paged and case-specific read routes as the workspace. It uses compact workspace data for counts, notifications and demo-clock state. [Coverage and remaining legacy callers](docs/OPSDESK_VALIDATION.md#paged-core-http-smoke).
+
 ## Project status and next work
 
 The [mail outbox guide](docs/OPSDESK_MAIL_OUTBOX.md) covers the synthetic demo and the disabled-by-default Resend pilot adapter.
