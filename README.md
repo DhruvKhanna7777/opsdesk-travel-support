@@ -137,6 +137,8 @@ Agency/supplier calendars and opt-in automatic workload handoff are merged throu
 
 Before live data, confirm production access rules, choose staging, rehearse backup/restore and configure monitoring. Live email, secure attachments, booking/supplier integrations, external AI evaluation and broader accessibility/security reviews remain pending. This repository documents a localhost prototype; it does not provide a production deployment.
 
+The pagination and directory tests use synthetic database fixtures as the source for expected counts and visible IDs. Directory checks cover both supplier accounts and verify booking, agency, region and thread-participant scope. [Verification](docs/OPSDESK_VALIDATION.md#independent-pagination-and-directory-fixtures)
+
 ## Documentation and source
 
 | Guide | Contents |

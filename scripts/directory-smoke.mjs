@@ -36,43 +36,51 @@ const login = async (account) =>
   ).accessToken;
 async function allPages(path, token, expected) {
   const first = await call(path, token);
-  const ids = [];
-  const allItems = [];
+  const items = [];
   for (let page = 1; page <= first.totalPages; page++) {
     const result =
       page === 1 ? first : await call(`${path}?page=${page}`, token);
-    allItems.push(...result.items);
+    assert.equal(result.page, page, path);
+    items.push(...result.items);
     assert(result.items.length <= 20);
     assert.equal(result.total, expected);
-    ids.push(...result.items.map((item) => item.id));
   }
-  assert.equal(ids.length, expected);
+  assert.equal(items.length, expected);
   assert.equal(
-    new Set(ids).size,
+    new Set(items.map((item) => item.id)).size,
     expected,
-    "No overlap at identical timestamps",
+    `Duplicate directory IDs for ${path}`,
   );
   const last = await call(`${path}?page=10000`, token);
   assert.equal(last.page, last.totalPages);
   for (const invalid of ["0", "-1", "1.5", "abc", "10001"])
     await call(`${path}?page=${invalid}`, token, 400);
-  return { ...first, allItems };
+  return items;
 }
 try {
-  const roles = [
-    "manager",
-    "maya",
-    "agency",
-    "horizon",
-    "asia",
-    "europe",
-    "supplier",
-  ];
+  const roles = {
+    manager: { id: "manager", staff: true },
+    maya: {
+      id: "customer-0",
+      scope: { agencyId: "atlas", customerId: "customer-0" },
+    },
+    agency: { id: "agency-atlas", scope: { agencyId: "atlas" } },
+    horizon: { id: "agency-horizon", scope: { agencyId: "horizon" } },
+    asia: { id: "agent-asia", staff: true, scope: { region: "ASIA" } },
+    europe: { id: "agent-europe", staff: true, scope: { region: "EUROPE" } },
+    supplier: { id: "supplier-user", supplierId: "supplier-0" },
+    skyline: { id: "supplier-other", supplierId: "supplier-1" },
+  };
   const tokens = Object.fromEntries(
-    await Promise.all(roles.map(async (r) => [r, await login(r)])),
+    await Promise.all(Object.keys(roles).map(async (r) => [r, await login(r)])),
   );
-  const workspace = await call("/ops/workspace", tokens.manager);
-  const source = workspace.bookings.find((b) => b.reference === "BK-1042");
+  const {
+    rows: [source],
+  } = await pool.query(
+    `SELECT "agencyId", "supplierId", region FROM "TravelBooking"
+     WHERE id = 'booking-0' AND reference = 'BK-1042'`,
+  );
+  assert(source, "Missing seeded BK-1042 booking");
   for (let i = 0; i < 45; i++) {
     const id = `${prefix}-${String(i).padStart(2, "0")}`;
     await pool.query(
@@ -176,26 +184,69 @@ try {
       await browser.close();
     }
   }
-  for (const role of roles) {
+  // Derive expected IDs from fixture relationships, independently of API responses.
+  const { rows: bookings } = await pool.query(
+    'SELECT id, "customerId", "agencyId", region FROM "TravelBooking"',
+  );
+  const { rows: tickets } = await pool.query(
+    'SELECT "customerId", "agencyId", region FROM "TravelTicket"',
+  );
+  const { rows: people } = await pool.query(
+    `SELECT p."userId" AS id, p.kind, u."lastName"
+     FROM "TravelProfile" p JOIN "User" u ON u.id = p."userId"`,
+  );
+  const { rows: threadAuthors } = await pool.query(
+    `SELECT DISTINCT m."senderId", c."supplierId", t.region
+     FROM "TravelMessage" m JOIN "TravelConversation" c ON c.id = m."conversationId"
+     JOIN "TravelTicket" t ON t.id = c."ticketId"`,
+  );
+  for (const [role, { id, staff, scope = {}, supplierId }] of Object.entries(
+    roles,
+  )) {
     const token = tokens[role];
-    const legacy = await call("/ops/workspace", token);
-    const bookings = await allPages(
+    const inScope = (row) =>
+      Object.entries(scope).every(([key, value]) => row[key] === value);
+    const expectedBookings = supplierId ? [] : bookings.filter(inScope);
+    const customers = supplierId
+      ? []
+      : [
+          ...expectedBookings.map((b) => b.customerId),
+          ...tickets.filter(inScope).map((t) => t.customerId),
+        ];
+    const authors = threadAuthors
+      .filter((row) =>
+        supplierId ? row.supplierId === supplierId : staff && inScope(row),
+      )
+      .map((row) => row.senderId);
+    const visibleIds = new Set([id, ...customers, ...authors]);
+    const expectedPeople = people.filter(
+      (person) =>
+        visibleIds.has(person.id) || ["AGENT", "MANAGER"].includes(person.kind),
+    );
+
+    const bookingItems = await allPages(
       "/ops/bookings",
       token,
-      legacy.bookings.length,
+      expectedBookings.length,
     );
-    assert(
-      bookings.allItems.every((b) =>
-        legacy.bookings.some((v) => v.id === b.id),
-      ),
+    const peopleItems = await allPages(
+      "/ops/people",
+      token,
+      expectedPeople.length,
     );
-    const people = await allPages("/ops/people", token, legacy.people.length);
-    assert(
-      people.allItems.every((p) => legacy.people.some((v) => v.id === p.id)),
-    );
+    for (const [actual, expected] of [
+      [bookingItems, expectedBookings],
+      [peopleItems, expectedPeople],
+    ]) {
+      assert.deepEqual(
+        actual.map((row) => row.id).sort(),
+        expected.map((row) => row.id).sort(),
+        `Directory scope differs for ${role}`,
+      );
+    }
     if (role !== "manager")
       assert(
-        people.allItems.every(
+        peopleItems.every(
           (p) => !("specialties" in p) && !("maxActiveCases" in p),
         ),
       );
@@ -203,17 +254,29 @@ try {
     assert.deepEqual(compact.bookings, []);
     assert.deepEqual(compact.people, []);
     const filtered = await call(`/ops/bookings?search=${prefix}`, token);
-    assert.equal(
-      filtered.total,
-      legacy.bookings.filter((b) => b.id.startsWith(prefix)).length,
+    const matchingBookings = expectedBookings.filter((b) =>
+      b.id.startsWith(prefix),
+    );
+    assert.equal(filtered.total, matchingBookings.length);
+    assert.deepEqual(
+      filtered.items.map((b) => b.id),
+      matchingBookings
+        .map((b) => b.id)
+        .sort()
+        .slice(0, 20),
     );
     const named = await call("/ops/people?search=Fixture", token);
-    assert.equal(
-      named.total,
-      legacy.people.filter((p) => p.name.includes("Fixture")).length,
+    const matchingPeople = new Set(
+      expectedPeople.filter((p) => p.lastName === "Fixture").map((p) => p.id),
     );
-    const staff = await call("/ops/people?kind=AGENT", token);
-    assert(staff.items.every((p) => p.kind === "AGENT"));
+    assert.equal(named.total, matchingPeople.size);
+    assert(named.items.every((p) => matchingPeople.has(p.id)));
+    const agents = await call("/ops/people?kind=AGENT", token);
+    assert.equal(
+      agents.total,
+      expectedPeople.filter((p) => p.kind === "AGENT").length,
+    );
+    assert(agents.items.every((p) => p.kind === "AGENT"));
   }
   for (const path of ["/ops/bookings", "/ops/people"]) {
     await call(path, null, 401);
