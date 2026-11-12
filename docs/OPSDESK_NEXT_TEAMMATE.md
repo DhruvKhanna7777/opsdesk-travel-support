@@ -8,6 +8,10 @@
 >
 > Next obtain owner-reviewed workloads and thresholds, human labels and adjudication through the blind review form, and observable screen-reader speech. Live booking and mail, scanner monitoring, retention approval and operational recovery remain open. Use Node 22.23.x and isolated synthetic data. Run mutating suites sequentially and preserve agency isolation, sessions, deadlines, idempotency and audits. Keep private exports and credentials out of Git. Leave merges to collaborators. Deployment remains paused.
 
+## Continue after the synthetic booking population PR
+
+> Continue OpsDesk in DhruvKhanna7777/opsdesk-travel-support. Fetch latest main and inspect open PRs and actual Chromium/Firefox steps. Read the handoff, backlog, validation and acceptance review guides. Main d378ca0 through PR #64 and open PR #65 passed both hosted browsers when this work started. Review the codex/synthetic-load-bookings PR. It adds opt-in disposable bookings, background case distribution reporting, an HTTP booking directory probe and verified cleanup. Use Node 22.23.x, npm ci and an isolated ops:preview. Run mutating API, load and browser suites sequentially. Preserve unrelated work, authorization, agency isolation, sessions, deadlines, idempotency and audit history. Obtain owner-approved traffic, booking/case distributions and targets, controlled cold-cache evidence, independently adjudicated classifier labels and spoken screen-reader evidence. Keep live booking/email, scanner monitoring, retention and authorized staged recovery pending until verified. No provider is selected. Commit and open reviewable PRs in this repo only. Leave merges to collaborators and keep deployment paused.
+
 ## Supplier message-history continuation
 
 This follow-up builds on the populated supplier-list probe in PR #58. Select `supplier-history` to measure page 12 of a 240-message thread after a fresh API process starts. The probe checks the returned scope and confirms that another supplier history returns HTTP 404 after timing. [Procedure](OPSDESK_STARTUP_PROFILE.md) · [Local validation](OPSDESK_VALIDATION.md#supplier-message-history-startup)

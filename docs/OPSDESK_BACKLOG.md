@@ -8,6 +8,10 @@ Latest fetched main is `e699fd3` through merged PR #63; no PRs were open at the 
 
 Next agree representative traffic, datasets and named approval of targets before any acceptance claim. Human classifier labelling/adjudication and spoken screen-reader output remain pending. Live booking/mail, scanner monitoring, retention and approved staging recovery remain open. Deployment remains paused. Earlier checkpoints below are historical.
 
+## Synthetic booking population
+
+The load harness now varies booking count and background case density and verifies the populated booking directory over HTTP. Use the [validation record](OPSDESK_VALIDATION.md#synthetic-booking-population) and [run options](OPSDESK_BOOKING_APPROVALS.md#synthetic-load-rehearsal). Next obtain representative booking and case density, role/identity mix and target approval before acceptance. Controlled cold-cache testing, independent classifier labels, observable spoken screen-reader review and live operational checks remain open.
+
 ## Supplier history startup rehearsal
 
 The synthetic profiler covers page 12 of a populated supplier history and verifies that another supplier thread is denied. Representative traffic, controlled-cache runs, agreed thresholds, human classifier labels and spoken screen-reader evidence remain open. [Validation](OPSDESK_VALIDATION.md#supplier-message-history-startup)

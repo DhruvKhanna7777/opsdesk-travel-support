@@ -33,6 +33,7 @@ const total = integer("OPSDESK_LOAD_REQUESTS", 200, 20, 10_000);
 const concurrency = integer("OPSDESK_LOAD_CONCURRENCY", 8, 1, 32);
 const duration = integer("OPSDESK_LOAD_DURATION_SECONDS", 0, 0, 180);
 const backgroundCases = integer("OPSDESK_LOAD_CASES", 0, 0, 18_000);
+const backgroundBookings = integer("OPSDESK_LOAD_BOOKINGS", 0, 0, 10_000);
 const historyLength = integer("OPSDESK_LOAD_HISTORY", 0, 0, 5_000);
 const readProfile = readRoleProfile(process.env.OPSDESK_LOAD_ROLE_WEIGHTS);
 const identityMode = process.env.OPSDESK_LOAD_IDENTITIES ?? "single";
@@ -47,6 +48,7 @@ const stats = new Map();
 const roleStats = new Map();
 const expectedWrites = new Map();
 let createdCases = 0;
+let createdBookings = 0;
 let next = 0;
 let nextRead = 0;
 let token;
@@ -74,7 +76,8 @@ async function rowCounts() {
   return (
     await pool.query(`
     SELECT (SELECT count(*) FROM "TravelTicket")::int cases,
-           (SELECT count(*) FROM "TravelMessage")::int messages
+           (SELECT count(*) FROM "TravelMessage")::int messages,
+           (SELECT count(*) FROM "TravelBooking")::int bookings
   `)
   ).rows[0];
 }
@@ -104,32 +107,71 @@ try {
   token = login.accessToken;
   const baseline = await rowCounts();
 
-  const inserted = await pool.query(
+  const {
+    rows: [fixtures],
+  } = await pool.query(
     `
     WITH templates AS (
-      SELECT t.*, row_number() OVER (ORDER BY id) AS slot,
-             count(*) OVER () AS slots
+      SELECT t.*, row_number() OVER (ORDER BY t.id) AS slot
       FROM "TravelTicket" t
-      WHERE "bookingId" IS NOT NULL AND id NOT LIKE 'LOAD-%'
+      JOIN "TravelBooking" b ON b.id = t."bookingId"
+      WHERE t.id NOT LIKE 'LOAD-%' AND b.id NOT LIKE 'LOAD-%'
+    ), bookings AS (
+      INSERT INTO "TravelBooking"
+      SELECT copied.*
+      FROM generate_series(0, $4::int - 1) i
+      JOIN templates t ON t.slot = (i % NULLIF((SELECT count(*) FROM templates), 0)) + 1
+      JOIN "TravelBooking" b ON b.id = t."bookingId"
+      CROSS JOIN LATERAL jsonb_populate_record(NULL::"TravelBooking", to_jsonb(b) ||
+        jsonb_build_object('id', $1::text || 'booking-' || i,
+                           'reference', $1::text || 'booking-' || i)) copied
+      RETURNING id
+    ), case_slots AS (
+      SELECT i, CASE WHEN i >= $3::int AND $4::int > 0
+                     THEN (i - $3::int) % NULLIF($4::int, 0) END AS booking_slot
+      FROM generate_series(0, $2::int - 1) i
+    ), cases AS (
+      INSERT INTO "TravelTicket"
+      SELECT copied.*
+      FROM case_slots s
+      JOIN templates t ON t.slot =
+        (coalesce(s.booking_slot, s.i) % NULLIF((SELECT count(*) FROM templates), 0)) + 1
+      LEFT JOIN bookings b ON b.id = $1::text || 'booking-' || s.booking_slot
+      CROSS JOIN LATERAL jsonb_populate_record(NULL::"TravelTicket", to_jsonb(t) ||
+        jsonb_build_object(
+          'id', $1::text || s.i, 'reference', $1::text || s.i,
+          'bookingId', coalesce(b.id, t."bookingId"),
+          'deadline', now() + interval '1 year', 'responseDeadline', NULL,
+          'autoHandoff', false
+        )) copied
+      RETURNING id, "bookingId"
+    ), distribution AS (
+      SELECT count(c.id)::int AS cases
+      FROM bookings b LEFT JOIN cases c ON c."bookingId" = b.id
+      GROUP BY b.id
     )
-    INSERT INTO "TravelTicket"
-    SELECT (jsonb_populate_record(NULL::"TravelTicket", to_jsonb(t) ||
-      jsonb_build_object(
-        'id', $1::text || i::text, 'reference', $1::text || i::text,
-        'deadline', now() + interval '1 year', 'responseDeadline', NULL,
-        'autoHandoff', false
-      ))).*
-    FROM generate_series(0, $2::int - 1) i
-    JOIN templates t ON t.slot = (i % t.slots) + 1
+    SELECT (SELECT count(*)::int FROM cases) AS cases,
+           count(*)::int AS bookings,
+           count(*) FILTER (WHERE cases > 0)::int AS "bookingsWithCases",
+           coalesce(sum(cases), 0)::int AS "casesOnBookings",
+           min(cases) AS "minCasesPerBooking",
+           max(cases) AS "maxCasesPerBooking"
+    FROM distribution
   `,
-    [prefix, concurrency + backgroundCases],
+    [prefix, concurrency + backgroundCases, concurrency, backgroundBookings],
   );
-  createdCases = inserted.rowCount;
+  const { cases, bookings, ...bookingDistribution } = fixtures;
+  createdCases = cases;
+  createdBookings = bookings;
   assert.equal(
-    inserted.rowCount,
+    createdCases,
     concurrency + backgroundCases,
     "Missing booking-linked synthetic case templates.",
   );
+  assert.equal(createdBookings, backgroundBookings);
+  if (backgroundBookings) {
+    assert.equal(bookingDistribution.casesOnBookings, backgroundCases);
+  }
   if (historyLength) {
     await pool.query(
       `
@@ -202,9 +244,17 @@ try {
   const queue = await request(`/ops/queue?tab=all&page=${deepQueue}`, 200);
   assert.equal(queue.page, deepQueue);
 
+  const bookingPage = Math.max(1, Math.ceil(backgroundBookings / 20));
+  const bookingPath = `/ops/bookings?page=${bookingPage}`;
+  if (backgroundBookings) {
+    const bookings = await request(bookingPath, 200);
+    assert.equal(bookings.page, bookingPage);
+    assert.equal(bookings.total, loaded.bookings);
+  }
+
   const operations = [
     ["queue", `/ops/queue?tab=all&page=${deepQueue}`],
-    ["bookings", "/ops/bookings?page=1"],
+    ["bookings", bookingPath],
     ["hot history", `/ops/tickets/${hot}/messages?page=${deepHistory}`],
     ["insights", "/ops/insights"],
   ];
@@ -399,9 +449,11 @@ try {
     writeRole: "manager",
     baseline,
     loaded,
+    syntheticBookings: { created: createdBookings, ...bookingDistribution },
     concurrency,
     durationSeconds: duration || undefined,
     queuePage: deepQueue,
+    bookingPage,
     historyPage: deepHistory,
     writes: stored.length,
     elapsedMs: Math.round(elapsedMs),
@@ -416,17 +468,24 @@ try {
   };
 } finally {
   try {
-    if (createdCases) {
-      const removed = await pool.query(
-        'DELETE FROM "TravelTicket" WHERE id LIKE $1',
-        [prefix + "%"],
-      );
-      assert.equal(
-        removed.rowCount,
-        createdCases,
-        "Fixture cleanup was incomplete.",
-      );
-    }
+    const removedCases = await pool.query(
+      'DELETE FROM "TravelTicket" WHERE id LIKE $1',
+      [prefix + "%"],
+    );
+    const removedBookings = await pool.query(
+      'DELETE FROM "TravelBooking" WHERE id LIKE $1',
+      [prefix + "%"],
+    );
+    assert.equal(
+      removedCases.rowCount,
+      createdCases,
+      "Case cleanup was incomplete.",
+    );
+    assert.equal(
+      removedBookings.rowCount,
+      createdBookings,
+      "Booking cleanup was incomplete.",
+    );
   } finally {
     await pool.end();
   }

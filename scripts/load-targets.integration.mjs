@@ -28,19 +28,23 @@ async function counts() {
     await pool.query(`SELECT
     (SELECT count(*)::int FROM "TravelTicket") AS cases,
     (SELECT count(*)::int FROM "TravelMessage") AS messages,
-    (SELECT count(*)::int FROM "TravelConversation") AS conversations`)
+    (SELECT count(*)::int FROM "TravelConversation") AS conversations,
+    (SELECT count(*)::int FROM "TravelBooking") AS bookings`)
   ).rows[0];
 }
 
 try {
   const baseline = await counts();
   for (const status of ["not-configured", "passed", "failed"]) {
+    const bookings = status === "not-configured" ? 0 : 25;
+    const cases = status === "passed" ? 53 : status === "failed" ? 3 : 0;
     const env = {
       ...process.env,
       OPSDESK_LOAD_REQUESTS: "200",
       OPSDESK_LOAD_CONCURRENCY: "4",
       OPSDESK_LOAD_DURATION_SECONDS: "0",
-      OPSDESK_LOAD_CASES: "0",
+      OPSDESK_LOAD_CASES: String(cases),
+      OPSDESK_LOAD_BOOKINGS: String(bookings),
       OPSDESK_LOAD_HISTORY: "0",
       OPSDESK_LOAD_IDENTITIES: "expanded",
       OPSDESK_LOAD_ROLE_WEIGHTS: JSON.stringify(
@@ -67,6 +71,20 @@ try {
     assert.equal(report.targetAssessment.status, status);
     assert.equal(report.requests, 200);
     assert.equal(report.writes, 40);
+    assert.equal(report.bookingPage, bookings ? 2 : 1);
+    assert.deepEqual(report.syntheticBookings, {
+      created: bookings,
+      bookingsWithCases: Math.min(bookings, cases),
+      casesOnBookings: cases,
+      minCasesPerBooking: bookings ? Math.floor(cases / bookings) : null,
+      maxCasesPerBooking: bookings ? Math.ceil(cases / bookings) : null,
+    });
+    assert.deepEqual(report.baseline, {
+      cases: baseline.cases,
+      messages: baseline.messages,
+      bookings: baseline.bookings,
+    });
+    assert.equal(report.loaded.bookings, baseline.bookings + bookings);
     assert.equal(Object.keys(report.requestsByIdentity).length, 12);
     assert.deepEqual(
       await counts(),
@@ -83,7 +101,7 @@ try {
       assert.equal(failures[0].target, 201);
     }
     console.log(
-      `PASS ${status}: 200 measured requests, 40 verified writes, 12 identities, original case/message/conversation counts restored.`,
+      `PASS ${status}: 200 measured requests, 40 verified writes, 12 identities, original case/message/conversation/booking counts restored.`,
     );
   }
 } finally {

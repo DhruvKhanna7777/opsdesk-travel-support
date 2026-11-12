@@ -10,6 +10,8 @@ Use `npm run ops:review-classifier` to review the blind classifier pack in a loc
 
 The synthetic load rehearsal now supports five-role read weights, opt-in rotation across seeded identities, manager writes and per-role latency reports. [Run options and scope](docs/OPSDESK_BOOKING_APPROVALS.md#synthetic-load-rehearsal) · [Expanded-load evidence](docs/OPSDESK_VALIDATION.md#expanded-load-identity-rehearsal). Representative traffic, cold-cache acceptance and agreed performance targets remain open.
 
+Set `OPSDESK_LOAD_BOOKINGS` to add disposable booking records to the synthetic load rehearsal and spread background cases across them. The report records the case distribution and the manager booking page used. [Run options](docs/OPSDESK_BOOKING_APPROVALS.md#synthetic-load-rehearsal) · [Validation](docs/OPSDESK_VALIDATION.md#synthetic-booking-population)
+
 The classifier evaluator now accepts a reviewer-labelled local dataset with provenance/hashes, per-category metrics and a confusion matrix. A blank synthetic review pack and spoken screen-reader checklist are in the [acceptance review guide](docs/OPSDESK_ACCEPTANCE_REVIEW.md). Independent evaluation and spoken-output acceptance remain open. An earlier main run was cancelled at browser installation; that historical run skipped hosted browsers and its final audit. [Current validation evidence](docs/OPSDESK_VALIDATION.md#validation-continuation---11-november-2026). Deployment remains paused.
 
 Customers can view their case summary and browse their authenticated bookings as cards. Each card opens the existing scoped case history. New tickets and booking cancellation requests remain available through their existing controls. [Customer portal validation](docs/OPSDESK_VALIDATION.md)

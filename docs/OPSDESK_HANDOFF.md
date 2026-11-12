@@ -14,6 +14,12 @@ The user confirmed there are no approved performance targets and requested confi
 
 Next obtain owner-approved targets and representative workloads before performance acceptance. Human classifier labels/adjudication, actual spoken screen-reader evidence, live booking/mail, production scanner monitoring, retention and staging recovery remain unfinished. Deployment remains paused. Leave merges to collaborators.
 
+## Synthetic booking population
+
+From main `d378ca0` through merged PR #64, the load harness now accepts `OPSDESK_LOAD_BOOKINGS` and reports how background cases populate generated bookings. It verifies the manager's booking page over HTTP, preserves seed-linked worker and supplier cases, and checks deletion counts before reporting. PR #65 adds a separate supplier shared-buffer experiment. Main and PR #65 passed hosted Chromium and Firefox at the start of this increment. Check the booking-population PR and latest main before relying on either branch. [Procedure](OPSDESK_BOOKING_APPROVALS.md#synthetic-load-rehearsal) · [Verification](OPSDESK_VALIDATION.md#synthetic-booking-population)
+
+Owner-approved workloads and targets, controlled cold-cache evidence, human classifier review, spoken accessibility, live booking and email, scanner monitoring, retention approval and staged recovery still need acceptance. Deployment remains paused.
+
 ## Current merged checkpoint
 
 **Finished and merged.** The application baseline for this handoff is main `b1b97ab`, with PRs #58–#62 merged. It includes the scoped customer portal, synthetic five-role load, classifier evaluator and blind review form, fresh API-process profiling and the follow-ups below. Main validation passed at the earlier PR #57 checkpoint. The combined application run through #62 was queued when this handoff was prepared. [PR #57 main validation](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43076744463) · [PR #62 main validation](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43098229155)
