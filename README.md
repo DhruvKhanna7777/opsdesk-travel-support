@@ -1,5 +1,7 @@
 # OpsDesk - connected travel support
 
+Workspace compatibility remains supported while external consumer migration is unconfirmed. The browser and CI authentication probe use compact metadata; dedicated HTTP tests retain full-response scope and requester redaction coverage. [Caller inventory, paged replacement routes and retirement gates](docs/OPSDESK_WORKSPACE_COMPATIBILITY.md).
+
 The optional shared-buffer query experiment can profile a deep supplier message page after checking thread ownership. [Run the supplier probe](docs/OPSDESK_QUERY_PROFILE.md#supplier-conversation-history)
 
 The load rehearsal can check supplied latency, throughput, duration and per-role sample targets using `OPSDESK_LOAD_TARGETS`. No targets are enabled or approved by default. [Configuration, failure behavior and acceptance limits](docs/OPSDESK_LOAD_TARGETS.md).

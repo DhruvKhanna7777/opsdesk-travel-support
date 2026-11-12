@@ -1,3 +1,47 @@
+# Workspace compatibility continuation
+
+12 November 2026. Started from freshly fetched main `527931d27471971405d5aa7b48c9487532b1f34b`. PRs #65–#68 are merged and zero PRs were open at the initial check. The actual jobs/steps for [main run 43187098916](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43187098916) showed success for API, Chromium, Firefox, synthetic recovery and dependency audit; the run's head SHA matches that checkpoint. Earlier open-PR states below are historical.
+
+The repository caller audit found the browser and functional HTTP suites already using compact metadata or paged/case-specific reads. This increment moves the unauthenticated CI readiness probe to `?compact=1`, retaining HTTP 401 and the separate health/worker probes. It preserves the full response, the controller's `compact=1` opt-in and the deliberate rotation requester-redaction assertion. [Inventory, migration routes and retirement requirements](OPSDESK_WORKSPACE_COMPATIBILITY.md).
+
+The new `workspace-compatibility-smoke.mjs` runs sequentially in `ops:test`. It checks unauthenticated/invalid-token denial for both modes and full/compact responses for nine identities: manager, global/Asia/Europe agents, Atlas/Horizon agencies, Maya and both supplier accounts. Expected case, booking, people, agency, thread, message, related-case and event IDs come from independent synthetic database rows. Requester status reasons, staff-only messages/events and escalation fields remain redacted. Compact arrays stay empty; counts, identity, agencies, clock, assistant mode and notification scope remain covered. Explicit `compact=0` still returns full case IDs.
+
+Resolved disposable cases provide real nonempty supplier threads for both login accounts, plus internal messages, private status reasons and non-null escalation fields. A `finally` block deletes only UUID-prefixed fixture cases and independently checks zero remaining fixture cases, conversations, messages and events. Success is printed after cleanup.
+
+## Local evidence
+
+Windows, Node **22.23.5**, fresh `npm ci`, PostgreSQL **18.6**, API **3163**, frontend **3162**, database **55462**. A fresh clone, ignored generated configuration and a separate synthetic database preserved unrelated worktrees and data. API/load integration and browser commands run sequentially.
+
+| Check | Verified result |
+| --- | --- |
+| `npm ci` | Passed; 1,175 packages added, 1,179 audited. Install reports 29 development-inclusive advisories (5 low, 24 moderate). No dependency upgrades or lockfile edits. |
+| `npm run ops:preview` | Shared, backend and optimized frontend builds, Prisma generation, migrations, synthetic seed and readiness passed. |
+| `npm run ops:test` | Exited 0. Includes 10 load-profile/target tests, 3 startup tests, 6 classifier-tooling tests and 91 backend tests in 10 suites. |
+| Core / pagination / directory / compatibility HTTP | **143 / 123 / 190 / 32** checks passed, including exact scoped IDs and full/compact redaction. Final compatibility-script rerun after moving success output behind cleanup also passed 32 checks. |
+| Concurrency / membership / SLA | 13 lock checks; 80 membership HTTP checks; 56 SLA HTTP plus 6 concurrency/reconnect checks passed. |
+| Workload / supplier calendars / contracts / rotations | 33 workload checks; 20 supplier-calendar HTTP checks plus policy assertions; 52 contract HTTP checks; 63 rotation HTTP plus 54 policy/concurrency/state assertions passed. |
+| Mail / attachments / booking | Signed customer and supplier replay/scope scenarios, 23 synthetic attachment checks and 40 booking-approval checks passed. No live integration acceptance. |
+| Load-target integration | Three scenarios passed: unconfigured, configured pass and deliberately unmet target. Each measured 200 requests, verified 40 exactly-once writes across 12 identities, and restored original booking/case/message/conversation counts. The deliberate failed-target child exit is expected. |
+| Production dependency audit | `npm audit --omit=dev` exited 0; **zero vulnerabilities**. |
+| Chromium browser command | Exited 0: all six workflow scripts, 26 axe states, five reflow widths, five-role keyboard/focus checks and two blind-review-form tests passed. |
+| Firefox browser command | Exited 0: the same complete workflow, accessibility/reflow/keyboard and review-form sequence passed, after Chromium finished. |
+| Independent cleanup query | After both browser commands: 30 bookings, 60 cases, 192 messages and 12 conversations; zero compatibility-prefixed rows in case, conversation, message and event tables. |
+| Static checks | Script syntax, Prettier on changed script/package/new guide, workflow YAML parsing with the installed JavaScript YAML library, and Git whitespace checks passed. |
+
+The isolated API, frontend and PostgreSQL services were stopped after validation; all three dedicated ports and the identified process IDs were absent. The extra PostgreSQL stop command found the server had already exited.
+
+[PR #69](https://github.com/DhruvKhanna7777/opsdesk-travel-support/pull/69) application commit `4e736a16446ef9edb7828a98b009122942d9edd2` passed [hosted run 43220571787](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43220571787). Its actual step records show successful dependency install, builds/startup, classifier regressions, synthetic recovery, full API regression, booking ownership, five-role load, process-start probes, Chromium, Firefox and production dependency audit. This evidence is independent of the starting main run. The follow-up recording this result changes documentation only; check its own head CI before merging. PR #69 remains open for collaborators; no merge or deployment was performed.
+
+## Attempts and acceptance limits
+
+The initial API run reached the new compatibility test and failed its nonempty supplier-fixture assertion: clean seeding gives conversations to supplier-2, whereas the login accounts belong to supplier-0 and supplier-1. The corrected test creates separate resolved disposable fixtures for both login accounts. The complete API rerun passed. The first Chromium invocation used the wrong URL environment variable and failed with connection refused at port 3000 before sign-in. The corrected invocation uses `OPSDESK_BROWSER_URL=http://127.0.0.1:3162`. An initial formatting check flagged package.json line endings; Prettier corrected them without additional semantic changes. The optional Python YAML parser installation failed because Windows Application Control blocked Cython; workflow parsing passed using the installed JavaScript YAML library. An additional inline probe assertion had a shell-quoting syntax error; it did not execute or alter the workflow. The workflow itself parsed successfully.
+
+**External caller compatibility remains unconfirmed.** No owner-attested consumer inventory, authorized external access-log observation or consumer migration acceptance was supplied. Retain the full response until that evidence and a retirement/rollback decision exist. Repository tests establish synthetic compatibility coverage only.
+
+The first commit attempt failed in the hook launcher because Bash is unavailable in this bundled Git environment. Direct `npx.cmd --no -- lint-staged` completed with no matching staged source files, and `npx.cmd --no -- commitlint --edit` passed for the commit message. Only the shell wrapper was skipped for this commit using `HUSKY=0`; repository hook files were preserved.
+
+Owner-approved performance targets and representative workloads, controlled cold-cache measurements, independently adjudicated human classifier labels, observable screen-reader speech, live booking/email acceptance, production scanner monitoring, retention approval and an authorized staging restore remain pending. No live booking provider is selected. Deployment remains paused; merges remain with collaborators.
+
 # Supplier history shared-buffer comparison — 12 November 2026
 
 The profiling runs used main `e699fd3` through PR #63. PR #64 subsequently merged at `d378ca0`. The [PR Chromium and Firefox steps passed](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43102297300). The [post-merge main Chromium and Firefox steps also passed](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43176748730). The earlier main validation and historical PR #61/#62 validations were queued at the initial check. GitHub marked [PR #60 run 43090996154](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43090996154) failed while its job record showed queued with no executed steps. That result provides no Firefox evidence. [Latest main at check](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43098403977) · [PR #61](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43095738307) · [PR #62](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43096512227)
