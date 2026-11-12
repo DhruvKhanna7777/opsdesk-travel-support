@@ -1,5 +1,9 @@
 # OpsDesk continuation checkpoint — 12 November 2026
 
+## Hosted demo continuation
+
+Main `4a03781` includes the Iteration 1 and TBO workflow features and the fresh-reset evidence. The user plans to continue from another Codex account with connected deployment plugins. Use the [copy-ready deployment/submission handoff](OPSDESK_DEPLOYMENT_HANDOFF.md) first. It records verified state, a staging-only prompt, required evidence and production gates. Check the latest main CI before reporting its result. Sections below retain their historical checkpoints.
+
 ## TBO workflow continuation
 
 The TBO workflow follow-up is stacked on PR #72 at `41610e8`. PR #72's hosted API, Chromium, Firefox, recovery, load, startup and audit checks passed. Review #72 first, then retarget the TBO follow-up to main after the parent merges. The TBO follow-up adds booking and cutoff labels, a saved-intent filter shared with CSV export, and audited EM escalation with manager acknowledgment. [Workflow and retention](OPSDESK_TBO_WORKFLOW.md) · [Validation](OPSDESK_VALIDATION.md#tbo-workflow)
