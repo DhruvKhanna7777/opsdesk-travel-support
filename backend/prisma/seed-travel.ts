@@ -257,12 +257,20 @@ async function main() {
     'RESOLVED',
     'CLOSED',
   ];
+  const weekStart = new Date(now);
+  weekStart.setUTCHours(0, 0, 0, 0);
+  weekStart.setUTCDate(
+    weekStart.getUTCDate() - ((weekStart.getUTCDay() + 6) % 7),
+  );
   for (let i = 0; i < 60; i++) {
     const b = i % 30,
       customer = b % 20,
       region = regions[customer % 3],
       status = i === 0 ? 'OPEN' : statuses[i % 5];
-    const created = new Date(now.getTime() - ((i % 14) + 1) * 24 * hour),
+    const historicalTime = now.getTime() - ((i % 14) + 1) * 24 * hour;
+    const created = new Date(
+        i < 2 ? Math.max(weekStart.getTime(), historicalTime) : historicalTime,
+      ),
       category = i === 0 ? 'CHECK_IN' : cats[i % 6];
     const ticketId = `ticket-${i}`,
       agentId = `agent-${region.toLowerCase()}`;
@@ -280,6 +288,10 @@ async function main() {
         customerId: `customer-${customer}`,
         bookingId: `booking-${b}`,
         category,
+        themes:
+          i === 0 || i === 1
+            ? { create: { theme: i === 0 ? 'SUPPLIER_FOLLOW_UP' : 'REFUND' } }
+            : undefined,
         status,
         region,
         agentId: i % 11 === 0 && i !== 0 ? null : agentId,
@@ -289,7 +301,9 @@ async function main() {
             (i === 0 ? 20 : i % 8 === 0 ? -2 : 8 + (i % 30)) * hour,
         ),
         createdAt: created,
-        updatedAt: new Date(now.getTime() - (i % 12) * hour),
+        updatedAt: new Date(
+          Math.max(created.getTime(), now.getTime() - (i % 12) * hour),
+        ),
         resolvedAt: ['RESOLVED', 'CLOSED'].includes(status)
           ? new Date(created.getTime() + 6 * hour)
           : null,
@@ -311,7 +325,9 @@ async function main() {
         content:
           'I have reviewed your booking and requested the relevant confirmation. Your earlier messages are attached to this case; you do not need to repeat the details.',
         visibility: 'CUSTOMER',
-        createdAt: new Date(created.getTime() + (0.5 + (i % 4)) * hour),
+        createdAt: new Date(
+          Math.min(now.getTime(), created.getTime() + (0.5 + (i % 4)) * hour),
+        ),
       },
     });
     await db.travelMessage.create({
@@ -321,7 +337,9 @@ async function main() {
         content:
           'Internal handover: verify the supplier response against the booking record before confirming to the customer.',
         visibility: 'INTERNAL',
-        createdAt: new Date(created.getTime() + 5 * hour),
+        createdAt: new Date(
+          Math.min(now.getTime(), created.getTime() + 5 * hour),
+        ),
       },
     });
     await db.travelEvent.create({

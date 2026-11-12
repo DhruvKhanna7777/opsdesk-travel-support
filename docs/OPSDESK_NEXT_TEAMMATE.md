@@ -1,5 +1,11 @@
 # OpsDesk continuation checkpoint — 12 November 2026
 
+## Iteration 1 continuation
+
+Start from main `3b969be` through PR #71. Its PR and post-merge validation both passed. Read the [Iteration 1 workflow](OPSDESK_ITERATION_ONE.md) and the latest validation record. Review the PR for editable supplier thread recipients, case themes and linked weekly Insights, and full filtered CSV export. Confirm the exact PR checks before merging. The original project workflow governs authorization, thread visibility, routing, deadlines, resolution and audit.
+
+Keep full and compact workspace responses supported. External caller inventory, authorized observation coverage and consumer migration acceptance still need owner evidence. Pending acceptance also includes representative workloads and targets, cold-cache evidence, adjudicated classifier labels, observable screen-reader speech, live booking and email, scanner monitoring, retention and authorized staging recovery. Use Node 22.23.x and an isolated synthetic preview. Run mutating suites sequentially. Leave merges to collaborators and deployment paused.
+
 ## Workspace observation summary continuation
 
 PR #70 is merged at starting main `c99ca5b`, with zero open PRs at the initial check. [Post-merge validation](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43226554929) passed both browsers, API, recovery, load/startup and audit. Older open-PR wording below is historical.

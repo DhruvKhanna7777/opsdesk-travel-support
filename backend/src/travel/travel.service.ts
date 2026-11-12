@@ -28,9 +28,20 @@ import { TravelMailService } from './travel-mail.service';
 import { supplierRepliesEnabled } from './resend-mail-reply';
 import { Prisma } from '../../generated/prisma/client';
 import { readTravelInsights } from './travel-insights';
+import {
+  ConversationRecipientsDto,
+  supplierThreadScope,
+} from './conversation-recipients';
+import { suggestThemes, TicketThemesDto } from './ticket-themes';
 import { TravelQueueDto } from './travel-queue.dto';
 import { readPage, TravelPageDto } from './travel-page.dto';
-import { readTravelQueue, type TravelTicketScope } from './travel-queue';
+import {
+  csvRow,
+  EXPORT_BATCH_SIZE,
+  readExportBatch,
+  readTravelQueue,
+  type TravelTicketScope,
+} from './travel-queue';
 import {
   AgentSpecialtiesDto,
   BookingScheduleDto,
@@ -163,6 +174,55 @@ export class TravelService implements OnApplicationBootstrap, OnModuleDestroy {
     this.staff(p);
     return readTravelInsights(this.db, this.staffRegion(p), await this.now());
   }
+  async ticketThemes(userId: string, id: string) {
+    const p = await this.profile(userId);
+    this.staff(p);
+    const ticket = await this.ticket(p, id, this.db);
+    const rows = await this.db.travelTicketTheme.findMany({
+      where: { ticketId: id },
+      orderBy: { theme: 'asc' },
+    });
+    return {
+      themes: rows.map(({ theme }) => theme),
+      suggestions: suggestThemes(ticket.title, ticket.description),
+    };
+  }
+
+  async updateTicketThemes(userId: string, id: string, dto: TicketThemesDto) {
+    return this.ticketLocked(id, async (tx) => {
+      const p = await this.profile(userId, tx);
+      this.staff(p);
+      await this.ticket(p, id, tx);
+      const rows = await tx.travelTicketTheme.findMany({
+        where: { ticketId: id },
+      });
+      if (
+        rows.length === dto.themes.length &&
+        rows.every(({ theme }) => dto.themes.includes(theme))
+      )
+        return { success: true };
+      await tx.travelTicketTheme.deleteMany({ where: { ticketId: id } });
+      if (dto.themes.length)
+        await tx.travelTicketTheme.createMany({
+          data: dto.themes.map((theme) => ({ theme, ticketId: id })),
+        });
+      const before =
+        rows
+          .map(({ theme }) => theme)
+          .sort()
+          .join(', ') || 'none';
+      const after = [...dto.themes].sort().join(', ') || 'none';
+      await this.event(
+        tx,
+        id,
+        'THEMES_CHANGED',
+        `Case themes: ${before} → ${after}.`,
+        userId,
+        await this.now(tx),
+      );
+      return { success: true };
+    });
+  }
   async queue(userId: string, query: TravelQueueDto) {
     const p = await this.profile(userId);
     if (query.attention) this.staff(p);
@@ -233,6 +293,67 @@ export class TravelService implements OnApplicationBootstrap, OnModuleDestroy {
           : [];
       }),
     };
+  }
+  async exportQueue(userId: string, query: TravelQueueDto) {
+    const profile = await this.profile(userId);
+    if (profile.kind === 'SUPPLIER')
+      throw new ForbiddenException('Case export is unavailable to suppliers.');
+    if (query.attention) this.staff(profile);
+    return this.exportRows(profile, query, await this.now());
+  }
+
+  private async *exportRows(
+    profile: Profile,
+    query: TravelQueueDto,
+    now: Date,
+  ) {
+    yield csvRow([
+      'Reference',
+      'Subject',
+      'Booking',
+      'Region',
+      'Category',
+      'Priority',
+      'Status',
+      'Deadline',
+    ]);
+    const scope = this.scope(profile);
+    let after: string | undefined;
+    for (;;) {
+      const current = await this.profile(profile.userId);
+      if (
+        current.sessionVersion !== profile.sessionVersion ||
+        current.kind !== profile.kind ||
+        current.agencyId !== profile.agencyId ||
+        current.region !== profile.region
+      )
+        throw new ForbiddenException('Case export scope changed.');
+      const rows = await readExportBatch(
+        this.db,
+        scope,
+        query,
+        profile.userId,
+        now,
+        after,
+      );
+      if (!rows.length) return;
+      yield rows
+        .map((row) =>
+          csvRow([
+            row.reference,
+            row.title,
+            row.booking ?? '',
+            row.region,
+            row.category,
+            row.priority,
+            row.status,
+            row.deadline.toISOString(),
+          ]),
+        )
+        .join('');
+      if (rows.length < EXPORT_BATCH_SIZE) return;
+      after = rows[rows.length - 1].id;
+    }
   }
   async detail(userId: string, id: string) {
     const p = await this.profile(userId);
@@ -453,7 +574,7 @@ export class TravelService implements OnApplicationBootstrap, OnModuleDestroy {
       throw new ForbiddenException('Supplier access required.');
     const where = ticketId
       ? { ticketId }
-      : { supplierId: p.supplierId || 'NONE' };
+      : supplierThreadScope({ ...p, email: p.user.email });
     return readPage(
       query,
       () => this.db.travelConversation.count({ where }),
@@ -462,6 +583,7 @@ export class TravelService implements OnApplicationBootstrap, OnModuleDestroy {
           where,
           skip,
           take,
+          omit: { recipientsConfigured: true },
           include: {
             supplier: { select: { id: true, name: true, email: true } },
           },
@@ -477,7 +599,7 @@ export class TravelService implements OnApplicationBootstrap, OnModuleDestroy {
       where: {
         id,
         ...(p.kind === 'SUPPLIER'
-          ? { supplierId: p.supplierId || 'NONE' }
+          ? supplierThreadScope({ ...p, email: p.user.email })
           : {}),
       },
     });
@@ -486,8 +608,140 @@ export class TravelService implements OnApplicationBootstrap, OnModuleDestroy {
       this.staff(p);
       await this.ticket(p, c.ticketId, this.db);
     }
-    const where = { conversationId: id };
+    const where = {
+      conversationId: id,
+      ...(p.kind === 'SUPPLIER'
+        ? { conversation: supplierThreadScope({ ...p, email: p.user.email }) }
+        : {}),
+    };
     return this.messagePage(where, query);
+  }
+  async conversationRecipients(userId: string, id: string) {
+    const p = await this.profile(userId);
+    this.staff(p);
+    const thread = await this.db.travelConversation.findUnique({
+      where: { id },
+      include: {
+        supplier: { select: { email: true } },
+        recipients: { orderBy: [{ kind: 'asc' }, { target: 'asc' }] },
+      },
+    });
+    if (!thread) throw new NotFoundException('Conversation not found.');
+    await this.ticket(p, thread.ticketId, this.db);
+    const members = await this.db.travelProfile.findMany({
+      where: {
+        supplierId: thread.supplierId,
+        kind: 'SUPPLIER',
+        status: 'ACTIVE',
+      },
+      select: {
+        userId: true,
+        user: { select: { firstName: true, lastName: true } },
+      },
+      orderBy: { userId: 'asc' },
+    });
+    return {
+      configured: thread.recipientsConfigured,
+      recipients: thread.recipients.map(({ kind, target, role }) => ({
+        kind,
+        target,
+        role,
+      })),
+      supplierEmail: thread.supplier.email.toLowerCase(),
+      members: members.map(({ userId, user }) => ({
+        id: userId,
+        name: `${user.firstName} ${user.lastName}`,
+      })),
+    };
+  }
+
+  async updateConversationRecipients(
+    userId: string,
+    id: string,
+    dto: ConversationRecipientsDto,
+  ) {
+    return this.conversationLocked(id, async (tx) => {
+      const p = await this.profile(userId, tx);
+      this.staff(p);
+      const thread = await tx.travelConversation.findUnique({
+        where: { id },
+        include: {
+          supplier: { select: { email: true } },
+          recipients: { orderBy: [{ kind: 'asc' }, { target: 'asc' }] },
+        },
+      });
+      if (!thread) throw new NotFoundException('Conversation not found.');
+      await this.ticket(p, thread.ticketId, tx);
+      const next = dto.recipients.map(({ kind, target, role }) => ({
+        kind,
+        target: kind === 'EMAIL' ? target.trim().toLowerCase() : target,
+        role,
+      }));
+      if (
+        !next.some(({ role }) => role === 'TO') ||
+        new Set(next.map(({ kind, target }) => JSON.stringify([kind, target])))
+          .size !== next.length
+      )
+        throw new BadRequestException(
+          'Choose at least one To recipient and remove duplicates.',
+        );
+      const users = next
+        .filter(({ kind }) => kind === 'USER')
+        .map(({ target }) => target);
+      const eligible = await tx.travelProfile.count({
+        where: {
+          userId: { in: users },
+          supplierId: thread.supplierId,
+          kind: 'SUPPLIER',
+          status: 'ACTIVE',
+        },
+      });
+      if (
+        eligible !== users.length ||
+        next.some(
+          ({ kind, target }) =>
+            kind === 'EMAIL' && target !== thread.supplier.email.toLowerCase(),
+        )
+      )
+        throw new BadRequestException('Choose recipients from this supplier.');
+      if (
+        thread.recipientsConfigured &&
+        thread.recipients.length === next.length &&
+        thread.recipients.every((previous) =>
+          next.some(
+            ({ kind, target, role }) =>
+              kind === previous.kind &&
+              target === previous.target &&
+              role === previous.role,
+          ),
+        )
+      )
+        return { success: true };
+      await tx.travelConversationRecipient.deleteMany({
+        where: { conversationId: id },
+      });
+      await tx.travelConversationRecipient.createMany({
+        data: next.map((recipient) => ({ ...recipient, conversationId: id })),
+      });
+      await tx.travelConversation.update({
+        where: { id },
+        data: { recipientsConfigured: true },
+      });
+      const countRoles = (recipients: { role: string }[]) =>
+        `${recipients.filter(({ role }) => role === 'TO').length} To, ${recipients.filter(({ role }) => role === 'CC').length} Cc`;
+      const before = thread.recipientsConfigured
+        ? countRoles(thread.recipients)
+        : 'supplier-wide';
+      await this.event(
+        tx,
+        thread.ticketId,
+        'SUPPLIER_RECIPIENTS_CHANGED',
+        `Supplier conversation recipients: ${before} → ${countRoles(next)}.`,
+        userId,
+        await this.now(tx),
+      );
+      return { success: true };
+    });
   }
   private async ticket(p: Profile, id: string, tx: Tx): Promise<Case> {
     const ticket = await tx.travelTicket.findFirst({
@@ -595,7 +849,12 @@ export class TravelService implements OnApplicationBootstrap, OnModuleDestroy {
           : Prisma.sql`FALSE`;
     const threadScope =
       p.kind === 'SUPPLIER'
-        ? Prisma.sql`c."supplierId" = ${p.supplierId || 'NONE'}`
+        ? Prisma.sql`c."supplierId" = ${p.supplierId}
+          AND (NOT c."recipientsConfigured" OR EXISTS (
+            SELECT 1 FROM "TravelConversationRecipient" r WHERE r."conversationId" = c.id
+            AND ((r.kind = 'USER' AND r.target = ${p.userId})
+              OR (r.kind = 'EMAIL' AND r.target = ${p.user.email.toLowerCase()}))
+          ))`
         : STAFF.includes(p.kind)
           ? Prisma.sql`EXISTS (SELECT 1 FROM "TravelTicket" t WHERE t.id = c."ticketId" AND ${ticketScope})`
           : Prisma.sql`FALSE`;
@@ -686,7 +945,7 @@ export class TravelService implements OnApplicationBootstrap, OnModuleDestroy {
               : 0,
             p.kind === 'SUPPLIER'
               ? this.db.travelConversation.count({
-                  where: { supplierId: p.supplierId || 'NONE' },
+                  where: supplierThreadScope({ ...p, email: p.user.email }),
                 })
               : 0,
           ])
@@ -724,7 +983,7 @@ export class TravelService implements OnApplicationBootstrap, OnModuleDestroy {
       : await this.db.travelConversation.findMany({
           where:
             p.kind === 'SUPPLIER'
-              ? { supplierId: p.supplierId || 'NONE' }
+              ? supplierThreadScope({ ...p, email: p.user.email })
               : staff
                 ? { ticketId: { in: ids } }
                 : { id: '__none__' },
@@ -732,6 +991,7 @@ export class TravelService implements OnApplicationBootstrap, OnModuleDestroy {
             messages: { orderBy: { createdAt: 'asc' } },
             supplier: { select: { id: true, name: true, email: true } },
           },
+          omit: { recipientsConfigured: true },
           orderBy: { createdAt: 'desc' },
         });
     const bookings =
@@ -1315,6 +1575,21 @@ export class TravelService implements OnApplicationBootstrap, OnModuleDestroy {
             FOR SHARE OF p, u
           `;
       if (!member) return;
+      if (
+        conversation &&
+        !(await tx.travelConversation.findFirst({
+          where: {
+            id: conversation.id,
+            ...supplierThreadScope({
+              supplierId: conversation.supplierId,
+              userId: member.userId,
+              email: sender,
+            }),
+          },
+          select: { id: true },
+        }))
+      )
+        return;
       const inserted = await tx.travelInboundMail.createMany({
         data: [{ id: inboundMailId, ticketId }],
         skipDuplicates: true,
@@ -1406,12 +1681,16 @@ export class TravelService implements OnApplicationBootstrap, OnModuleDestroy {
   async reply(userId: string, id: string, dto: SupplierReplyDto) {
     return this.conversationLocked(id, async (tx) => {
       const p = await this.profile(userId, tx);
-      const c = await tx.travelConversation.findUnique({ where: { id } });
+      const c = await tx.travelConversation.findFirst({
+        where: {
+          id,
+          ...(p.kind === 'SUPPLIER'
+            ? supplierThreadScope({ ...p, email: p.user.email })
+            : {}),
+        },
+      });
       if (!c) throw new NotFoundException('Conversation not found.');
-      if (p.kind === 'SUPPLIER') {
-        if (p.supplierId !== c.supplierId)
-          throw new NotFoundException('Conversation not found.');
-      } else {
+      if (p.kind !== 'SUPPLIER') {
         this.staff(p);
         await this.ticket(p, c.ticketId, tx);
       }

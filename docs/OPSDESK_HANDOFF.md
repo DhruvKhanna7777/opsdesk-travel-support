@@ -1,5 +1,13 @@
 # OpsDesk developer handoff
 
+## Iteration 1
+
+Starting main `3b969be` includes PR #71. Both [PR CI](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43229442639) and [post-merge main CI](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43229536644) passed, including API, Chromium, Firefox, synthetic recovery, load, startup and production audit. No PRs were open when this increment started.
+
+The Iteration 1 changes add editable supplier thread recipients independent of case assignment, staff-confirmed themes with regional Insights examples, and a role-scoped keyset CSV export that applies the current queue filters. [Use and scope](OPSDESK_ITERATION_ONE.md) · [Validation](OPSDESK_VALIDATION.md#iteration-1)
+
+External caller inventory, authorized observation coverage and consumer acceptance remain prerequisites for full-workspace retirement. Keep both response modes supported. Independent human, live provider, performance and operational acceptance remain open. Deployment stays paused.
+
 ## Workspace observation summary continuation
 
 Starting main `c99ca5b` includes merged PR #70; zero PRs were open at the initial check. [Post-merge CI 43226554929](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43226554929) passed builds, API, Chromium, Firefox, synthetic recovery, load/startup and audit before this follow-up was edited. Earlier merge/open-PR descriptions below are historical.

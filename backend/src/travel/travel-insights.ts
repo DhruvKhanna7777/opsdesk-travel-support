@@ -9,10 +9,10 @@ export async function readTravelInsights(
   // The authorized case set is shared by every aggregate in this snapshot.
   const [row] = await db.$queryRaw<{ report: TravelInsights }[]>`
     WITH clock AS (
-      SELECT (${now}::timestamptz AT TIME ZONE 'UTC') AS current_time_utc
+      SELECT (${now.toISOString()}::timestamptz AT TIME ZONE 'UTC') AS current_time_utc
     ),
     scoped AS MATERIALIZED (
-      SELECT t.id, t.category, t."bookingId", t."createdAt", t."resolvedAt", t.deadline,
+      SELECT t.id, t.reference, t.title, t.category, t."bookingId", t."createdAt", t."resolvedAt", t.deadline,
              t.status NOT IN ('RESOLVED', 'CLOSED') AS is_open
       FROM "TravelTicket" t
       WHERE (${region}::text IS NULL OR t.region = ${region}::text)
@@ -38,6 +38,21 @@ export async function readTravelInsights(
     ),
     category_totals AS (
       SELECT category, count(*) AS count FROM scoped GROUP BY category
+    ),
+    ranked_themes AS (
+      SELECT tags.theme, t.id, t.reference, t.title,
+             row_number() OVER (PARTITION BY tags.theme ORDER BY t."createdAt" DESC, t.id DESC) AS rank
+      FROM scoped t
+      JOIN "TravelTicketTheme" tags ON tags."ticketId" = t.id
+      CROSS JOIN clock
+      WHERE t."createdAt" >= date_trunc('week', current_time_utc)
+        AND t."createdAt" <= current_time_utc
+    ),
+    top_themes AS (
+      SELECT theme, count(*) AS count,
+             jsonb_agg(jsonb_build_object('id', id, 'reference', reference, 'title', title)
+               ORDER BY rank) FILTER (WHERE rank <= 3) AS examples
+      FROM ranked_themes GROUP BY theme ORDER BY count DESC, theme LIMIT 5
     ),
     day_totals AS (
       SELECT t."createdAt"::date AS day, count(*) AS count
@@ -92,6 +107,7 @@ export async function readTravelInsights(
         ORDER BY EXTRACT(EPOCH FROM ("resolvedAt" - "createdAt")) / 3600
       ) FILTER (WHERE NOT is_open AND "resolvedAt" >= "createdAt"),
       'categories', coalesce((SELECT jsonb_agg(category_totals ORDER BY category) FROM category_totals), '[]'),
+      'themes', coalesce((SELECT jsonb_agg(top_themes ORDER BY count DESC, theme) FROM top_themes), '[]'),
       'days', (SELECT jsonb_agg(days ORDER BY date) FROM days),
       'suppliers', coalesce((SELECT jsonb_agg(suppliers ORDER BY name, id) FROM suppliers), '[]')
     ) AS report

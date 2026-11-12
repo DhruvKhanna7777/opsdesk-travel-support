@@ -4,6 +4,7 @@ import { Attachments } from "./attachments";
 import { TicketSlaControls } from "./sla-settings";
 import { useState } from "react";
 import { useOpsResource, useOpsPage, PageControls } from "./paged-data";
+import { TRAVEL_THEMES } from "@helpdesk/shared";
 import {
   ArrowLeft,
   ArrowUpRight,
@@ -382,7 +383,9 @@ export function OnDemandTicket({
     return (
       <p role="alert">
         {detail.error} <button onClick={detail.retry}>Retry case</button>
-        <button onClick={props.onBack}>Back to conversations</button>
+        <button onClick={props.onBack}>
+          {props.backLabel ?? "Back to conversations"}
+        </button>
       </p>
     );
   if (!detail.data) return <p role="status">Loading case…</p>;
@@ -398,10 +401,69 @@ export function OnDemandTicket({
     />
   );
 }
+function TicketThemes({
+  id,
+  now,
+  busy,
+  mutate,
+}: {
+  id: string;
+  now: string;
+  busy: boolean;
+  mutate: Mutation;
+}) {
+  const path = `tickets/${id}/themes`;
+  const { data, error, retry } = useOpsResource<{
+    themes: string[];
+    suggestions: string[];
+  }>(path, now);
+  return (
+    <details className="od-panel">
+      <summary>Case themes</summary>
+      {error ? (
+        <p role="alert">{error}</p>
+      ) : data ? (
+        <form
+          key={data.themes.join("|")}
+          onSubmit={(event) => {
+            event.preventDefault();
+            const themes = new FormData(event.currentTarget).getAll("theme");
+            void mutate(path, { themes }, "Case themes saved.", "PATCH")
+              .then(retry)
+              .catch(() => {});
+          }}
+        >
+          <fieldset>
+            <legend>Tags</legend>
+            {TRAVEL_THEMES.map((theme) => (
+              <label key={theme}>
+                <input
+                  type="checkbox"
+                  name="theme"
+                  value={theme}
+                  defaultChecked={data.themes.includes(theme)}
+                />
+                {human(theme)}
+                {data.suggestions.includes(theme) ? " (suggested)" : ""}
+              </label>
+            ))}
+          </fieldset>
+          <button className="od-secondary" disabled={busy}>
+            Save themes
+          </button>
+        </form>
+      ) : (
+        <p role="status">Loading case themes…</p>
+      )}
+    </details>
+  );
+}
+
 export function TicketDetail({
   ticket: t,
   data,
   onBack,
+  backLabel = "Back to conversations",
   onSelect,
   mutate,
   busy,
@@ -409,6 +471,7 @@ export function TicketDetail({
   ticket: Ticket;
   data: Workspace;
   onBack: () => void;
+  backLabel?: string;
   onSelect: (id: string) => void;
   mutate: Mutation;
   busy: boolean;
@@ -461,7 +524,7 @@ export function TicketDetail({
     <>
       <button className="od-back" onClick={onBack}>
         <ArrowLeft size={16} />
-        Back to conversations
+        {backLabel}
       </button>
       <div className="od-detail-heading">
         <div>
@@ -489,6 +552,9 @@ export function TicketDetail({
           {active(t) ? (staff ? "Resolve case" : "Close case") : "Reopen case"}
         </button>
       </div>
+      {staff && (
+        <TicketThemes id={t.id} now={data.now} busy={busy} mutate={mutate} />
+      )}
       <section className="od-trajectory" aria-label="Case journey">
         <div className="od-trajectory-heading">
           <h2>Case journey</h2>
@@ -1011,6 +1077,105 @@ export function TicketDetail({
     </>
   );
 }
+type ThreadRecipient = {
+  kind: "EMAIL" | "USER";
+  target: string;
+  role: "TO" | "CC";
+};
+type ThreadRecipients = {
+  configured: boolean;
+  recipients: ThreadRecipient[];
+  supplierEmail: string;
+  members: { id: string; name: string }[];
+};
+
+function EditRecipients({
+  id,
+  now,
+  busy,
+  mutate,
+  close,
+}: {
+  id: string;
+  now: string;
+  busy: boolean;
+  mutate: Mutation;
+  close: () => void;
+}) {
+  const path = `conversations/${id}/recipients`;
+  const { data, error } = useOpsResource<ThreadRecipients>(path, now);
+  if (error) return <p role="alert">{error}</p>;
+  if (!data) return <p role="status">Loading recipients…</p>;
+  const options: {
+    kind: ThreadRecipient["kind"];
+    target: string;
+    label: string;
+  }[] = [
+    { kind: "EMAIL", target: data.supplierEmail, label: data.supplierEmail },
+    ...data.members.map(({ id, name }) => ({
+      kind: "USER" as const,
+      target: id,
+      label: name,
+    })),
+  ];
+  return (
+    <form
+      onSubmit={(event) => {
+        event.preventDefault();
+        const fields = new FormData(event.currentTarget);
+        const recipients = options.flatMap(({ kind, target }, index) => {
+          const role = fields.get(`recipient-${index}`);
+          return role ? [{ kind, target, role }] : [];
+        });
+        void mutate(path, { recipients }, "Thread recipients saved.", "PATCH")
+          .then(close)
+          .catch(() => {});
+      }}
+    >
+      <fieldset>
+        <legend>Supplier thread recipients</legend>
+        {!data.configured && (
+          <p>
+            This thread is shared with the booked supplier. Saving limits access
+            to the listed recipients.
+          </p>
+        )}
+        {data.recipients.some(
+          (r) =>
+            !options.some(
+              (option) => option.kind === r.kind && option.target === r.target,
+            ),
+        ) && (
+          <p>
+            Previously selected recipients who are no longer eligible will be
+            removed on save.
+          </p>
+        )}
+        {options.map(({ kind, target, label }, index) => (
+          <label key={`${kind}:${target}`}>
+            {label}
+            <select
+              name={`recipient-${index}`}
+              defaultValue={
+                data.recipients.find(
+                  (r) => r.kind === kind && r.target === target,
+                )?.role ?? ""
+              }
+            >
+              <option value="">Excluded</option>
+              <option value="TO">To</option>
+              <option value="CC">Cc</option>
+            </select>
+          </label>
+        ))}
+      </fieldset>
+      <button className="od-secondary" disabled={busy}>
+        Save recipients
+      </button>
+    </form>
+  );
+}
+
 export function SupplierConversation({
   conversation: c,
   data,
@@ -1023,6 +1188,7 @@ export function SupplierConversation({
   busy: boolean;
 }) {
   const [content, setContent] = useState("");
+  const [editingRecipients, setEditingRecipients] = useState(false);
   const messages = useOpsPage<Message>(
     `conversations/${c.id}/messages`,
     data.now,
@@ -1060,6 +1226,27 @@ export function SupplierConversation({
             ? "Reply received"
             : remaining(c.dueAt, data.now)}
       </small>
+      {["AGENT", "MANAGER"].includes(data.me.kind) && (
+        <>
+          <button
+            type="button"
+            className="od-secondary"
+            aria-expanded={editingRecipients}
+            onClick={() => setEditingRecipients((open) => !open)}
+          >
+            {editingRecipients ? "Hide recipients" : "Edit recipients"}
+          </button>
+          {editingRecipients && (
+            <EditRecipients
+              id={c.id}
+              now={data.now}
+              busy={busy}
+              mutate={mutate}
+              close={() => setEditingRecipients(false)}
+            />
+          )}
+        </>
+      )}
       <PageControls resource={messages} label="supplier messages" />
       <Thread
         messages={[...(messages.data?.items ?? [])].reverse()}

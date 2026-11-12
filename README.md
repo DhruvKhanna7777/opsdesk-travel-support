@@ -1,5 +1,7 @@
 # OpsDesk - connected travel support
 
+Iteration 1 adds editable recipients on supplier threads, staff-managed case themes with linked weekly Insights examples, and **Export all** for the current case filters. Recipient changes preserve the case owner, supplier, and saved deadlines. CSV exports use the caller's queue scope and stream matching rows in bounded batches. [Workflow, scope and test commands](docs/OPSDESK_ITERATION_ONE.md)
+
 Workspace compatibility remains supported while external consumer migration is unconfirmed. The browser and CI authentication probe use compact metadata; dedicated HTTP tests retain full-response scope and requester redaction coverage. [Caller inventory, paged replacement routes and retirement gates](docs/OPSDESK_WORKSPACE_COMPATIBILITY.md).
 
 Optional `OPSDESK_WORKSPACE_OBSERVATION=true` logging records successful workspace reads using only response mode, role and event metadata. It is disabled by default. [Local setup and evidence limits](docs/OPSDESK_WORKSPACE_COMPATIBILITY.md#optional-workspace-usage-observation).

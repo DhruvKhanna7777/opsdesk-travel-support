@@ -307,7 +307,7 @@ export function Bookings({
     </section>
   );
 }
-export function Insights() {
+export function Insights({ onSelect }: { onSelect: (id: string) => void }) {
   const [report, setReport] = useState<TravelInsights | null>(null);
   const [error, setError] = useState("");
   useEffect(() => {
@@ -448,6 +448,35 @@ export function Insights() {
           </div>
         </section>
       </div>
+      <section className="od-panel">
+        <h3>Top themes this week</h3>
+        <p>Tagged cases opened since Monday at 00:00 UTC.</p>
+        {report.themes.length ? (
+          <ul>
+            {report.themes.map(({ theme, count, examples }) => (
+              <li key={theme}>
+                <strong>{human(theme)}</strong> · {count}{" "}
+                {count === 1 ? "case" : "cases"}
+                <ul>
+                  {examples.map(({ id, reference, title }) => (
+                    <li key={id}>
+                      <button
+                        type="button"
+                        className="od-text-button"
+                        onClick={() => onSelect(id)}
+                      >
+                        {reference} · {title}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>No tagged cases this week.</p>
+        )}
+      </section>
       <section className="od-panel">
         <div className="od-section-title">
           <div>

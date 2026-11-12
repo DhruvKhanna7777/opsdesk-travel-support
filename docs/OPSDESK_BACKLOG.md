@@ -1,5 +1,9 @@
 # OpsDesk — prioritized remaining work
 
+## Iteration 1
+
+Review the [supplier recipient, case theme and CSV export increment](OPSDESK_ITERATION_ONE.md). These changes retain the project workflow's visibility, assignment, deadline and audit boundaries. The next iteration's TBO-specific controls and submission work remain open. Continue tracking external caller acceptance and live operational evidence below.
+
 ## Current workspace compatibility checkpoint
 
 PR #70 is merged at `c99ca5b`; [post-merge validation](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43226554929) passed builds, API, both browsers, synthetic recovery, load/startup and audit. The current follow-up adds a strict offline summary of frozen observation logs. Counts, UTC filters and raw-byte hashes support review; all reports leave retirement unassessed and collection coverage unverified. Empty/compact-only logs cannot establish external compatibility. [Summary procedure](OPSDESK_WORKSPACE_COMPATIBILITY.md#summarize-a-frozen-observation-log). Owner inventory, authorized observation/duplicate checks and consumer acceptance remain pending. The previous checkpoint below is historical.

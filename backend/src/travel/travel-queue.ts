@@ -12,13 +12,11 @@ export type TravelTicketScope = {
 
 const PAGE_SIZE = 20;
 
-export async function readTravelQueue(
-  db: PrismaService,
+function queueFilter(
   scope: TravelTicketScope,
   query: TravelQueueDto,
   userId: string,
-  now: Date,
-): Promise<TravelQueuePage> {
+) {
   const conditions = [Prisma.sql`TRUE`];
   if (scope.region) conditions.push(Prisma.sql`t.region = ${scope.region}`);
   if (scope.agencyId)
@@ -67,18 +65,29 @@ export async function readTravelQueue(
       lower(concat_ws(' ', t.title, t.reference, b.reference, u."firstName", u."lastName", a.name)),
       lower(${query.search.trim()})
     ) > 0`);
-
-  const [row] = await db.$queryRaw<{ queue: TravelQueuePage }[]>`
-    WITH clock AS (SELECT (${now}::timestamptz AT TIME ZONE 'UTC') AS now_utc),
-    filtered AS MATERIALIZED (
-      SELECT t.id, t.deadline,
-             array_position(ARRAY['URGENT','HIGH','MEDIUM','LOW']::text[], t.priority) AS rank
+  return Prisma.sql`
       FROM "TravelTicket" t
       CROSS JOIN clock
       LEFT JOIN "TravelBooking" b ON b.id = t."bookingId"
       LEFT JOIN "User" u ON u.id = t."customerId"
       JOIN "TravelAgency" a ON a.id = t."agencyId"
       WHERE ${Prisma.join(conditions, ' AND ')}
+  `;
+}
+
+export async function readTravelQueue(
+  db: PrismaService,
+  scope: TravelTicketScope,
+  query: TravelQueueDto,
+  userId: string,
+  now: Date,
+): Promise<TravelQueuePage> {
+  const [row] = await db.$queryRaw<{ queue: TravelQueuePage }[]>`
+    WITH clock AS (SELECT (${now.toISOString()}::timestamptz AT TIME ZONE 'UTC') AS now_utc),
+    filtered AS MATERIALIZED (
+      SELECT t.id, t.deadline,
+             array_position(ARRAY['URGENT','HIGH','MEDIUM','LOW']::text[], t.priority) AS rank
+      ${queueFilter(scope, query, userId)}
     ),
     totals AS (SELECT count(*)::int AS total FROM filtered),
     pages AS (
@@ -100,4 +109,49 @@ export async function readTravelQueue(
     FROM pages
   `;
   return row.queue;
+}
+
+type ExportRow = {
+  id: string;
+  reference: string;
+  title: string;
+  booking: string | null;
+  region: string;
+  category: string;
+  priority: string;
+  status: string;
+  deadline: Date;
+};
+
+export const EXPORT_BATCH_SIZE = 1000;
+export function readExportBatch(
+  db: PrismaService,
+  scope: TravelTicketScope,
+  query: TravelQueueDto,
+  userId: string,
+  now: Date,
+  after: string | undefined,
+) {
+  return db.$queryRaw<ExportRow[]>`
+    WITH clock AS (SELECT (${now.toISOString()}::timestamptz AT TIME ZONE 'UTC') AS now_utc)
+    SELECT t.id, t.reference, t.title, b.reference AS booking, t.region,
+           t.category, t.priority, t.status, t.deadline
+    ${queueFilter(scope, query, userId)}
+    ${after === undefined ? Prisma.empty : Prisma.sql`AND t.id > ${after}`}
+    ORDER BY t.id
+    LIMIT ${EXPORT_BATCH_SIZE}
+  `;
+}
+
+export function csvRow(values: string[]) {
+  return (
+    values
+      .map((value) => {
+        const safe = /^(?:[\t\r\n]|\s*[=+@-])/u.test(value)
+          ? `'${value}`
+          : value;
+        return `"${safe.replaceAll('"', '""')}"`;
+      })
+      .join(',') + '\r\n'
+  );
 }

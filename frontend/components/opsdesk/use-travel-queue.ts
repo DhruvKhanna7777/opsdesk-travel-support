@@ -57,6 +57,7 @@ export function useTravelQueue(
   }, [enabled, userId, query, resultKey, refreshKey]);
 
   return {
+    filters: filterKey,
     data: result?.key === resultKey ? result.data : undefined,
     error: result?.key === resultKey ? result.error : undefined,
     goToPage: (next: number) => setNavigation({ key, page: next }),

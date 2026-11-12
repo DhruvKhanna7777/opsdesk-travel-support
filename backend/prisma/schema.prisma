@@ -226,6 +226,7 @@ model TravelTicket {
   conversations TravelConversation[]
   events TravelEvent[]
   inboundMail TravelInboundMail[]
+  themes TravelTicketTheme[]
   @@index([agencyId, customerId])
   @@index([status, deadline])
   @@index([autoHandoff, status, id])
@@ -244,9 +245,27 @@ model TravelConversation {
   dueAt DateTime
   createdAt DateTime @default(now())
   messages TravelMessage[]
+  recipientsConfigured Boolean @default(false)
+  recipients TravelConversationRecipient[]
   @@index([supplierId])
   @@index([supplierId, createdAt, id])
   @@index([ticketId, createdAt, id])
+}
+
+model TravelConversationRecipient {
+  conversationId String
+  conversation TravelConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  kind String
+  target String
+  role String
+  @@id([conversationId, kind, target])
+}
+
+model TravelTicketTheme {
+  ticketId String
+  ticket TravelTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  theme String
+  @@id([ticketId, theme])
 }
 
 model TravelMessage {

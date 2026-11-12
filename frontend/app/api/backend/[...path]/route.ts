@@ -15,11 +15,13 @@ async function proxy(request: NextRequest, { params }: RouteContext): Promise<Ne
   const backendPath = `/${path.join("/")}${request.nextUrl.search}`;
   const method = request.method;
   const body = method === "GET" || method === "HEAD" ? undefined : await request.text();
+  const caseExport = method === "GET" && path.join("/") === "ops/queue/export";
 
   const attempt = (token: string | undefined) =>
     backendFetch(backendPath, {
       method,
       body,
+      ...(caseExport ? { signal: request.signal } : {}),
       headers: token ? { Authorization: `Bearer ${token}` } : undefined,
     });
 
@@ -51,7 +53,8 @@ async function proxy(request: NextRequest, { params }: RouteContext): Promise<Ne
     }
   }
 
-  const responseBody = await backendRes.arrayBuffer();
+  const responseBody =
+    caseExport && backendRes.ok ? backendRes.body : await backendRes.arrayBuffer();
   return new NextResponse(responseBody, {
     status: backendRes.status,
     headers: {
