@@ -7,6 +7,13 @@ but external caller compatibility is **unconfirmed**. A source search and passin
 synthetic tests cannot establish that no external clients exist. No retirement
 date, changed default or production rollout is authorized. Deployment stays paused.
 
+PR #69 is merged at main `169d4be66146a210b334280602a7de2e3fea4d1b`.
+[Post-merge validation](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43222335689)
+passed API, Chromium, Firefox, synthetic recovery, load/startup and audit. The
+owner reported that no access-log format or external caller inventory is
+available. Optional observation below prepares future evidence collection;
+external compatibility remains unconfirmed.
+
 This follow-up starts from main `527931d27471971405d5aa7b48c9487532b1f34b`,
 with PRs #65–#68 merged and zero open PRs at the initial check. Main run
 [43187098916](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43187098916)
@@ -58,6 +65,67 @@ Requester messages/events and escalation fields remain redacted. Supplier
 identities receive only their shared conversations, with no case or booking
 snapshot. People directories retain their existing staff/context visibility;
 this increment does not redefine that policy.
+
+## Optional workspace usage observation
+
+`OPSDESK_WORKSPACE_OBSERVATION=true` enables one structured Nest log message
+after each successful authorized workspace read. It is **off by default**; only
+the exact string `true` enables it. The response and `compact=1` selection stay
+unchanged. It creates no database record or new endpoint.
+
+The event has exactly five fields:
+
+```json
+{
+  "event": "opsdesk.workspace.response",
+  "version": 1,
+  "at": "2026-11-12T12:00:00.000Z",
+  "mode": "full",
+  "role": "MANAGER"
+}
+```
+
+`mode` is `full` or `compact`. `role` is one of MANAGER, AGENT, AGENCY,
+CUSTOMER or SUPPLIER; an unexpected value becomes UNKNOWN. There are no user,
+agency, booking, ticket or session IDs, tokens, IP addresses, headers, user-agent
+strings, query values or response content in this event. Other application or
+proxy logs have their own data-handling policies.
+
+For a dedicated synthetic PowerShell preview, set the variable only in that
+terminal before launching. Keep the resulting local log outside Git:
+
+```powershell
+$env:OPSDESK_WORKSPACE_OBSERVATION = 'true'
+New-Item -ItemType Directory -Force .opsdesk | Out-Null
+npm run ops:preview *> .opsdesk/workspace-observation.log
+```
+
+Stop the preview and remove the terminal setting with
+`Remove-Item Env:OPSDESK_WORKSPACE_OBSERVATION` to disable it for the next start.
+Do not start a second preview on occupied ports. Match known local test times
+and count events by mode/role; for example:
+
+```powershell
+rg -c 'opsdesk\.workspace\.response.*"mode":"full"' .opsdesk/workspace-observation.log
+rg -c 'opsdesk\.workspace\.response.*"mode":"compact"' .opsdesk/workspace-observation.log
+```
+
+Nest adds its normal log prefix. The JSON event records successful handler
+results, before HTTP serialization/delivery. Authentication failures and denied
+or failed reads produce no successful-response event. Serialization failures or
+disconnections can occur after an event is emitted. Other endpoints are outside
+this observation. Logging is best effort: filtered log levels, sink failure,
+process termination or collection gaps can lose events, and sink failure does
+not fail an authorized response. Ensure Nest's `log` level is collected when
+using this feature. No sampling or per-user state is added by the hook.
+
+These events identify response mode and role, **not individual external clients**.
+A full event establishes a legacy read, but cannot identify its owner. Zero full
+events alone cannot prove that no consumers exist. Record approved observation
+dates, environments, collector availability and known synthetic traffic, then
+combine that evidence with the owner-attested inventory and consumer acceptance
+below. This increment only exercises synthetic local traffic; it does not enable
+logging in a deployed environment or approve retention, deployment or retirement.
 
 ## Evidence required before retirement
 

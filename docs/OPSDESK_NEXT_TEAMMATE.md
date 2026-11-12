@@ -1,5 +1,13 @@
 # OpsDesk continuation checkpoint — 12 November 2026
 
+## Workspace usage observation continuation
+
+PR #69 is merged at starting main `169d4be`; zero PRs were open at the initial check. [Post-merge CI](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43222335689) passed API, Chromium, Firefox, synthetic recovery, load/startup and audit. Earlier open-PR statements below are historical.
+
+The owner has no access-log format or external caller inventory available. This follow-up adds opt-in, fixed-field workspace usage events, disabled by default and tested in the isolated synthetic preview. They distinguish full/compact reads and role; they do not identify external clients or prove complete observation. [Setup and limits](OPSDESK_WORKSPACE_COMPATIBILITY.md#optional-workspace-usage-observation) · [Verified checks](OPSDESK_VALIDATION.md#workspace-usage-observation).
+
+> Fetch latest main and inspect open PRs and actual CI before editing. Review the workspace observation increment, leaving merges to collaborators. Obtain an owner-attested external caller inventory and authorized observation/migration evidence before retiring the full response. Keep compact behavior, authorization, redaction, isolation, sessions, saved deadlines, idempotency and audit history covered. Use Node 22.23.x, npm ci and isolated synthetic data; run mutating API/browser/load suites sequentially. Workloads/targets, controlled cold caches, human labels/adjudication, observable speech, live booking/email, scanner monitoring, retention and staging recovery remain pending. No live booking provider is selected. Deployment remains paused.
+
 ## Workspace compatibility continuation
 
 Review open [PR #69](https://github.com/DhruvKhanna7777/opsdesk-travel-support/pull/69). Application head `4e736a1` passed [hosted run 43220571787](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43220571787), including API, Chromium, Firefox, synthetic recovery, load/startup and audit; local full API and both browsers also passed. The evidence-recording follow-up changes documentation only. Fetch and check the final head/main CI separately; leave merging to collaborators.

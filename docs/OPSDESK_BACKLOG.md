@@ -2,6 +2,8 @@
 
 ## Current workspace compatibility checkpoint
 
+PR #69 is now merged at `169d4be`, and [post-merge CI](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43222335689) passed both browsers, API, recovery, load/startup and audit. No external caller inventory or access-log format is available. The current follow-up adds disabled-by-default fixed-field workspace usage logging for future approved observation. It provides mode/role evidence, not caller identification or complete traffic coverage. [Collection procedure and limits](OPSDESK_WORKSPACE_COMPATIBILITY.md#optional-workspace-usage-observation). Full-response retirement remains blocked on external evidence; deployment stays paused. The prior checkpoint below is historical.
+
 PRs #65–#68 are merged at verified starting main `527931d`; zero PRs were open at the initial check. [Main CI](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43187098916) passed API, Chromium, Firefox, synthetic recovery and audit. Earlier state descriptions are historical.
 
 Repository callers have been inventoried, the CI authentication probe migrates to compact mode, and `ops:test` gains independent-fixture full/compact compatibility coverage. Preserve the full response and the rotation requester-redaction assertion. **External consumer compatibility remains unconfirmed.** Before retirement, obtain an owner-attested caller inventory, approved observation evidence, consumer migration acceptance and an approved compatibility/rollback plan. [Inventory, replacement routes and evidence requirements](OPSDESK_WORKSPACE_COMPATIBILITY.md).

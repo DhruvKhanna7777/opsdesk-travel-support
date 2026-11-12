@@ -8,6 +8,7 @@ import {
   Body,
   Controller,
   Get,
+  Logger,
   Param,
   Patch,
   Post,
@@ -36,6 +37,7 @@ import {
 @Controller('ops')
 @UseGuards(JwtAuthGuard)
 export class TravelController {
+  private readonly logger = new Logger(TravelController.name);
   constructor(private readonly travel: TravelService) {}
   @Get('escalation-rotations') rotations(@Req() req: AuthenticatedRequest) {
     return this.travel.rotations(req.user.userId);
@@ -68,11 +70,37 @@ export class TravelController {
   ) {
     return this.travel.saveContract(req.user.userId, id, contractId, dto);
   }
-  @Get('workspace') workspace(
+  @Get('workspace') async workspace(
     @Req() req: AuthenticatedRequest,
     @Query('compact') compact?: string,
   ) {
-    return this.travel.workspace(req.user.userId, compact === '1');
+    const compactMode = compact === '1';
+    const response = await this.travel.workspace(req.user.userId, compactMode);
+    if (process.env.OPSDESK_WORKSPACE_OBSERVATION === 'true') {
+      const kind = response.me.kind;
+      try {
+        this.logger.log(
+          JSON.stringify({
+            event: 'opsdesk.workspace.response',
+            version: 1,
+            at: new Date().toISOString(),
+            mode: compactMode ? 'compact' : 'full',
+            role: [
+              'MANAGER',
+              'AGENT',
+              'AGENCY',
+              'CUSTOMER',
+              'SUPPLIER',
+            ].includes(kind)
+              ? kind
+              : 'UNKNOWN',
+          }),
+        );
+      } catch {
+        // Best-effort observation must not change the authorized response.
+      }
+    }
+    return response;
   }
   @Get('bookings') bookings(
     @Req() req: AuthenticatedRequest,
