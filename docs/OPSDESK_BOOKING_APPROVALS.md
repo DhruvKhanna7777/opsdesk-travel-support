@@ -46,6 +46,10 @@ npm run ops:load
 
 Duration mode keeps the workers active for up to 180 seconds and drains in-flight requests. Without a duration, `OPSDESK_LOAD_REQUESTS` selects 20–10,000 requests. Case and history options accept up to 18,000 and 5,000 rows respectively. Concurrency accepts 1–32 workers. The harness verifies deep queue and history pages, directs most writes to the same case, and reports aggregate and per-operation p50, p95, p99 and maximum latency. Set `OPSDESK_TEST_URL` when using a custom API port. Run it separately from fixture-mutating suites.
 
+Set `OPSDESK_LOAD_BOOKINGS` to an integer from 0 through 10,000 to clone that many bookings from the booking-linked synthetic case templates. The default is 0. Combine it with `OPSDESK_LOAD_CASES` to distribute background cases round-robin across the generated bookings. With fewer cases than bookings, some generated bookings stay empty. The case and booking copies retain the source agency, customer and supplier relationships. Worker cases and supplier conversation fixtures still use existing bookings.
+
+For example, 6,000 bookings and 18,000 background cases produce three background cases per generated booking. The harness verifies the manager's booking total and page over HTTP and times that page during manager booking reads. The report includes booking counts before and after fixture setup and the observed number of populated bookings, linked background cases and minimum/maximum cases per generated booking (including empty bookings). Cleanup deletes run-specific cases before bookings and checks both deletion counts before reporting. The round-robin distribution uses synthetic templates and uncontrolled caches.
+
 The default workload uses one synthetic manager and one local host. To distribute reads across five authenticated roles, set positive integer weights before running the same command:
 
 ```powershell

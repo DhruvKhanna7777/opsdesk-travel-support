@@ -37,6 +37,20 @@ The first pre-implementation target-test run failed as expected because the new 
 
 No approved performance targets, representative dataset/traffic, controlled cold caches, human classifier labels/adjudication or new screen-reader speech were produced. The frozen reviewer export still needs human input. Live booking/provider selection, mail delivery, production scanner monitoring, retention and an authorized staging restore with owners/recovery targets remain unfinished. Deployment remains paused. Do not infer any of these acceptances from synthetic target passes or a valid report.
 
+## Synthetic booking population
+
+The starting main commit `d378ca0` passed [hosted validation](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43176748730) after PR #64 merged. PR #65 was open with [passing hosted validation](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43178348901). Both workflow records show successful Chromium and Firefox steps. Check the booking-population PR's own hosted run before merging.
+
+The booking option defaults to zero. With an opt-in population, generated cases round-robin across disposable bookings while the worker and supplier fixtures keep their existing booking relationships. The manager booking page is checked through HTTP. The report includes counts and observed distribution. The run checks fixture deletion before printing any result, including when a supplied target fails.
+
+Local Windows verification used Node 22.23.0 and the isolated synthetic preview. The shared, backend and frontend builds passed. The pinned dependencies from the preceding npm ci were reused. Ten load-profile/target unit tests, Node syntax, script formatting and whitespace checks passed. An initial integration invocation ran before the API bound its port and failed with connection refused. The readiness-gated rerun and the rerun after SQL setup optimization passed.
+
+The three final integration runs covered zero generated bookings, 25 bookings with 53 cases (two to three cases per booking), and 25 bookings with three cases (zero to one case per booking) and an intentionally unmet request target. The last child exited 1 as expected. Each scenario completed 200 measured requests and 40 exactly-once verified writes across 12 seeded identities. All restored original booking, case, message and conversation counts.
+
+The scaled run used 12 workers, the five equally weighted roles with expanded seeded identities, 6,000 generated bookings, 18,000 background cases and 1,200 seeded history messages. Every generated booking had three cases. The harness verified manager booking page 300, queue page 900 and history page 60. It measured 1,000 requests in 7.885 seconds and verified 200 exactly-once writes. Local p50/p95/p99 were 68/196/457 ms. An independent post-run count confirmed 30 bookings, 60 cases, 192 messages and 12 conversations, with zero remaining load booking/case fixtures. No target was configured for this run. The full API and browser regression suites are tracked by the hosted run on this PR.
+
+These are synthetic distributions with uncontrolled database and operating-system caches. Approved targets, representative traffic, controlled cold-cache measurements, independent human classifier review, spoken accessibility and live operational acceptance remain open. Deployment remains paused.
+
 # Supplier message-history startup
 
 The local manager, supplier-list and supplier-history run used Node 22.23.4 and loopback PostgreSQL 18.6 with one round, two repeats and a 150-second readiness limit. Three new processes completed nine timed GETs. Page 12 returned 20 of 240 messages, all in the selected supplier thread. A separate request after timing returned HTTP 404 for the other supplier thread. The first history read took 54.53 ms, with repeats of 21.81 and 27.83 ms.
