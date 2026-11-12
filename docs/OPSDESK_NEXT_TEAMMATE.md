@@ -1,12 +1,12 @@
-# OpsDesk continuation checkpoint — 11 November 2026
+# OpsDesk continuation checkpoint — 12 November 2026
 
-## Current continuation message
+## Current continuation
 
-> Continue OpsDesk in DhruvKhanna7777/opsdesk-travel-support. Fetch main and check open PRs and CI, including Firefox. The supplier shared-buffer follow-up starts from main e699fd3 through #63. PR #64 was open with successful hosted Chromium and Firefox checks. Its configurable targets require supplied values, and owner-approved thresholds are still pending. This profiler branch is independent of #64.
+> Continue OpsDesk in DhruvKhanna7777/opsdesk-travel-support. Fetch main and check open PRs and CI, including Firefox. PR #64 merged at main d378ca0 and its PR and combined main Chromium and Firefox steps passed. Review PR #65 for the supplier shared-buffer profiler. Configurable load limits are available through OPSDESK_LOAD_TARGETS. Owner-approved thresholds and representative workload assumptions remain pending.
 >
-> Read this document, the handoff, backlog, validation, acceptance review, query profiler guide and README. The optional shared-buffer profiler now exercises the supplier's deep message page and verifies a 404 for a second supplier. Check the exact run evidence and preserve the distinction between shared buffers, OS caches and full application latency.
+> Read this document, the handoff, backlog, validation, acceptance review, query profiler and load target guides, and README. The optional profiler exercises a deep supplier message page and verifies a 404 for a second supplier. Keep shared-buffer, OS-cache and full application latency evidence distinct.
 >
-> Next collect owner-reviewed workload assumptions and targets, independent human labels and adjudication through the blind review form, and observable screen-reader speech. Live booking and mail, scanner monitoring, retention approval and operational recovery acceptance remain open. Use Node 22.23.x and isolated synthetic data, run mutating suites sequentially, and preserve agency isolation, sessions, deadlines, idempotency and audits. Keep private review files and credentials out of Git. Leave merge decisions to collaborators. Deployment remains paused.
+> Next obtain owner-reviewed workloads and thresholds, human labels and adjudication through the blind review form, and observable screen-reader speech. Live booking and mail, scanner monitoring, retention approval and operational recovery remain open. Use Node 22.23.x and isolated synthetic data. Run mutating suites sequentially and preserve agency isolation, sessions, deadlines, idempotency and audits. Keep private exports and credentials out of Git. Leave merges to collaborators. Deployment remains paused.
 
 ## Supplier message-history continuation
 

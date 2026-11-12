@@ -1,10 +1,18 @@
 # OpsDesk developer handoff
 
-## 12 November checkpoint
+## Supplier profiler checkpoint
 
-This profiler follow-up starts at main `e699fd3` through PR #63. PR #64 is open and its hosted Chromium and Firefox steps passed. The latest main run and the historical PR #61/#62 runs were queued when checked. GitHub marked the historical PR #60 run failed while its job record still showed queued with no completed steps. See the validation record for run IDs and recheck GitHub before reporting current status. The profiler does not depend on PR #64.
+PR #64 merged at main `d378ca0`. Hosted Chromium and Firefox passed on both its PR and post-merge main. The supplier profiler follow-up was tested from `e699fd3` and then brought onto the merged baseline. It changes diagnostic tooling and documentation. [Main CI](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43176748730)
 
-Run the isolated shared-buffer experiment with `OPSDESK_PROFILE_MESSAGE_SCOPE=supplier` to capture a page from the authorized supplier thread. The default manager probe remains available. Approved performance thresholds, representative traffic, human labels and observable speech remain pending. Deployment remains paused. [Profile procedure](OPSDESK_QUERY_PROFILE.md#supplier-conversation-history)
+Set `OPSDESK_PROFILE_MESSAGE_SCOPE=supplier` in the isolated shared-buffer experiment to measure the authorized supplier thread page. Use the validation record for exact results. Approved thresholds, representative traffic, independent labels and observable speech remain pending. Deployment remains paused. [Profile procedure](OPSDESK_QUERY_PROFILE.md#supplier-conversation-history)
+
+## Supplied load targets — 12 November 2026
+
+Started from main `e699fd33ef1d29e815f6b664e7f37fb7ab554da9`, after PRs #58–#63 merged. No PRs were open at the initial check. Latest combined [main validation](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43098403977) and the recorded #60–#62 runs were still queued, not passed. The previous status tables below are historical snapshots.
+
+The user confirmed there are no approved performance targets and requested configurable checks. `OPSDESK_LOAD_TARGETS` now supplies versioned named aggregate/per-role sample and latency limits plus optional throughput/duration limits. Reports distinguish `not-configured`, `passed` and `failed`; retain each comparison and configuration digest; and appear only after cleanup succeeds. Target failure exits nonzero after exactly-once write verification and cleanup. No application authorization, session, routing, deadline, audit or provider policy changes are included. [Target procedure](OPSDESK_LOAD_TARGETS.md) · [Exact validation](OPSDESK_VALIDATION.md#supplied-load-targets--12-november-2026).
+
+Next obtain owner-approved targets and representative workloads before performance acceptance. Human classifier labels/adjudication, actual spoken screen-reader evidence, live booking/mail, production scanner monitoring, retention and staging recovery remain unfinished. Deployment remains paused. Leave merges to collaborators.
 
 ## Current merged checkpoint
 
