@@ -44,7 +44,7 @@ import {
 const scheduleFields = [
   ["checkInAt", "Check-in"],
   ["departureAt", "Departure"],
-  ["cancellationCutoffAt", "Cancellation cutoff"],
+  ["cancellationCutoffAt", "Cancellation cutoff (LCD)"],
 ] as const;
 
 function BookingSchedule({
@@ -258,7 +258,7 @@ export function NewTicket({
         </div>
         {data.me.kind === "CUSTOMER" && !booking && (
           <label>
-            Booking reference (optional)
+            Booking reference (TBOH, optional)
             <input
               maxLength={60}
               value={submittedReference}
@@ -401,6 +401,73 @@ export function OnDemandTicket({
     />
   );
 }
+function EscalateToEm({
+  id,
+  busy,
+  mutate,
+}: {
+  id: string;
+  busy: boolean;
+  mutate: Mutation;
+}) {
+  const [requestId, setRequestId] = useState<string | null>(null);
+  const [reason, setReason] = useState("");
+  const [error, setError] = useState("");
+  return (
+    <>
+      <button
+        type="button"
+        className="od-secondary"
+        disabled={busy}
+        onClick={() => {
+          setError("");
+          setReason("");
+          setRequestId(crypto.randomUUID());
+        }}
+      >
+        Escalate to EM
+      </button>
+      {requestId && (
+        <Modal title="Escalate to EM" onClose={() => setRequestId(null)}>
+          <form
+            onSubmit={(event) => {
+              event.preventDefault();
+              setError("");
+              void mutate(
+                `tickets/${id}/escalate-to-em`,
+                { reason, requestId },
+                "Escalated to EM.",
+              )
+                .then(() => setRequestId(null))
+                .catch((cause: unknown) =>
+                  setError(cause instanceof Error ? cause.message : "Could not escalate this case."),
+                );
+            }}
+          >
+            <label>
+              Escalation reason
+              <textarea
+                value={reason}
+                onChange={(event) => setReason(event.target.value)}
+                maxLength={500}
+                required
+              />
+            </label>
+            {error && <p role="alert">{error}</p>}
+            <button
+              type="submit"
+              className="od-primary"
+              disabled={busy || !reason.trim()}
+            >
+              Send escalation
+            </button>
+          </form>
+        </Modal>
+      )}
+    </>
+  );
+}
+
 function TicketThemes({
   id,
   now,
@@ -888,6 +955,9 @@ export function TicketDetail({
                 )}
               </div>
             </div>
+            {staff && active(t) && (
+              <EscalateToEm id={t.id} busy={busy} mutate={mutate} />
+            )}
           </section>
           <section className="od-panel">
             <h3>
@@ -897,7 +967,7 @@ export function TicketDetail({
             {t.booking ? (
               <>
                 <span className="od-booking-ref">
-                  {t.booking.reference}
+                  TBOH {t.booking.reference}
                   <ShieldCheck size={14} />
                 </span>
                 <h4>{t.booking.destination}</h4>
@@ -935,7 +1005,7 @@ export function TicketDetail({
                     }}
                   >
                     <input
-                      aria-label="Verify booking reference"
+                      aria-label="Verify booking reference (TBOH)"
                       value={verifiedRef}
                       onChange={(e) => setVerifiedRef(e.target.value)}
                       placeholder="BK-1042"

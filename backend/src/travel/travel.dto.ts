@@ -6,6 +6,7 @@ import {
   IsISO8601,
   IsOptional,
   IsString,
+  IsUUID,
   Max,
   MaxLength,
   Matches,
@@ -15,6 +16,15 @@ import {
   ArrayUnique,
 } from 'class-validator';
 import { CATEGORIES, PRIORITIES, STATUSES } from './travel.rules';
+export class EscalateToEmDto {
+  @IsUUID('4')
+  requestId: string;
+
+  @IsString()
+  @MaxLength(500)
+  @Matches(/\S/)
+  reason: string;
+}
 export class NewTravelTicketDto {
   @IsOptional() @IsString() @MinLength(1) @MaxLength(100) contractId?: string;
   @IsString() @MinLength(5) @MaxLength(180) title: string;

@@ -1,5 +1,9 @@
 # OpsDesk — prioritized remaining work
 
+## TBO workflow and submission
+
+Review the [TBO workflow follow-up](OPSDESK_TBO_WORKFLOW.md) after its Iteration 1 parent. Next complete a fresh setup and demo reset, Linux smoke, journeys A–E, the short walkthrough, architecture and cost comparison, and demo evidence. Production ticket retention requires owner approval. Deployment remains paused.
+
 ## Iteration 1
 
 Review the [supplier recipient, case theme and CSV export increment](OPSDESK_ITERATION_ONE.md). These changes retain the project workflow's visibility, assignment, deadline and audit boundaries. The next iteration's TBO-specific controls and submission work remain open. Continue tracking external caller acceptance and live operational evidence below.

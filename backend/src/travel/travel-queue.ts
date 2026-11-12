@@ -2,6 +2,7 @@ import type { TravelQueuePage } from '@helpdesk/shared';
 import type { PrismaService } from '../../prisma/prisma.service';
 import { Prisma } from '../../generated/prisma/client';
 import type { TravelQueueDto } from './travel-queue.dto';
+import { EM_ALERT_KIND } from './travel.rules';
 
 export type TravelTicketScope = {
   region?: string;
@@ -25,6 +26,10 @@ function queueFilter(
     conditions.push(Prisma.sql`t."customerId" = ${scope.customerId}`);
   if (scope.id) conditions.push(Prisma.sql`t.id = ${scope.id}`);
   const active = Prisma.sql`t.status NOT IN ('RESOLVED', 'CLOSED')`;
+  const emPending = Prisma.sql`EXISTS (
+    SELECT 1 FROM "TravelEvent" e WHERE e."ticketId" = t.id
+      AND e.kind = ${EM_ALERT_KIND} AND e."acknowledgedAt" IS NULL
+  )`;
   const tab = query.tab ?? 'active';
   if (tab === 'active' || tab === 'mine') conditions.push(active);
   if (tab === 'waiting')
@@ -32,6 +37,8 @@ function queueFilter(
   if (tab === 'resolved') conditions.push(Prisma.sql`NOT (${active})`);
   if (tab === 'mine') conditions.push(Prisma.sql`t."agentId" = ${userId}`);
   if (query.status) conditions.push(Prisma.sql`t.status = ${query.status}`);
+  if (query.intent) conditions.push(Prisma.sql`t.category = ${query.intent}`);
+  if (query.em) conditions.push(active, emPending);
   if (query.priority)
     conditions.push(Prisma.sql`t.priority = ${query.priority}`);
   if (query.region) conditions.push(Prisma.sql`t.region = ${query.region}`);
@@ -52,7 +59,7 @@ function queueFilter(
     conditions.push(
       active,
       Prisma.sql`(
-      t.priority = 'URGENT' OR t."agentId" IS NULL OR t.deadline <= clock.now_utc
+      t.priority = 'URGENT' OR t."agentId" IS NULL OR t.deadline <= clock.now_utc OR ${emPending}
       OR EXISTS (
         SELECT 1 FROM "TravelConversation" c
         WHERE c."ticketId" = t.id AND c.status = 'AWAITING_REPLY'

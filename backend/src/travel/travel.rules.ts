@@ -1,4 +1,5 @@
 export const STAFF = ['AGENT', 'MANAGER'];
+export const EM_ALERT_KIND = 'EM_ESCALATED';
 export const CATEGORIES = [
   'REFUND',
   'CANCELLATION',

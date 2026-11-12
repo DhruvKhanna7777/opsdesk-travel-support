@@ -111,7 +111,8 @@ try {
   );
   await manager.getByText("Edit booking schedule", { exact: true }).click();
   await manager.getByLabel("Departure (UTC)").waitFor();
-  await manager.getByLabel("Cancellation cutoff (UTC)").waitFor();
+  await manager.getByLabel("Cancellation cutoff (LCD) (UTC)").waitFor();
+  await manager.getByText("TBOH BK-1042", { exact: true }).waitFor();
   await manager.getByRole("button", { name: "Back to conversations" }).click();
 
   // Exercise native modal focus containment, accessible naming and restoration.
@@ -179,6 +180,19 @@ try {
   await manager.getByRole("button", { name: "Create & route ticket" }).click();
   await manager.getByRole("heading", { name: title }).waitFor();
   await manager.getByRole("button", { name: /OPS-1042/ }).waitFor();
+
+  await manager.getByRole("button", { name: "Escalate to EM" }).click();
+  const escalation = manager.getByRole("dialog", { name: "Escalate to EM" });
+  await escalation.getByRole("textbox", { name: "Escalation reason" }).fill("Synthetic manager review needed.");
+  await escalation.getByRole("button", { name: "Send escalation" }).click();
+  await manager.getByText("Escalated to EM.", { exact: true }).waitFor();
+  await manager.getByRole("button", { name: /Needs attention/ }).click();
+  await manager.getByRole("button", { name: "EM escalations" }).click();
+  await manager.getByLabel("Filter intent").selectOption("REFUND");
+  await openCase(manager, title, title);
+  await manager.getByRole("button", { name: "Notifications" }).click();
+  await manager.getByRole("button", { name: /^Acknowledge: Escalated to EM.*Synthetic manager review needed/ }).click();
+  await manager.getByText("Alert acknowledged.", { exact: true }).waitFor();
 
   await manager.getByRole("button", { name: /Supplier threads/ }).click();
   await manager.getByRole("button", { name: "Contact supplier" }).click();
