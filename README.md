@@ -4,6 +4,8 @@ Workspace compatibility remains supported while external consumer migration is u
 
 Optional `OPSDESK_WORKSPACE_OBSERVATION=true` logging records successful workspace reads using only response mode, role and event metadata. It is disabled by default. [Local setup and evidence limits](docs/OPSDESK_WORKSPACE_COMPATIBILITY.md#optional-workspace-usage-observation).
 
+Use `npm run --silent ops:summarize-workspace-observations -- --input LOG` to summarize a frozen local observation log by mode/role, with optional UTC bounds and source hashes. Reports omit raw content and always leave retirement unassessed. [Summary procedure](docs/OPSDESK_WORKSPACE_COMPATIBILITY.md#summarize-a-frozen-observation-log).
+
 The optional shared-buffer query experiment can profile a deep supplier message page after checking thread ownership. [Run the supplier probe](docs/OPSDESK_QUERY_PROFILE.md#supplier-conversation-history)
 
 The load rehearsal can check supplied latency, throughput, duration and per-role sample targets using `OPSDESK_LOAD_TARGETS`. No targets are enabled or approved by default. [Configuration, failure behavior and acceptance limits](docs/OPSDESK_LOAD_TARGETS.md).

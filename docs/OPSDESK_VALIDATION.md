@@ -1,3 +1,32 @@
+# Workspace observation summary
+
+12 November 2026. Started from fetched main `c99ca5b360827b79ebf6732ebcd4d042fafa3400`, including merged PR #70, with zero open PRs at the initial check. Actual steps in [post-merge run 43226554929](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43226554929) passed builds, API, Chromium, Firefox, synthetic recovery, load/startup and production dependency audit before edits. Older open-PR descriptions below are historical.
+
+Adds `ops:summarize-workspace-observations`, a streaming offline parser for frozen local logs. It validates version-1 fixed-field events, ignores unrelated lines, accepts Nest/ANSI/NDJSON and BOM-tagged UTF-8/UTF-16, hashes original bytes and aggregates modes/roles with optional canonical UTC bounds. Invalid recognized records make the report unusable. Diagnostics contain only line numbers and fixed codes; filenames and raw record/error content are omitted. Every report leaves retirement `not-assessed` and collection coverage `unverified`. [Usage and exact limits](OPSDESK_WORKSPACE_COMPATIBILITY.md#summarize-a-frozen-observation-log).
+
+## Summary local evidence
+
+Windows, Node **22.23.5**, fresh `npm ci`. This increment changes offline tooling, test wiring and documentation only. No backend/frontend behavior, dependencies, database schema, collector setting or deployment changed.
+
+| Check | Verified result |
+| --- | --- |
+| `npm ci` | Passed: 1,175 added / 1,179 audited. Development-inclusive audit: 29 advisories (5 low / 24 moderate). No dependency or lockfile changes. |
+| `npm run ops:test:workspace-observations` | **9 test groups passed** on the first run. Covers mixed/prefixed/ANSI/CRLF input; fixed raw-byte provenance; all roles; repeated rows; empty/unrelated/compact-only input; UTC boundary/exclusion behavior; malformed/private/duplicate/unsupported fields; impossible dates and dimensions; bounded diagnostics; BOM-tagged UTF encodings; invalid encoding/overlong lines; and CLI exit/redaction behavior. |
+| Captured producer-log replay | On the ignored, frozen log from PR #70's isolated synthetic preview, the CLI reproduced **156 valid records: 21 full / 135 compact**, zero invalid records. Report status was `legacy-reads-observed`, retirement `not-assessed`. |
+| Bounded known-probe replay | Selecting the known first probe's UTC interval reproduced **19 included records: 10 full / 9 compact**, with **137 excluded**. Source SHA-256 matched the unbounded report because provenance hashes the entire input file. |
+| Static checks | Both Node syntax checks, script/test/package Prettier and Git whitespace checks passed. |
+| Production dependency audit | `npm audit --omit=dev` exited 0 with **zero vulnerabilities**. |
+
+Offline test fixtures use dedicated `.opsdesk/observation-summary-test-*` directories and validate the resolved parent before recursive cleanup. Raw logs and generated reports remain ignored local files. No local preview or mutating API/browser/load/recovery suites were rerun for this offline-only increment; the captured log came from the previously verified isolated preview. Hosted validation on this PR's own head remains separate and must be checked before merge.
+
+Direct staged lint completed with no files matching its configured source patterns, and commit-message lint passed. The already-verified bundled Git hook environment lacks Bash, so only the shell wrapper is skipped for this commit using `HUSKY=0`; repository hooks remain intact.
+
+## Summary limits and remaining acceptance
+
+Exit 0 means usable parsing only, never acceptance. Counts describe rows rather than proven delivered requests or unique clients; repeated rows are intentionally retained, so collector replays can inflate counts. The hash does not prove authenticity, collection coverage or an owner-approved observation period. Full events in this synthetic replay include deliberate compatibility probes. Empty/compact-only or time-filtered output cannot establish the absence of external legacy clients.
+
+No external caller inventory, authorized live observation or consumer migration acceptance was produced. The full response remains available and observation stays off by default. Performance targets/representative workloads, controlled cold caches, human classifier labels/adjudication, observable screen-reader speech, live booking/email, production scanner monitoring, retention and authorized staging recovery remain pending. No live booking provider is selected. Deployment remains paused; leave merging to collaborators.
+
 # Workspace usage observation
 
 12 November 2026. Fetched starting main `169d4be66146a210b334280602a7de2e3fea4d1b` includes merged PR #69. Zero PRs were open at the initial check. Actual steps in [post-merge run 43222335689](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43222335689) passed builds, API, Chromium, Firefox, synthetic recovery, load/startup and production dependency audit before this increment was edited. Earlier open-PR #69 statements below are historical.
