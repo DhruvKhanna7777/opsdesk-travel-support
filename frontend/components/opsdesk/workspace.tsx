@@ -61,7 +61,7 @@ export function OpsDeskWorkspace() {
     [busy, setBusy] = useState(false),
     [toast, setToast] = useState("");
   const [view, setView] = useState("inbox"),
-    [selected, setSelected] = useState<string | null>(null),
+    [selected, setSelectedCase] = useState<string | null>(null),
     [tab, setTab] = useState("active"),
     [search, setSearch] = useState(""),
     [priority, setPriority] = useState("ALL"),
@@ -76,12 +76,30 @@ export function OpsDeskWorkspace() {
     [showClock, setShowClock] = useState(false),
     [showHelp, setShowHelp] = useState(false);
   const [theme, setTheme] = useState<"light" | "dark">("light");
+  const [expandedHistory, setExpandedHistory] = useState<ReadonlySet<string>>(
+    () => new Set(),
+  );
   useEffect(() => {
+    const restoreCase = () => {
+      setSelectedCase(new URL(window.location.href).searchParams.get("case"));
+    };
     const frame = requestAnimationFrame(() => {
+      restoreCase();
       if (window.localStorage.getItem("opsdesk-theme") === "dark") setTheme("dark");
     });
-    return () => cancelAnimationFrame(frame);
+    window.addEventListener("popstate", restoreCase);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("popstate", restoreCase);
+    };
   }, []);
+  function setSelected(id: string | null) {
+    const url = new URL(window.location.href);
+    if (id) url.searchParams.set("case", id);
+    else url.searchParams.delete("case");
+    window.history.replaceState(null, "", url);
+    setSelectedCase(id);
+  }
   const toggleTheme = () => {
     setTheme((current) => {
       const next = current === "light" ? "dark" : "light";
@@ -223,6 +241,7 @@ export function OpsDeskWorkspace() {
     setData(null);
     setSelected(null);
     setView("inbox");
+    setExpandedHistory(new Set());
   }
   return (
     <div className="od-app" data-theme={theme}>
@@ -427,7 +446,13 @@ export function OpsDeskWorkspace() {
               id={selected}
               data={data}
               onBack={() => setSelected(null)}
-              backLabel={view === "insights" ? "Back to Insights" : undefined}
+              backLabel={
+                view === "insights"
+                  ? "Back to Insights"
+                  : view === "bookings"
+                    ? "Back to bookings"
+                    : undefined
+              }
               onSelect={setSelected}
               mutate={mutate}
               busy={busy}
@@ -524,6 +549,15 @@ export function OpsDeskWorkspace() {
                   search={search}
                   setSearch={setSearch}
                   onSelect={setSelected}
+                  expandedHistory={expandedHistory}
+                  onToggleHistory={(id) =>
+                    setExpandedHistory((current) => {
+                      const next = new Set(current);
+                      if (next.has(id)) next.delete(id);
+                      else next.add(id);
+                      return next;
+                    })
+                  }
                 />
               ) : view === "insights" ? (
                 <Insights onSelect={setSelected} />
@@ -606,15 +640,15 @@ export function OpsDeskWorkspace() {
                         <b>Some journeys can’t wait.</b>
                         <span>
                           {counts.urgent} active case
-                          {counts.urgent === 1 ? "" : "s"} need an urgent
+                          {counts.urgent === 1 ? " needs" : "s need"} an urgent
                           response. Check the booking deadline before your next
                           step.
                         </span>
                       </div>
                       <button
                         onClick={() => {
+                          navigate("inbox");
                           setPriority("URGENT");
-                          setTab("active");
                         }}
                       >
                         View urgent cases <ArrowRight size={16} />

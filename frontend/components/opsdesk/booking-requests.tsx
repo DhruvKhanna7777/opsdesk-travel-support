@@ -1,6 +1,6 @@
 "use client";
 import { useRef, useState } from "react";
-import { Modal, request } from "./ui";
+import { date, Modal, request } from "./ui";
 import { DirectorySelect } from "./directory-select";
 import { useOpsPage, PageControls } from "./paged-data";
 import type { Booking, Workspace } from "@/lib/opsdesk-types";
@@ -52,7 +52,8 @@ function ReviewPanel({
   );
   const [customerId, setCustomer] = useState("");
   const [supplierId, setSupplier] = useState("");
-  const [bookingId, setBooking] = useState("");
+  const [booking, setBooking] = useState<Booking>();
+  const bookingId = booking?.id ?? "";
   const [decisionReasons, setDecisionReasons] = useState<
     Record<string, string>
   >({});
@@ -222,17 +223,27 @@ function ReviewPanel({
             </label>
           </>
         ) : (
-          <DirectorySelect<Booking>
-            path="bookings"
-            label="Booking to cancel"
-            value={bookingId}
-            onSelect={setBooking}
-            text={(b) => `${b.reference} — ${b.destination}`}
-            refresh={refresh}
-            required
-          >
-            <option value="">Select booking</option>
-          </DirectorySelect>
+          <>
+            <DirectorySelect<Booking>
+              path="bookings"
+              label="Booking to cancel"
+              value={bookingId}
+              onSelect={(_, selectedBooking) => setBooking(selectedBooking)}
+              text={(b) => `${b.reference} — ${b.destination}`}
+              refresh={refresh}
+              required
+            >
+              <option value="">Select booking</option>
+            </DirectorySelect>
+            {booking && (
+              <p>
+                Cancellation cutoff (LCD){" "}
+                {booking.cancellationCutoffAt
+                  ? `${date(booking.cancellationCutoffAt)} (your local time)`
+                  : "not recorded"}
+              </p>
+            )}
+          </>
         )}
         <label>
           Request reason

@@ -58,6 +58,24 @@ describe('travel policy decisions', () => {
       'URGENT',
     );
   });
+  it('raises cancellation priority before the controlling cutoff', () => {
+    const cutoff = later(10);
+    expect(
+      urgency('CANCELLATION', cutoff, later(48), now, later(24), cutoff),
+    ).toEqual({
+      priority: 'HIGH',
+      reason: 'Cancellation cutoff is within 24 hours',
+    });
+    expect(
+      urgency('CANCELLATION', cutoff, later(48), later(4), later(24), cutoff),
+    ).toEqual({
+      priority: 'URGENT',
+      reason: 'Cancellation cutoff is within 6 hours',
+    });
+    expect(
+      urgency('CANCELLATION', later(8), later(48), now, later(8), cutoff),
+    ).toBeNull();
+  });
   it('prefers qualified specialists and excludes unrelated or unavailable specialists', () => {
     const specialist = {
       userId: 'refund',

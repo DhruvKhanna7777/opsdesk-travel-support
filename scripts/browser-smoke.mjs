@@ -168,7 +168,10 @@ try {
     "Close button must restore opener focus",
   );
   await manager.getByRole("button", { name: "New ticket" }).click();
-  const booking = manager.getByRole("dialog").getByRole("combobox");
+  const booking = manager.getByRole("dialog").getByRole("combobox", {
+    name: "Booking",
+    exact: true,
+  });
   const bookingId = await booking
     .locator("option", { hasText: "BK-1042" })
     .getAttribute("value");
@@ -233,7 +236,7 @@ try {
   await supplier.close();
 
   await manager.reload();
-  await openCase(manager, title, title);
+  await manager.getByRole("heading", { name: title, exact: true }).waitFor();
   await manager.getByRole("button", { name: /Supplier threads/ }).click();
   await manager
     .getByText("The demo refund has been confirmed.", { exact: true })
@@ -334,7 +337,7 @@ try {
   await bell.click();
   assert.equal(await acknowledge.count(), 0);
   await bell.click();
-  await openCase(manager, title, title);
+  await manager.getByRole("heading", { name: title, exact: true }).waitFor();
   await manager
     .getByRole("button", { name: "Older messages", exact: true })
     .click();

@@ -4,7 +4,8 @@ import { Attachments } from "./attachments";
 import { TicketSlaControls } from "./sla-settings";
 import { useState } from "react";
 import { useOpsResource, useOpsPage, PageControls } from "./paged-data";
-import { TRAVEL_THEMES } from "@helpdesk/shared";
+import { classifyTravelIntent, TRAVEL_THEMES } from "@helpdesk/shared";
+import { categories } from "./reports";
 import {
   ArrowLeft,
   ArrowUpRight,
@@ -183,6 +184,8 @@ export function NewTicket({
 }) {
   const [title, setTitle] = useState(""),
     [description, setDescription] = useState(""),
+    [category, setCategory] = useState(""),
+    [priority, setPriority] = useState(""),
     [bookingId, setBookingId] = useState(""),
     [contractId, setContractId] = useState(""),
     [submittedReference, setSubmittedReference] = useState(""),
@@ -212,6 +215,10 @@ export function NewTicket({
     }
   }
   const [booking, setBooking] = useState<Booking>();
+  const suggestedIntent =
+    title.trim() || description.trim()
+      ? classifyTravelIntent(`${title} ${description}`)
+      : "";
   return (
     <Modal title="Start a conversation" onClose={onClose}>
       <form
@@ -221,6 +228,8 @@ export function NewTicket({
           void onCreate({
             title,
             description,
+            category: category || undefined,
+            priority: priority || undefined,
             contractId: contractId || undefined,
             ...(booking
               ? {
@@ -316,6 +325,37 @@ export function NewTicket({
             placeholder="Include the issue and the outcome you need."
           />
         </label>
+        <label>
+          Intent
+          <select
+            value={category}
+            onChange={(event) => setCategory(event.target.value)}
+          >
+            <option value="">
+              {suggestedIntent
+                ? `Suggested: ${human(suggestedIntent)}`
+                : "Suggest from subject and description"}
+            </option>
+            {categories.map((intent) => (
+              <option key={intent} value={intent}>{human(intent)}</option>
+            ))}
+          </select>
+        </label>
+        {["AGENT", "MANAGER"].includes(data.me.kind) && (
+          <label>
+            Priority
+            <select
+              value={priority}
+              onChange={(event) => setPriority(event.target.value)}
+            >
+              <option value="">Automatic</option>
+              {["LOW", "MEDIUM", "HIGH", "URGENT"].map((level) => (
+                <option key={level} value={level}>{human(level)}</option>
+              ))}
+            </select>
+            <small>Travel deadlines can raise the selected priority.</small>
+          </label>
+        )}
         {booking && (
           <p className="od-info">
             <Layers3 size={16} />
@@ -378,7 +418,7 @@ export function OnDemandTicket({
   data,
   ...props
 }: Omit<Parameters<typeof TicketDetail>[0], "ticket"> & { id: string }) {
-  const detail = useOpsResource<Ticket>(`tickets/${id}`, data.now);
+  const detail = useOpsResource<Ticket>(`tickets/${encodeURIComponent(id)}`, data.now);
   if (detail.error)
     return (
       <p role="alert">
@@ -805,7 +845,7 @@ export function TicketDetail({
                     Contact supplier
                   </button>
                 </div>
-                <PageControls resource={conversations} label="threads" />
+                <PageControls resource={conversations} label="threads" singularLabel="thread" />
                 {threads.length ? (
                   threads.map((c) => (
                     <SupplierConversation
@@ -1025,7 +1065,7 @@ export function TicketDetail({
               Connected history{" "}
               <span className="od-count">{history.data?.total ?? 0}</span>
             </h3>
-            <PageControls resource={history} label="related cases" />
+            <PageControls resource={history} label="related cases" singularLabel="related case" />
             {related.length ? (
               related.map((v) => (
                 <button
@@ -1385,7 +1425,7 @@ export function SupplierDesk({
         </span>
       </div>
       <div className="od-supplier-desk">
-        <PageControls resource={conversations} label="threads" />
+        <PageControls resource={conversations} label="threads" singularLabel="thread" />
         {threads.length ? (
           threads.map((c) => (
             <SupplierConversation

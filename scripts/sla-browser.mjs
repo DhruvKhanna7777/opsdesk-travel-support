@@ -107,7 +107,7 @@ try {
   await page.getByRole("button", { name: /All conversations/ }).click();
   await page.getByRole("button", { name: "New ticket", exact: true }).click();
   const dialog = page.getByRole("dialog", { name: "Start a conversation" });
-  const booking = dialog.getByRole("combobox");
+  const booking = dialog.getByRole("combobox", { name: "Booking", exact: true });
   await booking.selectOption("booking-0");
   await dialog.getByLabel("Subject", { exact: true }).fill(title);
   await dialog
