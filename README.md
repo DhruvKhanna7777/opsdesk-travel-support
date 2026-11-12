@@ -1,10 +1,23 @@
-# OpsDesk — Connected Travel Support
+<div align="center">
 
-A travel support workspace that connects each case to its booking, traveler, agency, earlier cases, and supplier conversations. Teams can route work, manage response deadlines, review booking requests, and track operational trends from one place.
+<h1>OpsDesk — Connected Travel Support</h1>
 
-**Stack:** Next.js · NestJS · Prisma · PostgreSQL
+<p>A travel support workspace that connects each case to its booking, traveler, agency, earlier cases, and supplier conversations.</p>
 
-[Features](#-features) · [Architecture](#-architecture) · [Quick start](#-quick-start) · [Workflows](#-workflows) · [Testing](#-testing) · [Documentation](#-documentation)
+<p>Route work, manage response deadlines, review booking requests, and track operational trends from one place.</p>
+
+<p><strong>Next.js · NestJS · Prisma · PostgreSQL</strong></p>
+
+<p>
+  <a href="#-features">Features</a> ·
+  <a href="#-architecture">Architecture</a> ·
+  <a href="#-quick-start">Quick start</a> ·
+  <a href="#-workflows">Workflows</a> ·
+  <a href="#-testing">Testing</a> ·
+  <a href="#-documentation">Documentation</a>
+</p>
+
+</div>
 
 ---
 
@@ -15,7 +28,7 @@ Travel support rarely fits into one ticket. A complaint may depend on a booking,
 ## ✨ Features
 
 | Area | What it does |
-| --- | --- |
+| :--- | :--- |
 | 🎫 Connected cases | Links complaints to bookings, travelers, agencies, and authorized case history. |
 | 📥 Shared inbox | Provides regional queues, search and filters, ownership, priorities, and manager reassignment. |
 | 🧭 Routing and coverage | Assigns work using region, specialty, availability, and capacity; supports optional automatic handoff when coverage changes. |
@@ -99,7 +112,7 @@ npm run ops:test:browser
 ## 📚 Documentation
 
 | Guide | Covers |
-| --- | --- |
+| :--- | :--- |
 | [Setup and local workflows](OPSDESK_README.md) | Launcher, configuration, accounts, and role journeys |
 | [Developer handoff](docs/OPSDESK_HANDOFF.md) | Architecture and implementation notes |
 | [Response policies](docs/OPSDESK_SLA_CALENDARS.md) | Calendars, contracts, coverage, and escalation |
