@@ -1,5 +1,21 @@
 # OpsDesk continuation checkpoint — 12 November 2026
 
+## TBO workflow continuation
+
+The TBO workflow follow-up is stacked on PR #72 at `41610e8`. PR #72's hosted API, Chromium, Firefox, recovery, load, startup and audit checks passed. Review #72 first, then retarget the TBO follow-up to main after the parent merges. The TBO follow-up adds booking and cutoff labels, a saved-intent filter shared with CSV export, and audited EM escalation with manager acknowledgment. [Workflow and retention](OPSDESK_TBO_WORKFLOW.md) · [Validation](OPSDESK_VALIDATION.md#tbo-workflow)
+
+Next finish the submission increment with a fresh setup, demo reset, Linux smoke, journeys A–E, a short walkthrough, architecture and cost comparison, and demo evidence. Keep deployment paused and leave merging to collaborators. Live retention and external workspace retirement still require owner evidence.
+
+**Copy-ready message**
+
+> Continue OpsDesk in `DhruvKhanna7777/opsdesk-travel-support`. Fetch main and check open PRs and CI, including Firefox. Read the handoff, validation record and TBO workflow guide first.
+>
+> **Finished and merged.** Main was `3b969be` through PR #71. Both workspace response modes remain supported, and the offline observation summarizer is available. Its PR and post-merge validation passed.
+>
+> **Implemented and awaiting review.** PR #72 adds editable supplier recipients, weekly case themes and full filtered CSV export. Hosted CI passed, and the local export verified 50,000 agency rows. The TBO follow-up stacks on #72. It adds TBOH/LCD labels, intent filtering in the queue and export, and audited EM escalation and acknowledgment. It also records the prototype ticket retention policy. Review #72 first, then verify the TBO follow-up's base and hosted checks. The prototype retention policy still needs owner approval for live use.
+>
+> **Still to do.** Finish the demo and submission increment with a fresh setup, reset, Linux smoke, journeys A–E, a 3–5 minute walkthrough, architecture and cost comparison, and demo evidence. Keep external workspace retirement, representative performance, independent classifier labels, spoken screen-reader acceptance, live booking and email, scanner monitoring, retention approval and staging recovery open until verified. Use Node 22.23.x and isolated synthetic data. Run mutating suites sequentially. Leave merges to collaborators and deployment paused.
+
 ## Iteration 1 continuation
 
 Start from main `3b969be` through PR #71. Its PR and post-merge validation both passed. Read the [Iteration 1 workflow](OPSDESK_ITERATION_ONE.md) and the latest validation record. Review the PR for editable supplier thread recipients, case themes and linked weekly Insights, and full filtered CSV export. Confirm the exact PR checks before merging. The original project workflow governs authorization, thread visibility, routing, deadlines, resolution and audit.

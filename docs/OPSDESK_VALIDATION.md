@@ -1,3 +1,15 @@
+# TBO workflow
+
+Fetched main `3b969be` and checked the only open PR, #72 at `41610e8`. [PR #72 validation](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43242581733) was still running at the first check, with API and recovery successful. It subsequently completed successfully, including Chromium, Firefox, startup, load and production audit. This increment is based on #72 so the new intent filter can also apply to its full CSV export.
+
+The incremental changes use the existing booking fields, case category and alert/audit schema. No new migration or dependencies are required. The prototype retention policy documents current behavior and keeps live approval open. [TBO workflow](OPSDESK_TBO_WORKFLOW.md)
+
+Local Windows validation used Node 22.23.4, the lockfile-identical Node 22 dependency install from Iteration 1, and a fresh isolated PostgreSQL 18.6 cluster. The preview built both applications, applied all 29 parent migrations and seeded 60 cases. The focused HTTP suite passed **39 checks**, including intent validation, agency isolation in the queue and CSV, staff-only EM escalation and reasons, concurrent request retry, coverage, saved deadline and assignment preservation, manager-only acknowledgment, closed-case rejection and fixture cleanup.
+
+The sequential `npm run ops:test` passed **107 backend unit tests** in 11 suites and the complete API, compatibility, lock/concurrency, mail, attachment, booking and load-target regressions. The same run passed both the 47-check Iteration 1 suite and the 39-check TBO suite. Changed-file ESLint and the local production dependency audit passed, with zero audit findings.
+
+The full browser suite passed in Chromium and then Firefox. Each engine passed six workflow scripts, five reflow widths, five-role keyboard checks, 26 axe states and both review-form tests. The primary journey checked the TBOH and LCD labels, sent an EM escalation, found it using the manager queue and intent filters, and acknowledged it from Notifications. Local recovery was not rerun for this schema-neutral follow-up. [Parent recovery and CI evidence](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43242581733)
+
 # Iteration 1
 
 Started from main `3b969be45456e86deb9f602ef96edc9ae8a6ec79` with zero open PRs. [PR #71 CI](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43229442639) was still running at the first check, with Chromium successful and Firefox active. It later completed successfully. [Post-merge main CI](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43229536644) had already completed successfully. Actual steps in both runs verified isolated setup/build, API, synthetic recovery, load, startup, Chromium, Firefox and the production dependency audit.
