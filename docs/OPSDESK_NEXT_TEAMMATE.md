@@ -2,6 +2,8 @@
 
 ## Workspace compatibility continuation
 
+Review open [PR #69](https://github.com/DhruvKhanna7777/opsdesk-travel-support/pull/69). Application head `4e736a1` passed [hosted run 43220571787](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43220571787), including API, Chromium, Firefox, synthetic recovery, load/startup and audit; local full API and both browsers also passed. The evidence-recording follow-up changes documentation only. Fetch and check the final head/main CI separately; leave merging to collaborators.
+
 Start from verified main `527931d27471971405d5aa7b48c9487532b1f34b`. PRs #65–#68 are merged; zero PRs were open at this increment's initial check. Main run [43187098916](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43187098916) passed API, Chromium, Firefox, synthetic recovery and the dependency audit. Earlier open-PR statements below are historical.
 
 This increment migrates the CI authentication probe to compact mode and adds an independent-fixture full/compact compatibility suite. The legacy response and intentional rotation requester-redaction assertion remain. External callers are **unconfirmed**, so full-response retirement is blocked. Use the [caller inventory, migration map and owner evidence requirements](OPSDESK_WORKSPACE_COMPATIBILITY.md) and [new validation record](OPSDESK_VALIDATION.md#workspace-compatibility-continuation).

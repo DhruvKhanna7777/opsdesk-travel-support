@@ -28,7 +28,9 @@ Windows, Node **22.23.5**, fresh `npm ci`, PostgreSQL **18.6**, API **3163**, fr
 | Independent cleanup query | After both browser commands: 30 bookings, 60 cases, 192 messages and 12 conversations; zero compatibility-prefixed rows in case, conversation, message and event tables. |
 | Static checks | Script syntax, Prettier on changed script/package/new guide, workflow YAML parsing with the installed JavaScript YAML library, and Git whitespace checks passed. |
 
-The isolated API, frontend and PostgreSQL services were stopped after validation; all three dedicated ports and the identified process IDs were absent. The extra PostgreSQL stop command found the server had already exited. Hosted PR CI must be checked on the actual branch head; the starting main run above does not establish this branch's CI result.
+The isolated API, frontend and PostgreSQL services were stopped after validation; all three dedicated ports and the identified process IDs were absent. The extra PostgreSQL stop command found the server had already exited.
+
+[PR #69](https://github.com/DhruvKhanna7777/opsdesk-travel-support/pull/69) application commit `4e736a16446ef9edb7828a98b009122942d9edd2` passed [hosted run 43220571787](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43220571787). Its actual step records show successful dependency install, builds/startup, classifier regressions, synthetic recovery, full API regression, booking ownership, five-role load, process-start probes, Chromium, Firefox and production dependency audit. This evidence is independent of the starting main run. The follow-up recording this result changes documentation only; check its own head CI before merging. PR #69 remains open for collaborators; no merge or deployment was performed.
 
 ## Attempts and acceptance limits
 
