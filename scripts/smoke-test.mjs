@@ -45,8 +45,24 @@ async function login(id) {
     )
   ).accessToken;
 }
+async function readFixturePages(path, token) {
+  const separator = path.includes("?") ? "&" : "?";
+  const first = await call(`${path}${separator}page=1`, token);
+  assert.equal(first.page, 1, path);
+  const items = [...first.items];
+  for (let page = 2; page <= first.totalPages; page++) {
+    const next = await call(`${path}${separator}page=${page}`, token);
+    assert.equal(next.page, page, path);
+    assert.equal(next.total, first.total, path);
+    items.push(...next.items);
+  }
+  assert.equal(items.length, first.total, path);
+  assert.equal(new Set(items.map(({ id }) => id)).size, first.total, path);
+  return items;
+}
+
 try {
-  await call("/ops/workspace", null, undefined, "GET", 401);
+  await call("/ops/workspace?compact=1", null, undefined, "GET", 401);
   const session = await call("/auth/login", null, {
     email: "agency@opsdesk.demo",
     password: "OpsDeskDemo!2026",
@@ -117,16 +133,22 @@ try {
     agent = await login("asia"),
     supplier = await login("supplier"),
     wrongSupplier = await login("skyline");
-  const initial = await call("/ops/workspace", manager);
-  assert(initial.tickets.length >= 60);
-  assert.equal(initial.bookings.length, 30);
+  const initial = await call("/ops/workspace?compact=1", manager);
+  const initialTickets = await readFixturePages("/ops/queue?tab=all", manager);
+  const routingRoster = await readFixturePages(
+    "/ops/people?kind=AGENT",
+    manager,
+  );
+  assert(initialTickets.length >= 60);
+  assert.equal(initial.counts.total, initialTickets.length);
+  assert.equal((await call("/ops/bookings?page=1", manager)).total, 30);
   assert.equal(initial.me.kind, "MANAGER");
   await call("/ops/insights", null, undefined, "GET", 401);
   await call("/ops/insights", customer, undefined, "GET", 403);
   await call("/ops/insights", agency, undefined, "GET", 403);
   await call("/ops/insights", supplier, undefined, "GET", 403);
   const managerReport = await call("/ops/insights", manager);
-  assert.equal(managerReport.total, initial.tickets.length);
+  assert.equal(managerReport.total, initialTickets.length);
   assert.equal(
     managerReport.closed + managerReport.backlog,
     managerReport.total,
@@ -141,7 +163,7 @@ try {
   );
   assert.equal(typeof managerReport.medianFirstResponseHours, "number");
   assert(managerReport.medianFirstResponseHours >= 0);
-  const resolutions = initial.tickets
+  const resolutions = initialTickets
     .filter(
       (value) =>
         value.resolvedAt && ["RESOLVED", "CLOSED"].includes(value.status),
@@ -158,7 +180,7 @@ try {
   assert(
     Math.abs(managerReport.medianResolutionHours - medianResolution) < 1e-9,
   );
-  const asiaSpecialties = initial.people.find(
+  const asiaSpecialties = routingRoster.find(
     (p) => p.id === "agent-asia",
   ).specialties;
   await call(
@@ -181,33 +203,53 @@ try {
     { specialties: asiaSpecialties },
     "PATCH",
   );
-  const customerData = await call("/ops/workspace", customer);
-  assert(customerData.tickets.every((t) => t.customerId === "customer-0"));
-  assert(
-    customerData.tickets
-      .flatMap((t) => t.messages)
-      .every((m) => m.visibility === "CUSTOMER"),
+  const customerTickets = await readFixturePages(
+    "/ops/queue?tab=all",
+    customer,
   );
-  assert.equal(customerData.conversations.length, 0);
-  const agencyData = await call("/ops/workspace", agency),
-    otherData = await call("/ops/workspace", other);
-  assert(agencyData.tickets.every((t) => t.agencyId === "atlas"));
-  assert(otherData.tickets.every((t) => t.agencyId === "horizon"));
-  const agentData = await call("/ops/workspace", agent);
-  assert(agentData.tickets.every((t) => t.region === "ASIA"));
+  assert(customerTickets.length > 0);
+  assert(customerTickets.every((t) => t.customerId === "customer-0"));
+  for (const { id } of customerTickets) {
+    const messages = await readFixturePages(
+      `/ops/tickets/${id}/messages`,
+      customer,
+    );
+    assert(messages.every((m) => m.visibility === "CUSTOMER"));
+  }
+  await call(
+    `/ops/tickets/${customerTickets[0].id}/conversations`,
+    customer,
+    undefined,
+    "GET",
+    403,
+  );
+  const agencyTickets = await readFixturePages("/ops/queue?tab=all", agency);
+  const otherTickets = await readFixturePages("/ops/queue?tab=all", other);
+  assert(
+    agencyTickets.length > 0 &&
+      agencyTickets.every((t) => t.agencyId === "atlas"),
+  );
+  assert(
+    otherTickets.length > 0 &&
+      otherTickets.every((t) => t.agencyId === "horizon"),
+  );
+  const agentTickets = await readFixturePages("/ops/queue?tab=all", agent);
+  assert(
+    agentTickets.length > 0 && agentTickets.every((t) => t.region === "ASIA"),
+  );
   const regionReport = await call("/ops/insights", agent);
-  assert.equal(regionReport.total, agentData.tickets.length);
+  assert.equal(regionReport.total, agentTickets.length);
   assert(regionReport.total < managerReport.total);
   assert.equal(
     regionReport.suppliers.reduce((sum, row) => sum + row.cases, 0),
-    agentData.tickets.filter((ticket) => ticket.bookingId).length,
+    agentTickets.filter((ticket) => ticket.bookingId).length,
   );
   await call("/ops/queue", null, undefined, "GET", 401);
   await call("/ops/queue?page=0", manager, undefined, "GET", 400);
   await call("/ops/queue?attention=1", customer, undefined, "GET", 403);
   const queue1 = await call("/ops/queue?tab=all", manager);
   const queue2 = await call("/ops/queue?tab=all&page=2", manager);
-  assert.equal(queue1.total, initial.tickets.length);
+  assert.equal(queue1.total, initialTickets.length);
   assert.equal(queue1.ids.length, queue1.pageSize);
   assert.equal(queue2.page, 2);
   assert.equal(queue2.ids.filter((id) => queue1.ids.includes(id)).length, 0);
@@ -215,7 +257,7 @@ try {
   assert(matches.ids.includes("ticket-0"));
   assert(
     matches.ids.every((id) =>
-      customerData.tickets.some((ticket) => ticket.id === id),
+      customerTickets.some((ticket) => ticket.id === id),
     ),
   );
   const foreignMatches = await call("/ops/queue?tab=all&search=bk-1042", other);
@@ -226,12 +268,11 @@ try {
   );
   assert.equal(
     assignedRegion.total,
-    agentData.tickets.filter((ticket) => ticket.agentId === "agent-asia")
-      .length,
+    agentTickets.filter((ticket) => ticket.agentId === "agent-asia").length,
   );
   assert(
     assignedRegion.ids.every((id) =>
-      agentData.tickets.some((ticket) => ticket.id === id),
+      agentTickets.some((ticket) => ticket.id === id),
     ),
   );
   await call("/tickets/queue", agent, undefined, "GET", 403);
@@ -312,17 +353,26 @@ try {
   assert.equal(ticket.bookingId, "booking-0");
   assert.equal(ticket.category, "REFUND");
   assert(ticket.agentId);
-  const current = await call("/ops/workspace", manager);
-  const saved = current.tickets.find((t) => t.id === ticket.id);
-  assert(saved.relatedIds.includes("ticket-0"));
-  assert(saved.relatedIds.includes("ticket-30"));
-  const pending = current.tickets.find((t) => t.id === unmatched.id);
+  const related = await readFixturePages(
+    `/ops/tickets/${ticket.id}/related`,
+    manager,
+  );
+  assert(related.some(({ id }) => id === "ticket-0"));
+  assert(related.some(({ id }) => id === "ticket-30"));
+  const pendingMessages = await readFixturePages(
+    `/ops/tickets/${unmatched.id}/messages`,
+    manager,
+  );
   assert.equal(
-    pending.messages[0].content,
+    pendingMessages[0].content,
     "Please verify the booking reference.",
   );
+  const pendingEvents = await readFixturePages(
+    `/ops/tickets/${unmatched.id}/events`,
+    manager,
+  );
   assert(
-    pending.events.some(
+    pendingEvents.some(
       (event) =>
         event.kind === "BOOKING_REVIEW_REQUIRED" &&
         event.text.includes("NO-SUCH-BOOKING"),
@@ -356,12 +406,11 @@ try {
     "POST",
     201,
   );
-  const afterNote = await call("/ops/workspace", customer);
-  assert(
-    !afterNote.tickets
-      .find((t) => t.id === ticket.id)
-      .messages.some((m) => m.content.includes("staff-only")),
+  const afterNote = await readFixturePages(
+    `/ops/tickets/${ticket.id}/messages`,
+    customer,
   );
+  assert(!afterNote.some((m) => m.content.includes("staff-only")));
   const conversation = await call(
     `/ops/tickets/${ticket.id}/conversations`,
     agent,
@@ -382,11 +431,25 @@ try {
     "POST",
     201,
   );
-  const supplierData = await call("/ops/workspace", supplier);
-  assert.equal(supplierData.tickets.length, 0);
-  assert.equal(supplierData.bookings.length, 0);
-  assert(supplierData.conversations.some((c) => c.id === conversation.id));
-  assert(!JSON.stringify(supplierData).includes("staff-only"));
+  assert.equal((await call("/ops/queue?tab=all", supplier)).total, 0);
+  assert.equal((await call("/ops/bookings?page=1", supplier)).total, 0);
+  const supplierThreads = await readFixturePages(
+    "/ops/conversations",
+    supplier,
+  );
+  assert(supplierThreads.some((c) => c.id === conversation.id));
+  const threadPath = `/ops/conversations/${conversation.id}/messages`;
+  const supplierMessages = await readFixturePages(threadPath, supplier);
+  assert(
+    supplierMessages.some(
+      (m) =>
+        m.content === "Please confirm whether this refund has been approved.",
+    ),
+  );
+  assert(
+    !JSON.stringify([supplierThreads, supplierMessages]).includes("staff-only"),
+  );
+  await call(threadPath, wrongSupplier, undefined, "GET", 404);
   await call(
     `/ops/conversations/${conversation.id}/reply`,
     wrongSupplier,
@@ -404,7 +467,12 @@ try {
     "POST",
     201,
   );
-  const afterReply = await call("/ops/workspace", manager);
+  const ticketPath = `/ops/tickets/${ticket.id}`;
+  const afterReply = await call(ticketPath, manager);
+  const threadsAfterReply = await readFixturePages(
+    `${ticketPath}/conversations`,
+    manager,
+  );
   const outbound = await call(
     `/ops/tickets/${ticket.id}/messages`,
     manager,
@@ -468,21 +536,15 @@ try {
     "MANAGER_CANCELLED",
     "MANAGER_RETRY",
   ]);
-  assert.equal(
-    afterReply.tickets.find((t) => t.id === ticket.id).status,
-    "WAITING_SUPPLIER",
-  );
+  assert.equal(afterReply.status, "WAITING_SUPPLIER");
   await call(
     `/ops/conversations/${parallelConversation.id}`,
     agent,
     { status: "CLOSED" },
     "PATCH",
   );
-  const afterLastPending = await call("/ops/workspace", manager);
-  assert.equal(
-    afterLastPending.tickets.find((t) => t.id === ticket.id).status,
-    "IN_PROGRESS",
-  );
+  const afterLastPending = await call(ticketPath, manager);
+  assert.equal(afterLastPending.status, "IN_PROGRESS");
   await call(
     `/ops/conversations/${conversation.id}`,
     customer,
@@ -516,27 +578,32 @@ try {
     { status: "AWAITING_REPLY" },
     "PATCH",
   );
-  const afterReopen = await call("/ops/workspace", manager);
-  assert.equal(
-    afterReopen.tickets.find((t) => t.id === ticket.id).status,
-    "WAITING_SUPPLIER",
+  const afterReopen = await call(ticketPath, manager);
+  assert.equal(afterReopen.status, "WAITING_SUPPLIER");
+  const reopenedThreads = await readFixturePages(
+    `${ticketPath}/conversations`,
+    manager,
   );
-  const reopenedDueAt = afterReopen.conversations.find(
+  const reopenedDueAt = reopenedThreads.find(
     (c) => c.id === conversation.id,
   ).dueAt;
+  assert(reopenedDueAt);
   await call(
     `/ops/conversations/${conversation.id}`,
     agent,
     { status: "AWAITING_REPLY" },
     "PATCH",
   );
-  const afterRetry = await call("/ops/workspace", manager);
+  const threadsAfterRetry = await readFixturePages(
+    `${ticketPath}/conversations`,
+    manager,
+  );
   assert.equal(
-    afterRetry.conversations.find((c) => c.id === conversation.id).dueAt,
+    threadsAfterRetry.find((c) => c.id === conversation.id).dueAt,
     reopenedDueAt,
   );
   assert.equal(
-    afterReply.conversations.find((c) => c.id === conversation.id).status,
+    threadsAfterReply.find((c) => c.id === conversation.id).status,
     "REPLIED",
   );
   await call(
@@ -569,15 +636,22 @@ try {
     },
     "PATCH",
   );
-  const resolvedCustomer = await call("/ops/workspace", customer);
-  const resolved = resolvedCustomer.tickets.find((t) => t.id === ticket.id);
+  const resolved = await call(ticketPath, customer);
+  const resolvedEvents = await readFixturePages(
+    `${ticketPath}/events`,
+    customer,
+  );
   assert.equal(resolved.status, "RESOLVED");
   assert(
-    resolved.events.some(
+    resolvedEvents.some(
       (event) => event.text === "WAITING_SUPPLIER → RESOLVED",
     ),
   );
-  assert(!JSON.stringify(resolved).includes("Private resolution detail"));
+  assert(
+    !JSON.stringify([resolved, resolvedEvents]).includes(
+      "Private resolution detail",
+    ),
+  );
   await call(
     `/ops/tickets/${ticket.id}`,
     customer,
@@ -642,9 +716,9 @@ try {
     [ticket.id],
   );
   assert.equal(events.rows[0].n, 1);
-  const alerts = (await call("/ops/workspace", manager)).notifications.filter(
-    (event) => event.ticketId === ticket.id,
-  );
+  const alerts = (
+    await call("/ops/workspace?compact=1", manager)
+  ).notifications.filter((event) => event.ticketId === ticket.id);
   assert.equal(alerts.filter((event) => event.kind === "ESCALATED").length, 1);
   assert.equal(
     alerts.filter((event) => event.kind === "SUPPLIER_OVERDUE").length,
@@ -714,7 +788,9 @@ try {
 
   temporaryBookingId = randomUUID();
   const schedulePath = `/ops/bookings/${temporaryBookingId}/schedule`;
-  const workspaceTime = Date.parse((await call("/ops/workspace", manager)).now);
+  const workspaceTime = Date.parse(
+    (await call("/ops/workspace?compact=1", manager)).now,
+  );
   const at = (hours) => new Date(workspaceTime + hours * 3600000).toISOString();
   await pool.query(
     `INSERT INTO "TravelBooking"
@@ -758,13 +834,16 @@ try {
   created.push(cancellation.id);
   assert.equal(cancellation.deadline, at(4));
   await call(schedulePath, manager, { cancellationCutoffAt: null }, "PATCH");
-  const rescheduled = (await call("/ops/workspace", manager)).tickets.find(
-    (t) => t.id === cancellation.id,
+  const cancellationPath = `/ops/tickets/${cancellation.id}`;
+  const rescheduled = await call(cancellationPath, manager);
+  const rescheduledEvents = await readFixturePages(
+    `${cancellationPath}/events`,
+    manager,
   );
   assert.equal(rescheduled.deadline, at(10));
   assert.equal(rescheduled.responseDeadline, cancellation.responseDeadline);
   assert.equal(
-    rescheduled.events.filter((event) => event.kind === "DEADLINE_CHANGED")
+    rescheduledEvents.filter((event) => event.kind === "DEADLINE_CHANGED")
       .length,
     1,
   );
@@ -788,7 +867,7 @@ try {
     unchangedPolicy.responsePolicyVersion,
     policy.responsePolicyVersion,
   );
-  const routingAgents = initial.people.filter((person) =>
+  const routingAgents = routingRoster.filter((person) =>
     ["agent-asia", "agent-global"].includes(person.id),
   );
   previousCapacities = routingAgents;
@@ -835,9 +914,7 @@ try {
         Date.parse(result.responseStartedAt),
       6 * 3600000,
     );
-  const afterPolicy = (await call("/ops/workspace", manager)).tickets.find(
-    (value) => value.id === cancellation.id,
-  );
+  const afterPolicy = await call(cancellationPath, manager);
   assert.equal(afterPolicy.responseDeadline, cancellation.responseDeadline);
   const completed = routedAtCapacity[0];
   await call(
@@ -859,9 +936,8 @@ try {
   );
   assert.equal((await call("/health/ready", null)).status, "ready");
   assert.equal((await call("/health/worker", null)).status, "ready");
-  const activeCases = (await call("/ops/workspace", manager)).tickets.filter(
-    (value) => !["RESOLVED", "CLOSED"].includes(value.status),
-  ).length;
+  const activeCases = (await call("/ops/workspace?compact=1", manager)).counts
+    .open;
   const candidateSweep = await call(
     "/ops/clock/advance",
     manager,

@@ -43,6 +43,16 @@ The local manager, supplier-list and supplier-history run used Node 22.23.4 and 
 
 The template held 37 conversations and 433 messages. A separate maintenance query found zero remaining profiler databases and verified the original counts of 60 cases, 192 messages and 12 conversations. Three startup guard tests, script formatting and syntax, workflow YAML parsing and Git whitespace checks passed. The local run used a longer readiness limit than CI. Cache state and representative performance acceptance remain open.
 
+## Paged core HTTP smoke
+
+Started from main `d378ca0` after PR #64. [Main](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43176748730), [PR #65](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43178348901) and [PR #66](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43181282633) had successful Chromium and Firefox steps. Both PRs were open and the smoke change uses neither branch as its base.
+
+The primary suite uses paged queues, a paged agent directory, case detail, related cases, events, customer messages and supplier threads. It checks page totals and unique IDs while walking the stable synthetic fixtures. New explicit checks deny a requester access to staff conversation listings and return HTTP 404 to the other supplier reading the thread. Compact metadata supplies notifications, clock state and counts.
+
+The Windows synthetic preview on Node 22.23.0 passed shared, backend and frontend builds, using the pinned dependencies installed earlier with npm ci. The complete local `npm run ops:test` exited zero. It included 91 backend unit tests, 143 core HTTP checks, 124 pagination checks, 177 directory checks, and the remaining concurrency, membership, SLA, calendar, contract, rotation, mail, attachment, booking and load-target checks. Each load-target scenario verified 40 writes and restored its fixture counts. No local browser suite ran in this increment. Check both hosted browser steps on this PR's commit. Formatting, syntax and whitespace checks passed.
+
+Remaining legacy callers include the CI authentication probe, fixture selection in pagination and directory smoke, directory parity assertions and the legacy requester-redaction check in rotation smoke. The compatibility response remains available.
+
 # Populated supplier startup follow-up
 
 Main `0310cd5463428c467a9f7e470eea89496a5dc288` contains merged PR #57. The PR and main workflows both passed startup smoke, API and recovery, five-role load, Chromium, Firefox and the dependency audit. [PR validation](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43075807792) · [Main validation](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43076744463)

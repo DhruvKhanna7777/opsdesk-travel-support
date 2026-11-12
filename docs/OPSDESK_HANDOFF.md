@@ -26,6 +26,10 @@ Hosted status below is for the listed PR commit. PR #59 was retargeted to main a
 
 **Next.** Recheck main CI, including Firefox. Have a human reviewer label and adjudicate the blind classifier pack, freeze the export, and run the evaluator's `--dataset` mode. Record actual screen-reader speech. Select a booking provider and arrange live booking/mail acceptance, production scanner monitoring, retention approval, and an authorized staging restore with agreed recovery targets and owners. Deployment remains paused. [Copy-ready continuation](OPSDESK_NEXT_TEAMMATE.md#current-continuation-message)
 
+## Paged core HTTP smoke
+
+The core smoke script now uses production-shaped paged queues, directories, case details, history and supplier threads. It verifies complete fixture pages and no duplicate IDs. Manager and requester scope, notification acknowledgement, supplier privacy and saved deadlines remain covered. The legacy backend response is still available. See the [validation and remaining callers](OPSDESK_VALIDATION.md#paged-core-http-smoke).
+
 ## Supplier message-history follow-up
 
 The startup profiler includes a separate deep supplier-history probe in addition to the populated list probe from PR #58. It checks scope on every timed read and tests the other supplier thread after timing. [Procedure and limits](OPSDESK_STARTUP_PROFILE.md) · [Validation](OPSDESK_VALIDATION.md#supplier-message-history-startup)
