@@ -12,6 +12,7 @@ import { createHash, createHmac, timingSafeEqual } from 'node:crypto';
 import { Socket } from 'node:net';
 import { PrismaService } from '../../prisma/prisma.service';
 import { STAFF } from './travel.rules';
+import { supplierThreadScope } from './conversation-recipients';
 
 const MAX_BYTES = 2 * 1024 * 1024;
 const LINK_MS = 5 * 60 * 1000;
@@ -117,17 +118,27 @@ export class TravelAttachmentsService implements OnModuleInit, OnModuleDestroy {
   private async visibleMessage(userId: string, messageId: string) {
     const profile = await this.db.travelProfile.findUnique({
       where: { userId },
+      include: { user: { select: { email: true } } },
     });
     if (!profile || profile.status !== 'ACTIVE')
       throw new ForbiddenException('OpsDesk access required.');
     const message = await this.db.travelMessage.findUnique({
       where: { id: messageId },
-      include: { ticket: true, conversation: true },
+      include: { ticket: true },
     });
     if (!message) throw new NotFoundException('Message not found.');
     if (message.conversationId) {
       if (profile.kind === 'SUPPLIER') {
-        if (profile.supplierId !== message.conversation?.supplierId)
+        if (
+          !(await this.db.travelConversation.findFirst({
+            where: {
+              id: message.conversationId,
+              ticketId: message.ticketId,
+              ...supplierThreadScope({ ...profile, email: profile.user.email }),
+            },
+            select: { id: true },
+          }))
+        )
           throw new NotFoundException('Message not found.');
       } else if (
         !STAFF.includes(profile.kind) ||

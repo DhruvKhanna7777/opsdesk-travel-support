@@ -217,51 +217,6 @@ export function OpsDeskWorkspace() {
     setSelected(null);
     setView("inbox");
   }
-  function exportCsv() {
-    const values = [
-      [
-        "Reference",
-        "Subject",
-        "Booking",
-        "Region",
-        "Category",
-        "Priority",
-        "Status",
-        "Deadline",
-      ],
-      ...rows.map((t) => [
-        t.reference,
-        t.title,
-        t.booking?.reference || "",
-        t.region,
-        t.category,
-        t.priority,
-        t.status,
-        t.deadline,
-      ]),
-    ];
-    const csv = values
-      .map((row) =>
-        row
-          .map(
-            (v) =>
-              '"' +
-              (/^[=+@-]/.test(v) ? "'" : "") +
-              v.replaceAll('"', '""') +
-              '"',
-          )
-          .join(","),
-      )
-      .join("\r\n");
-    const url = URL.createObjectURL(
-      new Blob([csv], { type: "text/csv;charset=utf-8;" }),
-    );
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "opsdesk-current-page.csv";
-    a.click();
-    URL.revokeObjectURL(url);
-  }
   return (
     <div className="od-app" data-theme={theme}>
       <aside className="od-sidebar">
@@ -465,6 +420,7 @@ export function OpsDeskWorkspace() {
               id={selected}
               data={data}
               onBack={() => setSelected(null)}
+              backLabel={view === "insights" ? "Back to Insights" : undefined}
               onSelect={setSelected}
               mutate={mutate}
               busy={busy}
@@ -518,15 +474,15 @@ export function OpsDeskWorkspace() {
                   </p>
                 </div>
                 <div className="od-flex">
-                  {staff && ["inbox", "manager"].includes(view) && (
-                    <button
+                  {["inbox", "manager"].includes(view) && (
+                    <a
                       className="od-secondary"
-                      onClick={exportCsv}
-                      disabled={!queue.data}
+                      href={`/api/backend/ops/queue/export?${queue.filters}`}
+                      download
                     >
                       <ArrowDownToLine size={16} />
-                      Export page
-                    </button>
+                      Export all
+                    </a>
                   )}
                   <button
                     className="od-primary"
@@ -563,7 +519,7 @@ export function OpsDeskWorkspace() {
                   onSelect={setSelected}
                 />
               ) : view === "insights" ? (
-                <Insights />
+                <Insights onSelect={setSelected} />
               ) : (
                 <>
                   {customer ? (

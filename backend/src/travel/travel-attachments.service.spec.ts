@@ -26,21 +26,27 @@ describe('travel attachments', () => {
           status: 'ACTIVE',
           kind: 'SUPPLIER',
           supplierId: 'other',
+          userId: 'user',
+          user: { email: 'other@opsdesk.demo' },
         }),
       },
       travelMessage: {
         findUnique: jest.fn().mockResolvedValue({
           conversationId: 'c',
-          conversation: { supplierId: 'supplier' },
+          ticketId: 'ticket',
           ticket: { region: 'GLOBAL' },
         }),
       },
+      travelConversation: { findFirst: jest.fn().mockResolvedValue(null) },
       travelAttachment: { findMany: jest.fn() },
     };
     const service = new TravelAttachmentsService(db as never);
     await expect(service.list('user', 'message')).rejects.toThrow(
       'Message not found',
     );
+    expect(db.travelConversation.findFirst.mock.calls).toMatchObject([
+      [{ where: { id: 'c', supplierId: 'other' } }],
+    ]);
     expect(db.travelAttachment.findMany).not.toHaveBeenCalled();
   });
 

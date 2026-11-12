@@ -79,7 +79,7 @@ export class TravelMailService
       where: { id: messageId },
       include: {
         ticket: { include: { booking: true } },
-        conversation: { include: { supplier: true } },
+        conversation: { include: { supplier: true, recipients: true } },
       },
     });
     if (!message || !['CUSTOMER', 'SUPPLIER'].includes(message.visibility))
@@ -120,6 +120,21 @@ export class TravelMailService
           supplierId: conversation.supplierId,
           kind: 'SUPPLIER',
           status: 'ACTIVE',
+          ...(conversation.recipientsConfigured &&
+          !conversation.recipients.some(
+            (recipient) =>
+              recipient.kind === 'EMAIL' &&
+              recipient.target === conversation.supplier.email.toLowerCase(),
+          )
+            ? {
+                userId: {
+                  in: conversation.recipients
+                    .filter(({ kind }) => kind === 'USER')
+                    .map(({ target }) => target),
+                },
+                user: { email: conversation.supplier.email },
+              }
+            : {}),
         },
         select: { userId: true },
       });

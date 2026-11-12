@@ -189,6 +189,19 @@ try {
     .getByRole("button", { name: "Send to supplier thread" })
     .click();
   await manager.getByRole("heading", { name: subject }).waitFor();
+  await manager.getByRole("button", { name: "Edit recipients" }).click();
+  await manager
+    .getByLabel("Aster Reservations", { exact: true })
+    .selectOption("TO");
+  await manager.getByRole("button", { name: "Save recipients" }).click();
+  await manager
+    .getByText("Thread recipients saved.", { exact: true })
+    .waitFor();
+  await manager.getByText("Case themes", { exact: true }).click();
+  await manager.getByRole("checkbox", { name: /^Refund/i }).check();
+  await manager.getByRole("checkbox", { name: /^Supplier follow up/i }).check();
+  await manager.getByRole("button", { name: "Save themes" }).click();
+  await manager.getByText("Case themes saved.", { exact: true }).waitFor();
 
   const supplier = await signIn("supplier");
   const thread = supplier.getByRole("article").filter({ hasText: subject });
@@ -222,6 +235,7 @@ try {
     await customerThread.getByText(draft, { exact: true }).count(),
     0,
   );
+  const fileButton = replyRow.getByRole('button', { name: /browser-fixture.txt/ });
   assert(
     await manager.getByRole("button", { name: "Send reply" }).isDisabled(),
   );
@@ -235,7 +249,6 @@ try {
   await replyRow.locator('input[type=file]').setInputFiles({
     name: 'browser-fixture.txt', mimeType: 'text/plain', buffer: attachmentBytes,
   });
-  const fileButton = replyRow.getByRole('button', { name: /browser-fixture.txt/ });
   await fileButton.waitFor();
   const downloadEvent = manager.waitForEvent('download');
   await fileButton.click();
@@ -333,6 +346,24 @@ try {
   await manager
     .getByRole("heading", { name: "Supplier performance" })
     .waitFor();
+  await manager
+    .getByRole("heading", { name: "Top themes this week" })
+    .waitFor();
+  await manager
+    .getByRole("button", { name: new RegExp(title) })
+    .first()
+    .click();
+  await manager.getByRole("heading", { name: title }).waitFor();
+  await manager.getByRole("button", { name: /All conversations/ }).click();
+  await manager.getByRole("button", { name: /All cases/ }).click();
+  await manager.getByLabel("Search conversations").fill(title);
+  const downloadPromise = manager.waitForEvent("download");
+  await manager.getByRole("link", { name: "Export all" }).click();
+  const download = await downloadPromise;
+  assert.equal(download.suggestedFilename(), "opsdesk-cases.csv");
+  const csv = readFileSync(await download.path(), "utf8");
+  assert.equal(csv.trimEnd().split("\r\n").length, 2);
+  assert(csv.includes(title));
   await manager.close();
 
   const customer = await signIn("maya", {

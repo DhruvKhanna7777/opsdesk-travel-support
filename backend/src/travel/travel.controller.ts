@@ -4,18 +4,25 @@ import { SupplierCalendarDto } from './sla.dto';
 import { HandoffPolicyDto } from './sla.dto';
 import { CalendarPolicyDto, SlaPauseDto, EscalationOwnerDto } from './sla.dto';
 import { TravelDirectoryDto } from './travel-directory.dto';
+import { ConversationRecipientsDto } from './conversation-recipients';
+import { TicketThemesDto } from './ticket-themes';
 import {
   Body,
   Controller,
   Get,
+  Header,
   Logger,
   Param,
   Patch,
   Post,
   Query,
   Req,
+  Res,
+  StreamableFile,
   UseGuards,
 } from '@nestjs/common';
+import { Readable } from 'node:stream';
+import type { Response } from 'express';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import type { AuthenticatedRequest } from '../common/types/authenticated-request.type';
 import { TravelService } from './travel.service';
@@ -127,6 +134,32 @@ export class TravelController {
   ) {
     return this.travel.messages(req.user.userId, id, query);
   }
+  @Get('tickets/:id/themes') themes(
+    @Req() req: AuthenticatedRequest,
+    @Param('id') id: string,
+  ) {
+    return this.travel.ticketThemes(req.user.userId, id);
+  }
+  @Patch('tickets/:id/themes') updateThemes(
+    @Req() req: AuthenticatedRequest,
+    @Param('id') id: string,
+    @Body() dto: TicketThemesDto,
+  ) {
+    return this.travel.updateTicketThemes(req.user.userId, id, dto);
+  }
+  @Get('conversations/:id/recipients') recipients(
+    @Req() req: AuthenticatedRequest,
+    @Param('id') id: string,
+  ) {
+    return this.travel.conversationRecipients(req.user.userId, id);
+  }
+  @Patch('conversations/:id/recipients') updateRecipients(
+    @Req() req: AuthenticatedRequest,
+    @Param('id') id: string,
+    @Body() dto: ConversationRecipientsDto,
+  ) {
+    return this.travel.updateConversationRecipients(req.user.userId, id, dto);
+  }
   @Get('tickets/:id/events') events(
     @Req() req: AuthenticatedRequest,
     @Param('id') id: string,
@@ -183,6 +216,19 @@ export class TravelController {
     @Query() query: TravelQueueDto,
   ) {
     return this.travel.queue(req.user.userId, query);
+  }
+  @Get('queue/export')
+  @Header('Cache-Control', 'private, no-store')
+  async exportQueue(
+    @Req() req: AuthenticatedRequest,
+    @Query() query: TravelQueueDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const rows = await this.travel.exportQueue(req.user.userId, query);
+    return new StreamableFile(Readable.from(rows), {
+      type: 'text/csv; charset=utf-8',
+      disposition: 'attachment; filename="opsdesk-cases.csv"',
+    }).setErrorHandler((error) => res.destroy(error));
   }
   @Post('tickets') create(
     @Req() req: AuthenticatedRequest,
