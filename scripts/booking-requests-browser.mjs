@@ -51,7 +51,7 @@ try {
   await panel
     .getByLabel("Booking supplier", { exact: true })
     .selectOption(seed.supplierId);
-  await panel.getByLabel("Booking reference", { exact: true }).fill(reference);
+  await panel.getByLabel("Booking reference (TBOH)", { exact: true }).fill(reference);
   await panel
     .getByLabel("Destination", { exact: true })
     .fill("Synthetic approval destination");

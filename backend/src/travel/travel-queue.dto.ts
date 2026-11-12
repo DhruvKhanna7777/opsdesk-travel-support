@@ -8,7 +8,7 @@ import {
   MaxLength,
   Min,
 } from 'class-validator';
-import { PRIORITIES, STATUSES } from './travel.rules';
+import { CATEGORIES, PRIORITIES, STATUSES } from './travel.rules';
 
 export class TravelQueueDto {
   @IsOptional()
@@ -30,6 +30,14 @@ export class TravelQueueDto {
   @IsOptional()
   @IsIn(['1'])
   attention?: string;
+
+  @IsOptional()
+  @IsIn(['1'])
+  em?: string;
+
+  @IsOptional()
+  @IsIn(CATEGORIES)
+  intent?: string;
 
   @IsOptional()
   @IsIn(STATUSES)
