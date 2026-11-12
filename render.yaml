@@ -1,0 +1,57 @@
+# Disposable synthetic demonstration only. Do not reuse these resources for live data.
+services:
+  - type: web
+    name: opsdesk-synthetic-api
+    runtime: node
+    plan: free
+    region: singapore
+    autoDeployTrigger: "off"
+    buildCommand: npm ci && npm run prisma:generate && npm run build --workspace=backend
+    startCommand: npm exec --workspace=backend -- prisma migrate deploy && npm exec --workspace=backend -- tsx prisma/seed-travel.ts && node backend/dist/src/main.js
+    healthCheckPath: /health/ready
+    envVars:
+      - key: NODE_VERSION
+        value: 22.23.0
+      - key: NODE_ENV
+        value: development
+      - key: HOST
+        value: 0.0.0.0
+      - key: OPSDESK_DEMO
+        value: "true"
+      - key: OPSDESK_HOSTED_DEMO
+        value: "true"
+      - key: OPSDESK_LOCAL_COUNTERS
+        value: "false"
+      - key: FRONTEND_URL
+        sync: false
+      - key: OPSDESK_HOSTED_DEMO_GATE_SECRET
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: OPSDESK_ATTACHMENT_SIGNING_SECRET
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: opsdesk-synthetic-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: opsdesk-synthetic-kv
+          property: connectionString
+  - type: keyvalue
+    name: opsdesk-synthetic-kv
+    plan: free
+    region: singapore
+    ipAllowList: []
+    maxmemoryPolicy: noeviction
+    persistenceMode: "off"
+databases:
+  - name: opsdesk-synthetic-db
+    plan: free
+    region: singapore
+    postgresMajorVersion: "18"
+    databaseName: opsdesk_synthetic
+    ipAllowList: []

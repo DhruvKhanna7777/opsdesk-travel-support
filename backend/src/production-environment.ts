@@ -6,6 +6,30 @@ export function validateEnvironment(config: Record<string, unknown>) {
       !['development', 'test', 'production'].includes(config.NODE_ENV))
   )
     throw new Error('NODE_ENV must be development, test or production.');
+  if (config.OPSDESK_HOSTED_DEMO === 'true') {
+    if (config.NODE_ENV === 'production' || config.OPSDESK_DEMO !== 'true')
+      throw new Error(
+        'OPSDESK_HOSTED_DEMO requires a non-production synthetic demo.',
+      );
+    const gate = config.OPSDESK_HOSTED_DEMO_GATE_SECRET;
+    if (typeof gate !== 'string' || gate.length < 32)
+      throw new Error(
+        'OPSDESK_HOSTED_DEMO_GATE_SECRET must have at least 32 characters.',
+      );
+    const origin = config.FRONTEND_URL;
+    let parsed: URL;
+    try {
+      parsed = new URL(origin as string);
+    } catch {
+      throw new Error(
+        'FRONTEND_URL must be an HTTPS origin for a hosted demo.',
+      );
+    }
+    if (parsed.protocol !== 'https:' || parsed.origin !== origin)
+      throw new Error(
+        'FRONTEND_URL must be an HTTPS origin for a hosted demo.',
+      );
+  }
   if (config.NODE_ENV !== 'production') return config;
   const required = (name: string) => {
     const value = config[name];

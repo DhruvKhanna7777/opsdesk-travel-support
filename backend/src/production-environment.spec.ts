@@ -9,6 +9,23 @@ const valid = () => ({
   TURNSTILE_SECRET_KEY: 'configured-real-turnstile-key',
 });
 describe('production configuration validation', () => {
+  it('requires a guarded, synthetic, non-production hosted demo', () => {
+    const demo = {
+      NODE_ENV: 'development',
+      OPSDESK_DEMO: 'true',
+      OPSDESK_HOSTED_DEMO: 'true',
+      FRONTEND_URL: 'https://opsdesk-demo.vercel.app',
+      OPSDESK_HOSTED_DEMO_GATE_SECRET: 'a'.repeat(64),
+    };
+    expect(validateEnvironment(demo)).toBe(demo);
+    for (const change of [
+      { OPSDESK_DEMO: 'false' },
+      { NODE_ENV: 'production' },
+      { OPSDESK_HOSTED_DEMO_GATE_SECRET: '' },
+      { FRONTEND_URL: 'http://localhost:3000' },
+    ])
+      expect(() => validateEnvironment({ ...demo, ...change })).toThrow();
+  });
   it('rejects mistyped environment modes', () => {
     expect(() => validateEnvironment({ NODE_ENV: 'Production' })).toThrow(
       'NODE_ENV',

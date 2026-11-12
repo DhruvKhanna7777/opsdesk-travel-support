@@ -26,12 +26,18 @@ export interface BackendErrorBody {
  * object, not two different failure shapes. Content-Type/shape match the
  * backend's own error responses so existing JSON-parsing error handling
  * (handleTokenResponse, apiClient) picks this up for free. */
-export function backendFetch(path: string, init?: RequestInit): Promise<Response> {
+export function backendFetch(
+  path: string,
+  init?: RequestInit,
+): Promise<Response> {
   return fetch(`${BACKEND_API_URL}${path}`, {
     ...init,
     headers: {
       "Content-Type": "application/json",
       ...init?.headers,
+      ...(process.env.OPSDESK_HOSTED_DEMO_GATE_SECRET
+        ? { "x-opsdesk-demo-gate": process.env.OPSDESK_HOSTED_DEMO_GATE_SECRET }
+        : {}),
     },
   }).catch(
     () =>
@@ -56,7 +62,9 @@ export function backendFetch(path: string, init?: RequestInit): Promise<Response
  * This is a plain function, not an HTTP call to /api/auth/refresh, so the
  * proxy handler's retry-on-401 path doesn't cost a self-fetch round trip.
  */
-export async function refreshTokens(refreshToken: string): Promise<string | null> {
+export async function refreshTokens(
+  refreshToken: string,
+): Promise<string | null> {
   const res = await backendFetch("/auth/refresh", {
     method: "POST",
     body: JSON.stringify({ refreshToken }),
