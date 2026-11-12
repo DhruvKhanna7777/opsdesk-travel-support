@@ -1,3 +1,39 @@
+# Workspace usage observation
+
+12 November 2026. Fetched starting main `169d4be66146a210b334280602a7de2e3fea4d1b` includes merged PR #69. Zero PRs were open at the initial check. Actual steps in [post-merge run 43222335689](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43222335689) passed builds, API, Chromium, Firefox, synthetic recovery, load/startup and production dependency audit before this increment was edited. Earlier open-PR #69 statements below are historical.
+
+The owner confirmed that no access-log format or external caller inventory is available. This increment adds exact opt-in `OPSDESK_WORKSPACE_OBSERVATION=true` logging after successful authorized workspace service reads. The event has only `event`, `version`, `at`, `mode` and allowlisted `role` fields. Unexpected roles become UNKNOWN. There are no user, agency, booking, case or session identifiers, tokens, addresses, headers, query values or response content in the event. Logging is off by default, produces no database records, and sink failures preserve the authorized response. Full/compact mode selection, guards and returned content remain unchanged. [Procedure and limits](OPSDESK_WORKSPACE_COMPATIBILITY.md#optional-workspace-usage-observation).
+
+## Observation local evidence
+
+Windows, Node **22.23.5**, fresh `npm ci`, dedicated synthetic PostgreSQL **18.6** on **55462**, API **3163**, frontend **3162**. Existing ignored configuration and synthetic data were preserved. Observation was enabled only in the local preview process. Mutating API/load and browser commands run sequentially.
+
+| Check | Verified result |
+| --- | --- |
+| Install and preview | `npm ci` passed: 1,175 added / 1,179 audited; shared/backend/optimized frontend builds, Prisma generation, migrations, seed preservation and readiness passed. No dependency changes. |
+| Focused observation tests | **16 passed**: absent/false/malformed opt-in, exact compact selection, fixed event schema, timestamp, all five roles, unknown-role scrubbing, private data exclusion, rejected reads and sink failure. |
+| Real HTTP observation | The existing **32-check compatibility suite** produced exactly **19 events: 10 full / 9 compact**, for nine identities. Four unauthenticated/invalid-token workspace probes emitted no successful-response events. All emitted JSON objects had exactly the five expected fields and allowlisted roles. Fixture cleanup passed. |
+| Full `npm run ops:test` | Exited **0**, with **107 backend tests in 11 suites**, 10 load-profile/target, 3 startup and 6 classifier-tooling tests. Core / pagination / directory / compatibility HTTP checks: **143 / 123 / 190 / 32** passed against the observation-enabled API. |
+| Other API regressions | 13 lock checks; 80 membership HTTP; 56 SLA HTTP + 6 concurrency/reconnect; 33 workload; 20 supplier-calendar HTTP plus policy; 52 contract HTTP; 63 rotation HTTP + 54 policy/state assertions passed. Signed customer/supplier replay and scope, 23 synthetic attachment and 40 booking checks passed. |
+| Load-target integration | Three expected scenarios passed, including the deliberately unmet target child. Each measured 200 requests, verified 40 exactly-once writes across 12 identities and restored booking/case/message/conversation counts. |
+| Dependency audit | `npm audit --omit=dev` exited 0 with **zero vulnerabilities**. Install's development-inclusive audit reported 29 advisories (5 low / 24 moderate); no force upgrades were applied. |
+| Changed backend lint | Passed after correcting four initial test-only typing/lint findings. Initial focused tests already passed; the corrected tests passed again. |
+| Chromium browser command | Exited 0: all six workflow scripts, 26 axe states, five reflow widths, five-role keyboard/focus checks and two blind-review-form tests passed. |
+| Firefox browser command | The same complete workflow/accessibility/reflow/keyboard/review-form sequence exited 0, after Chromium finished. |
+| Final event audit | All **156 events** (21 full / 135 compact) across the local API/browser runs had exactly the five expected fields, valid UTC timestamps and allowlisted roles. These include deliberate compatibility tests, not external caller observations. |
+| Independent database cleanup | 30 bookings, 60 cases, 192 messages, 12 conversations; zero compatibility-prefixed case/thread/message/event rows. The opt-in setting was absent from the saved env file. |
+| Static checks | Changed backend ESLint and Prettier, compatibility-guide formatting and Git whitespace checks passed. |
+
+The isolated API, frontend and database were stopped; dedicated ports 3162, 3163 and 55462 had no listeners afterward. This change still requires its own hosted PR checks; the starting main CI above does not establish this branch's result.
+
+Direct `npx.cmd --no -- lint-staged` passed the staged backend ESLint tasks, and commit-message lint passed. The already-verified bundled Git environment lacks Bash for its hook launcher, so only that wrapper is skipped for this commit with `HUSKY=0`; repository hooks remain intact.
+
+## Observation limits and pending acceptance
+
+These are local synthetic events, not external usage evidence. Events describe handler results before serialization/delivery and identify mode/role rather than individual clients. Guard/read failures are excluded; log filtering, sink/process failure or collector gaps can lose events. Zero full events alone is not retirement approval. The owner still needs an inventory, an authorized observation period and collection coverage, consumer migration acceptance, and a retirement/rollback decision. The legacy full response and deliberate redaction/compatibility tests remain.
+
+No production logging or deployed environment was enabled. Performance targets/representative workloads, controlled cold caches, independent human classifier labels/adjudication, observable screen-reader speech, live booking/email, production scanner monitoring, retention and authorized staging recovery remain pending. No live booking provider is selected. Deployment stays paused and merges remain with collaborators.
+
 # Workspace compatibility continuation
 
 12 November 2026. Started from freshly fetched main `527931d27471971405d5aa7b48c9487532b1f34b`. PRs #65–#68 are merged and zero PRs were open at the initial check. The actual jobs/steps for [main run 43187098916](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43187098916) showed success for API, Chromium, Firefox, synthetic recovery and dependency audit; the run's head SHA matches that checkpoint. Earlier open-PR states below are historical.

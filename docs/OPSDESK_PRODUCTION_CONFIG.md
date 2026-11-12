@@ -1,5 +1,11 @@
 # Production startup checks
 
+Optional workspace observation is disabled by default. Exact
+`OPSDESK_WORKSPACE_OBSERVATION=true` emits fixed response-mode/role events after
+successful authorized workspace reads. It does not change startup validation,
+identify callers or establish a retention policy. No deployed
+environment was changed. See [setup and collection limits](OPSDESK_WORKSPACE_COMPATIBILITY.md#optional-workspace-usage-observation).
+
 Run the backend with `NODE_ENV=production` in a real production deployment. The ConfigModule validator checks the loaded environment before database/Redis providers are initialized. Missing NODE_ENV continues to mean development; do not depend on deployment infrastructure to infer this value.
 
 Production startup rejects:

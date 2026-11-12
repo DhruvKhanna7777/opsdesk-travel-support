@@ -1,5 +1,13 @@
 # OpsDesk developer handoff
 
+## Workspace usage observation continuation
+
+Starting main `169d4be` includes merged PR #69, with zero open PRs at this increment's initial check. [Post-merge CI 43222335689](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43222335689) passed API, Chromium, Firefox, synthetic recovery, load/startup and audit. Earlier statements that #69 is open are historical.
+
+No existing access-log format or external caller inventory is available, as confirmed by the owner. This follow-up adds off-by-default `OPSDESK_WORKSPACE_OBSERVATION=true` logging of successful workspace handler results, using only version, timestamp, response mode and allowlisted role metadata. No identities, request fields or response content are logged by the hook. Logging failure preserves the authorized response. [Local setup, collection limits and retirement requirements](OPSDESK_WORKSPACE_COMPATIBILITY.md#optional-workspace-usage-observation) · [Validation](OPSDESK_VALIDATION.md#workspace-usage-observation).
+
+The full response, compact metadata, authorization and redaction remain supported. External compatibility is unconfirmed; retain the full response pending owner inventory and approved observation/migration evidence. No production observation or retention acceptance is claimed. All other human, live integration, performance and recovery acceptance gates remain pending. Deployment stays paused; leave merging to collaborators.
+
 ## Workspace compatibility continuation
 
 [PR #69](https://github.com/DhruvKhanna7777/opsdesk-travel-support/pull/69) is open. Its application commit `4e736a1` passed [hosted validation 43220571787](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43220571787), including actual successful API, Chromium, Firefox, synthetic recovery, load/startup and dependency-audit steps. Local builds, full API and both browser commands passed sequentially on Node 22.23.5; fixtures were independently checked and local services stopped. This evidence-recording follow-up changes documentation only; check the final head CI before merging.
@@ -419,6 +427,7 @@ The browser requests compact workspace metadata and filtered inbox rows from Pos
 | `NODE_ENV` | Backend development for local counter mode; optimized Next preview runs its production build |
 | `OPSDESK_LOCAL_COUNTERS` | `true` enables local PostgreSQL counters; explicitly rejected in production |
 | `OPSDESK_DEMO` | `true` enables the synthetic workspace's effective demo clock |
+| `OPSDESK_WORKSPACE_OBSERVATION` | Off by default; exact `true` logs fixed workspace response-mode/role events. Collection is best effort and does not identify callers. |
 | `REDIS_URL` | Production/session/rate-limit Redis when local counters are disabled |
 | `GEMINI_API_KEY` | Optional inherited AI feature; not required or connected in OpsDesk |
 | `TURNSTILE_SECRET_KEY` | Generated local test value for inherited registration; production requires real captcha configuration |
