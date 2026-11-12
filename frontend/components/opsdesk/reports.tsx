@@ -137,13 +137,21 @@ function BookingHistory({
   id,
   data,
   onSelect,
+  open,
+  onToggle,
 }: {
   id: string;
   data: Workspace;
   onSelect: (id: string) => void;
+  open: boolean;
+  onToggle: () => void;
 }) {
-  const [open, setOpen] = useState(false);
-  const history = useOpsPage<{ id: string; reference: string }>(
+  const history = useOpsPage<{
+    id: string;
+    reference: string;
+    title: string;
+    status: string;
+  }>(
     open ? `bookings/${id}/tickets` : null,
     data.now,
   );
@@ -153,13 +161,13 @@ function BookingHistory({
         type="button"
         className="od-text-button"
         aria-expanded={open}
-        onClick={() => setOpen(!open)}
+        onClick={onToggle}
       >
         {open ? "Hide case history" : "View case history"}
       </button>
       {open && (
         <>
-          <PageControls resource={history} label="booking cases" />
+          <PageControls resource={history} label="booking cases" singularLabel="booking case" />
           {history.data?.total === 0 && <p>No cases for this booking.</p>}
           {history.data?.items.map((t) => (
             <button
@@ -167,7 +175,7 @@ function BookingHistory({
               key={t.id}
               onClick={() => onSelect(t.id)}
             >
-              {t.reference}
+              {t.reference} · {t.title} · {human(t.status)}
               <ArrowUpRight size={12} />
             </button>
           ))}
@@ -181,11 +189,15 @@ export function Bookings({
   search,
   setSearch,
   onSelect,
+  expandedHistory,
+  onToggleHistory,
 }: {
   data: Workspace;
   search: string;
   setSearch: (s: string) => void;
   onSelect: (s: string) => void;
+  expandedHistory: ReadonlySet<string>;
+  onToggleHistory: (id: string) => void;
 }) {
   const bookings = useOpsPage<Booking>(
     `bookings?search=${encodeURIComponent(search)}`,
@@ -243,7 +255,13 @@ export function Bookings({
                   <dd>{booking.supplier.name}</dd>
                 </div>
               </dl>
-              <BookingHistory id={booking.id} data={data} onSelect={onSelect} />
+              <BookingHistory
+                id={booking.id}
+                data={data}
+                onSelect={onSelect}
+                open={expandedHistory.has(booking.id)}
+                onToggle={() => onToggleHistory(booking.id)}
+              />
             </li>
           ))}
         </ul>
@@ -288,6 +306,8 @@ export function Bookings({
                         id={b.id}
                         data={data}
                         onSelect={onSelect}
+                        open={expandedHistory.has(b.id)}
+                        onToggle={() => onToggleHistory(b.id)}
                       />
                     </td>
                   </tr>

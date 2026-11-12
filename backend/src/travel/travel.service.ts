@@ -431,13 +431,15 @@ export class TravelService implements OnApplicationBootstrap, OnModuleDestroy {
       relatedIds: [],
       summary: [
         relatedCount
-          ? `${relatedCount} earlier or related cases for this booking.`
+          ? `${relatedCount} earlier or related case${relatedCount === 1 ? '' : 's'} for this booking.`
           : 'No other linked cases in your authorized history.',
         booking
           ? `Booking ${booking.reference}: ${booking.destination}.`
           : 'Booking reference needs verification.',
         ...(STAFF.includes(p.kind)
-          ? [`${pending} supplier conversation(s) awaiting a reply.`]
+          ? [
+              `${pending} supplier conversation${pending === 1 ? '' : 's'} awaiting a reply.`,
+            ]
           : []),
       ].join(' '),
     };
@@ -1214,6 +1216,8 @@ export class TravelService implements OnApplicationBootstrap, OnModuleDestroy {
           'Suppliers reply only to shared conversations.',
         );
       const staff = STAFF.includes(p.kind);
+      if (dto.priority && !staff)
+        throw new ForbiddenException('Only staff can set intake priority.');
       const agencyId = staff ? dto.agencyId : p.agencyId;
       if (!agencyId) throw new BadRequestException('Select the agency.');
       const customerId = p.kind === 'CUSTOMER' ? userId : dto.customerId;
@@ -1275,6 +1279,21 @@ export class TravelService implements OnApplicationBootstrap, OnModuleDestroy {
         booking,
         now,
       );
+      const travelPriority = urgency(
+        category,
+        deadline,
+        booking?.checkInAt,
+        now,
+        responseDeadline,
+        booking?.cancellationCutoffAt,
+      )?.priority;
+      const priority =
+        PRIORITIES[
+          Math.max(
+            PRIORITIES.indexOf(travelPriority ?? ''),
+            PRIORITIES.indexOf(dto.priority ?? ''),
+          )
+        ] ?? 'MEDIUM';
       const ticket = await tx.travelTicket.create({
         data: {
           reference: `OPS-${randomUUID().slice(0, 8).toUpperCase()}`,
@@ -1293,9 +1312,7 @@ export class TravelService implements OnApplicationBootstrap, OnModuleDestroy {
             JSON.stringify(slaSnapshot),
           ) as Prisma.InputJsonValue,
           agentId: agent?.userId,
-          priority:
-            urgency(category, deadline, booking?.checkInAt, now)?.priority ||
-            'MEDIUM',
+          priority,
           createdAt: now,
           updatedAt: now,
         },
@@ -2733,6 +2750,10 @@ export class TravelService implements OnApplicationBootstrap, OnModuleDestroy {
     let checked = 0;
     for (;;) {
       const selectionTime = await this.now();
+      const upcoming = {
+        gt: selectionTime,
+        lte: new Date(+selectionTime + CHECK_IN_HIGH_HOURS * 3600000),
+      };
       const candidates = await this.db.travelTicket.findMany({
         where: {
           status: { notIn: ['RESOLVED', 'CLOSED'] },
@@ -2744,16 +2765,12 @@ export class TravelService implements OnApplicationBootstrap, OnModuleDestroy {
               },
             },
             { deadline: { lte: selectionTime } },
+            { category: 'CANCELLATION', deadline: upcoming },
             {
               category: { not: 'REFUND' },
               booking: {
                 is: {
-                  checkInAt: {
-                    gt: selectionTime,
-                    lte: new Date(
-                      +selectionTime + CHECK_IN_HIGH_HOURS * 3600000,
-                    ),
-                  },
+                  checkInAt: upcoming,
                 },
               },
             },
@@ -2779,7 +2796,9 @@ export class TravelService implements OnApplicationBootstrap, OnModuleDestroy {
           const t = await tx.travelTicket.findUnique({
             where: { id: candidate.id },
             include: {
-              booking: { select: { checkInAt: true } },
+              booking: {
+                select: { checkInAt: true, cancellationCutoffAt: true },
+              },
               conversations: {
                 where: { status: 'AWAITING_REPLY', dueAt: { lte: now } },
                 select: { id: true, dueAt: true, subject: true },
@@ -2796,6 +2815,7 @@ export class TravelService implements OnApplicationBootstrap, OnModuleDestroy {
             t.slaPausedAt
               ? new Date('9999-01-01T00:00:00Z')
               : t.responseDeadline,
+            t.booking?.cancellationCutoffAt,
           );
           await this.refreshEscalationOwner(tx, t, now);
           if (!rule && t.conversations.length === 0) return;

@@ -62,9 +62,11 @@ export function useOpsPage<T>(path: string | null, refreshKey: string) {
 export function PageControls<T>({
   resource,
   label,
+  singularLabel,
 }: {
   resource: ReturnType<typeof useOpsPage<T>>;
   label: string;
+  singularLabel?: string;
 }) {
   if (resource.error)
     return (
@@ -80,7 +82,7 @@ export function PageControls<T>({
   return (
     <nav className="od-flex od-space od-pagination" aria-label={`${label} pagination`}>
       <span>
-        {total} {label} · Page {page} of {totalPages}
+        {total} {total === 1 ? singularLabel ?? label : label} · Page {page} of {totalPages}
       </span>
       {totalPages > 1 && (
         <>

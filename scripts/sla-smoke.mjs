@@ -464,6 +464,45 @@ try {
     before,
   );
   concurrency++;
+  await db.travelAgency.update({
+    where: { id: agency },
+    data: { responseTargetHours: 24 },
+  });
+  await db.travelBooking.update({
+    where: { id: booking.id },
+    data: {
+      checkInAt: new Date("2026-01-16T18:00:00Z"),
+      cancellationCutoffAt: new Date("2026-01-15T04:00:00Z"),
+    },
+  });
+  await setTime("2026-01-14T18:00:00Z");
+  const cancellation = await create(manager, "CANCELLATION", booking.reference);
+  const cancellationPath = `/ops/tickets/${cancellation.id}`;
+  assert.equal(cancellation.priority, "HIGH");
+  assert.equal(cancellation.deadline, "2026-01-15T04:00:00.000Z");
+
+  await setTime("2026-01-14T22:15:00Z");
+  await Promise.all([service.sweep(), peer.sweep()]);
+  assert.equal((await call(cancellationPath, manager)).priority, "URGENT");
+  const cancellationEvents = await call(`${cancellationPath}/events`, manager);
+  assert.equal(
+    cancellationEvents.items.filter(
+      ({ text }) => text === "Cancellation cutoff is within 6 hours",
+    ).length,
+    1,
+  );
+  const { alertId } = await call(
+    `${cancellationPath}/escalate-to-em`,
+    manager,
+    { requestId: randomUUID(), reason: "Review before cancellation cutoff" },
+    201,
+    "POST",
+  );
+  const emQueue = `/ops/queue?attention=1&em=1&search=${cancellation.reference}`;
+  assert.deepEqual((await call(emQueue, manager)).ids, [cancellation.id]);
+  await call(`${cancellationPath}/alerts/${alertId}/acknowledge`, manager, {}, 201, "POST");
+  assert.equal((await call(emQueue, manager)).total, 0);
+
   console.log(
     `PASS: ${checks} SLA HTTP checks and ${concurrency} concurrency/reconnect checks; calendars, scopes, snapshot, pause, shifts, travel urgency and ownership.`,
   );

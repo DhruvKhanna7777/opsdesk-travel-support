@@ -33,6 +33,7 @@ export class NewTravelTicketDto {
   @IsOptional() @IsString() agencyId?: string;
   @IsOptional() @IsString() customerId?: string;
   @IsOptional() @IsIn(CATEGORIES) category?: string;
+  @IsOptional() @IsIn(PRIORITIES) priority?: string;
 }
 export class UpdateTravelTicketDto {
   @IsOptional() @IsString() @MaxLength(60) bookingReference?: string;

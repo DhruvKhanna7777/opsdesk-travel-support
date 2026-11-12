@@ -19,49 +19,7 @@ export const STATUSES = [
 export const PRIORITIES = ['LOW', 'MEDIUM', 'HIGH', 'URGENT'];
 export const active = (status: string) =>
   !['RESOLVED', 'CLOSED'].includes(status);
-export function classify(text: string): string {
-  const complaint = text
-    .toLowerCase()
-    .replaceAll('’', "'")
-    .replace(
-      /\b(?:do not|don't)\s+(?:(?:want|need)\s+(?:(?:a|any|to)\s+)?)?(?:refund\w*|cancel\w*)\b/g,
-      '',
-    );
-  if (
-    /\b(?:refund\w*|money back|reimburs\w*)\b|\b(?:reverse|return|credit back)\b[^.!?;]{0,45}\b(?:charge|payment|paid)\b/.test(
-      complaint,
-    )
-  )
-    return 'REFUND';
-  if (
-    /\bcancel\w*\b|\b(?:void|withdraw)\b[^.!?;]{0,55}\b(?:booking|reservation|ticket)\b/.test(
-      complaint,
-    )
-  )
-    return 'CANCELLATION';
-  if (
-    /\b(?:reschedul\w*|amend\w*)\b|\b(?:move|change|correct)\b[^.!?;]{0,55}\b(?:booking|reservation|arrival|check[ -]?in|dates?|ticket|name|time)\b/.test(
-      complaint,
-    ) ||
-    /\b(?:move|change)\s+(?:(?:my|our|the|this|return|outbound|inbound)\s+){0,4}(?:flight|trip|seat|train)\b/.test(
-      complaint,
-    )
-  )
-    return 'BOOKING_CHANGE';
-  if (
-    /\b(?:baggage|luggage|suitcases?|carry[ -]?ons?|checked bags?)\b/.test(
-      complaint,
-    )
-  )
-    return 'BAGGAGE';
-  if (
-    /\b(?:check[ -]?in|voucher)\b|\b(?:reception|front desk)\b[^.!?;]{0,70}\b(?:can't find|cannot find|can't locate|cannot locate|can't see|doesn't recognize)\b/.test(
-      complaint,
-    )
-  )
-    return 'CHECK_IN';
-  return 'OTHER';
-}
+export { classifyTravelIntent as classify } from '@helpdesk/shared';
 export const RESPONSE_WINDOW_MS = 24 * 3600000;
 export const CHECK_IN_HIGH_HOURS = 24;
 
@@ -95,6 +53,7 @@ export function urgency(
   checkInAt: Date | undefined,
   now: Date,
   responseDeadline?: Date | null,
+  cancellationCutoffAt?: Date | null,
 ) {
   if (deadline <= now)
     return {
@@ -104,12 +63,19 @@ export function urgency(
           ? 'Travel deadline breached'
           : 'Response deadline breached',
     };
-  if (category !== 'REFUND' && checkInAt && checkInAt > now) {
-    const hours = (checkInAt.getTime() - now.getTime()) / 3600000;
+  const cutoffControlsDeadline =
+    category === 'CANCELLATION' &&
+    cancellationCutoffAt?.getTime() === deadline.getTime();
+  const upcomingTravelDate = cutoffControlsDeadline
+    ? cancellationCutoffAt
+    : checkInAt;
+  const label = cutoffControlsDeadline ? 'Cancellation cutoff' : 'Check-in';
+  if (category !== 'REFUND' && upcomingTravelDate && upcomingTravelDate > now) {
+    const hours = (+upcomingTravelDate - +now) / 3600000;
     if (hours <= 6)
-      return { priority: 'URGENT', reason: 'Check-in is within 6 hours' };
+      return { priority: 'URGENT', reason: `${label} is within 6 hours` };
     if (hours <= CHECK_IN_HIGH_HOURS)
-      return { priority: 'HIGH', reason: 'Check-in is within 24 hours' };
+      return { priority: 'HIGH', reason: `${label} is within 24 hours` };
   }
   return null;
 }

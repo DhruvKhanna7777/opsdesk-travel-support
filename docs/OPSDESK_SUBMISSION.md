@@ -31,14 +31,14 @@ After extending the readiness window to 60 seconds, a reset local workspace with
 
 ## Demo journeys
 
-The two-iteration finish plan calls for journeys A-E but does not define them. These are the current repository's five demonstrable paths; replace this mapping if a separate acceptance brief defines A-E.
+The TBO Zendesk brief defines journeys A–E. Use the hosted walkthrough to inspect the saved example. Use an isolated synthetic workspace to run the creation, reassignment, and escalation steps below.
 
 | Journey | Show | Observable check |
 | --- | --- | --- |
-| A. Intake and booking context | Manager finds `OPS-1042`, opens its verified booking reference (TBOH), earlier case and saved case brief. | Booking and related case are linked; the brief cites saved records. |
-| B. Supplier coordination | Staff opens the case's separate supplier thread, sends a question, and Aster's supplier account replies. | Supplier sees only shared threads; customer and agency views hide the supplier exchange. |
-| C. Ownership and deadlines | Manager views owner, priority, cancellation cutoff (LCD) and deadline; show routing and the demo clock in a disposable workspace. | Saved deadlines and audit history remain visible after staff actions. |
-| D. EM escalation | Scoped staff uses **Escalate to EM** with a reason. Manager filters **Needs attention** to EM escalations and acknowledges the notification. | Urgent priority, one audit event on retry and an acknowledged alert. |
+| A. Intake and booking context | Create a refund case for `BK-1043` and review the suggested intent before submitting. | The new case shows both earlier cases for the booking and the saved intent. |
+| B. Routing and ownership | Create a case on the isolated seed, then open **Activity** and inspect the routing reason and owner. | The recorded assignment explains regional eligibility and availability. |
+| C. Supplier conversation and transfer | Open a supplier thread, record its recipients, reassign the case as manager, and reopen the thread. | The recipient list stays the same after transfer and the requester cannot see the exchange. |
+| D. EM escalation | On the isolated seed, advance the clock until a cancellation case reaches six hours before its controlling LCD. Open **Activity**, then use **Escalate to EM** with a reason. Manager filters **Needs attention** to EM escalations and acknowledges the notification. | The cutoff raises the case to Urgent before it passes. The EM alert appears in the queue and leaves it after acknowledgment. |
 | E. Insights and export | Filter the queue by intent, open a weekly theme example, then use **Export all**. | Filtered, role-scoped rows extend beyond the visible page. |
 
 The [TBO workflow](OPSDESK_TBO_WORKFLOW.md) and [Iteration 1 workflow](OPSDESK_ITERATION_ONE.md) give the exact role and data boundaries. The browser and HTTP suites automate parts of each path. A hosted browser walkthrough is recorded as written observations and screenshots above; a video remains to be captured.
@@ -47,12 +47,12 @@ The [TBO workflow](OPSDESK_TBO_WORKFLOW.md) and [Iteration 1 workflow](OPSDESK_I
 
 | Time | Narration and action |
 | --- | --- |
-| 0:00-0:35 | Sign in as manager. Explain that the workspace shows synthetic, role-scoped travel cases. Find `OPS-1042`. |
-| 0:35-1:15 | Open the case. Point out TBOH/booking context, saved brief, earlier case and LCD. The brief is generated from records, without an external AI call. |
-| 1:15-2:00 | Open supplier threads. Show the private conversation and explain that recipients are independently editable and survive case transfer. Switch to Aster's supplier login to show the reply scope. |
+| 0:00-0:35 | On the isolated seed, sign in as manager and enter a refund complaint for `BK-1043`. Review the suggested intent and create the case. |
+| 0:35-1:15 | Show TBOH and the two earlier cases. Open **Activity** and show the routing reason and resulting owner. |
+| 1:15-2:00 | Open a seeded supplier thread, show its recipients, reassign the case, then reopen the recipient list and compare it. |
 | 2:00-2:45 | Return as staff. Escalate to EM with a reason; open the manager's EM queue and acknowledge the notification. Point to the activity record and unchanged case owner/deadline. |
 | 2:45-3:30 | Filter by intent, open Insights and a linked weekly theme example, then export all matching cases. Explain agency scope and streamed rows beyond one page. |
-| 3:30-4:10 | Switch to Maya or the agency account. Show that staff notes and supplier threads are absent. Close with the local-only deployment boundary. |
+| 3:30-4:10 | Switch to Maya or the agency account and show the requester-visible conversation. Close by explaining that the hosted demo uses synthetic data and production rollout remains paused. |
 
 Record this on a reset synthetic clone. Do not advance the demo clock on a shared workspace. A screen recording has not been produced in this increment.
 

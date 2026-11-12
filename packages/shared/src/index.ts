@@ -81,3 +81,4 @@ export {
   AI_CHAT_MESSAGE_MAX_LENGTH,
   AI_CHAT_MAX_TRANSCRIPT_MESSAGES,
 } from './ai-chat';
+export { classifyTravelIntent } from './travel-intent';
