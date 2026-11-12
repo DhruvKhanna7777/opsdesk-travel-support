@@ -48,6 +48,7 @@ import { BookingRequests } from "./booking-requests";
 import {
   AgencyResponseSettings,
   Bookings,
+  categories,
   Insights,
   RoutingSettings,
 } from "./reports";
@@ -66,6 +67,8 @@ export function OpsDeskWorkspace() {
     [priority, setPriority] = useState("ALL"),
     [region, setRegion] = useState("ALL"),
     [status, setStatus] = useState("ALL"),
+    [intent, setIntent] = useState("ALL"),
+    [em, setEm] = useState(false),
     [owner, setOwner] = useState("ALL"),
     [deadline, setDeadline] = useState("ALL"),
     [showNew, setShowNew] = useState(false),
@@ -100,6 +103,8 @@ export function OpsDeskWorkspace() {
       priority,
       region,
       status,
+      intent,
+      em: view === "manager" && em ? "1" : "",
       owner,
       deadline,
       attention: view === "manager" ? "1" : "",
@@ -181,6 +186,8 @@ export function OpsDeskWorkspace() {
     setPriority("ALL");
     setRegion("ALL");
     setStatus("ALL");
+    setIntent("ALL");
+    setEm(false);
     setOwner("ALL");
     setDeadline("ALL");
   }
@@ -654,6 +661,18 @@ export function OpsDeskWorkspace() {
                         />
                       </label>
                       <select
+                        aria-label="Filter intent"
+                        value={intent}
+                        onChange={(e) => setIntent(e.target.value)}
+                      >
+                        <option value="ALL">All intents</option>
+                        {categories.map((category) => (
+                          <option value={category} key={category}>
+                            {human(category)}
+                          </option>
+                        ))}
+                      </select>
+                      <select
                         aria-label="Filter priority"
                         value={priority}
                         onChange={(e) => setPriority(e.target.value)}
@@ -693,6 +712,20 @@ export function OpsDeskWorkspace() {
                     </div>
                     {staff && (
                       <div className="od-filters">
+                        {view === "manager" && (
+                          <button
+                            type="button"
+                            className="od-secondary"
+                            aria-pressed={em}
+                            onClick={() => {
+                              setEm((previous) => !previous);
+                              setTab("active");
+                              setStatus("ALL");
+                            }}
+                          >
+                            EM escalations
+                          </button>
+                        )}
                         <select
                           aria-label="Filter status"
                           value={status}
@@ -836,6 +869,8 @@ export function OpsDeskWorkspace() {
                               setPriority("ALL");
                               setRegion("ALL");
                               setStatus("ALL");
+                              setIntent("ALL");
+                              setEm(false);
                               setOwner("ALL");
                               setDeadline("ALL");
                               setSearch("");

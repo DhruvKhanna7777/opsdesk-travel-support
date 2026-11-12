@@ -179,7 +179,7 @@ try {
         if (!result.ok) throw new Error('Could not load scoped bookings');
         return (await result.json()).items.map((booking) => booking.reference);
       });
-      assert.deepEqual(await cards.locator('.od-booking-ref').allTextContents(), expected);
+      assert.deepEqual(await cards.locator('.od-booking-ref').allTextContents(), expected.map((reference) => `TBOH ${reference}`));
       await scan(page, 'customer booking cards');
       await page.getByRole('button', {name: 'Switch to dark theme'}).click();
       await scan(page, 'customer booking cards dark theme');

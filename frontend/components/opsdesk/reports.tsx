@@ -6,7 +6,7 @@ import type { TravelInsights } from "@helpdesk/shared";
 import type { Workspace, Booking, Person } from "@/lib/opsdesk-types";
 import { date, human, request, type Mutation } from "./ui";
 
-const categories = [
+export const categories = [
   "REFUND",
   "CANCELLATION",
   "BOOKING_CHANGE",
@@ -214,7 +214,7 @@ export function Bookings({
                 <BookOpen size={22} aria-hidden="true" />
                 <div>
                   <h2>{booking.destination}</h2>
-                  <span className="od-booking-ref">{booking.reference}</span>
+                  <span className="od-booking-ref">TBOH {booking.reference}</span>
                 </div>
               </div>
               {booking.bookingStatus === "CANCELLED" && (
@@ -252,7 +252,7 @@ export function Bookings({
           <table className="od-table">
             <thead>
               <tr>
-                <th>BOOKING</th>
+                <th>BOOKING REFERENCE (TBOH)</th>
                 <th>TRAVELER</th>
                 <th>AGENCY / SUPPLIER</th>
                 <th>TRAVEL DATE</th>

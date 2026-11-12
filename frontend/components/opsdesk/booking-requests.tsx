@@ -177,7 +177,7 @@ function ReviewPanel({
               <option value="">Select supplier</option>
             </DirectorySelect>
             <label>
-              Booking reference
+              Booking reference (TBOH)
               <input name="reference" required minLength={2} maxLength={80} />
             </label>
             <label>
