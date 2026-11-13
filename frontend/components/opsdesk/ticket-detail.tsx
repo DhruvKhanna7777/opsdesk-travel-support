@@ -119,18 +119,18 @@ function BookingSchedule({
   );
 }
 function IntakeContract({
-  agencyId,
+  path,
+  result,
   refresh,
   value,
   onSelect,
 }: {
-  agencyId: string;
+  path: string;
+  result: ReturnType<typeof useOpsResource<{ selectionRequired: boolean }>>;
   refresh: string;
   value: string;
   onSelect: (id: string) => void;
 }) {
-  const path = `contracts?agencyId=${encodeURIComponent(agencyId)}`;
-  const result = useOpsResource<{ selectionRequired: boolean }>(path, refresh);
   if (result.error)
     return (
       <p role="alert">
@@ -223,6 +223,17 @@ export function NewTicket({
   const [booking, setBooking] = useState<Booking>();
   const agencyIntake = data.me.kind === "AGENCY";
   const allowUnlistedBooking = agencyIntake || data.me.kind === "CUSTOMER";
+  const agencyId = booking?.agencyId || data.me.agencyId;
+  const contractPath = agencyId
+    ? `contracts?agencyId=${encodeURIComponent(agencyId)}`
+    : null;
+  const contractPolicy = useOpsResource<{ selectionRequired: boolean }>(
+    contractPath,
+    data.now,
+  );
+  const contractPending = Boolean(contractPath && (
+    !contractPolicy.data || (contractPolicy.data.selectionRequired && !contractId)
+  ));
   const suggestedIntent =
     title.trim() || description.trim()
       ? classifyTravelIntent(`${title} ${description}`)
@@ -235,7 +246,7 @@ export function NewTicket({
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          if (saving.current || busy) return;
+          if (saving.current || busy || contractPending) return;
           setError("");
           if (agencyIntake && !booking && !customerId) {
             setError("Select the traveler in your agency.");
@@ -324,10 +335,11 @@ export function NewTicket({
             <small>Support will review references we can’t match.</small>
           </label>
         )}
-        {(booking?.agencyId || data.me.agencyId) && (
+        {contractPath && (
           <IntakeContract
-            key={booking?.agencyId || data.me.agencyId}
-            agencyId={(booking?.agencyId || data.me.agencyId)!}
+            key={contractPath}
+            path={contractPath}
+            result={contractPolicy}
             refresh={data.now}
             value={contractId}
             onSelect={setContractId}
@@ -427,7 +439,7 @@ export function NewTicket({
           <button type="button" className="od-secondary" onClick={close} disabled={busy}>
             Cancel
           </button>
-          <button className="od-primary" disabled={busy}>
+          <button className="od-primary" disabled={busy || contractPending}>
             {busy ? "Saving…" : "Create & route ticket"}
           </button>
         </div>
