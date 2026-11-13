@@ -2,7 +2,7 @@
 import { DirectorySelect } from "./directory-select";
 import { Attachments } from "./attachments";
 import { TicketSlaControls } from "./sla-settings";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useOpsResource, useOpsPage, PageControls } from "./paged-data";
 import { classifyTravelIntent, TRAVEL_THEMES } from "@helpdesk/shared";
 import { categories } from "./reports";
@@ -174,6 +174,7 @@ export function NewTicket({
   onClose: () => void;
   onCreate: (body: unknown) => Promise<void>;
 }) {
+  const requestId = useRef<string | null>(null);
   const [title, setTitle] = useState(""),
     [description, setDescription] = useState(""),
     [category, setCategory] = useState(""),
@@ -224,7 +225,9 @@ export function NewTicket({
             setError("Select the traveler in your agency.");
             return;
           }
+          requestId.current ??= crypto.randomUUID();
           void onCreate({
+            requestId: requestId.current,
             title,
             description,
             category: category || undefined,

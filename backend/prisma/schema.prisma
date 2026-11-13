@@ -227,10 +227,21 @@ model TravelTicket {
   events TravelEvent[]
   inboundMail TravelInboundMail[]
   themes TravelTicketTheme[]
+  intake TravelTicketIntake?
   @@index([agencyId, customerId])
   @@index([status, deadline])
   @@index([autoHandoff, status, id])
   @@index([bookingId, createdAt, id])
+}
+
+model TravelTicketIntake {
+  submitterId String
+  requestId String @db.Uuid
+  fingerprint String
+  ticketId String @unique
+  ticket TravelTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  @@id([submitterId, requestId])
 }
 
 model TravelConversation {

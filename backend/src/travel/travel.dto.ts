@@ -26,6 +26,7 @@ export class EscalateToEmDto {
   reason: string;
 }
 export class NewTravelTicketDto {
+  @IsOptional() @IsUUID('4') requestId?: string;
   @IsOptional() @IsString() @MinLength(1) @MaxLength(100) contractId?: string;
   @IsString() @MinLength(5) @MaxLength(180) title: string;
   @IsString() @MinLength(10) @MaxLength(10000) description: string;
