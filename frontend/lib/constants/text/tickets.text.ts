@@ -59,10 +59,8 @@ export const TICKET_PAGINATION_TEXT = {
 
 export const TICKET_SORT_CONTROLS_TEXT = {
   SORT_LABEL: "Sort",
-  SORT_ASCENDING_ARIA: "Sort ascending",
-  SORT_DESCENDING_ARIA: "Sort descending",
-  ASC: "Asc",
-  DESC: "Desc",
+  ASC: "Ascending",
+  DESC: "Descending",
   FIELD_LABELS: {
     createdAt: "Created",
     updatedAt: "Updated",

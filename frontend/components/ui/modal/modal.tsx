@@ -62,7 +62,7 @@ export function Modal({ open, onClose, title, children, preventClose }: ModalPro
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div
         aria-hidden="true"
-        className="absolute inset-0 bg-bg/80"
+        className="absolute inset-0 bg-action/55"
         onClick={preventClose ? undefined : onClose}
       />
       <div
@@ -71,7 +71,7 @@ export function Modal({ open, onClose, title, children, preventClose }: ModalPro
         aria-modal="true"
         aria-labelledby="modal-title"
         className={cn(
-          "relative w-full max-w-md rounded-lg border border-border bg-surface-raised p-6 shadow-xl",
+          "relative w-full max-w-md max-h-[90svh] overflow-y-auto rounded-3xl border border-border bg-surface p-6 shadow-xl",
         )}
       >
         <h2 id="modal-title" className="text-lg font-semibold text-text">

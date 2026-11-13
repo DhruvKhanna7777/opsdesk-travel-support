@@ -1,5 +1,6 @@
+import { SupportPage } from "@/components/layout/support-page";
 import { Suspense } from "react";
-import Link from "next/link";
+import { Skiper40Link } from "@/components/ui/skiper40-link";
 import type { Metadata } from "next";
 import { Card } from "@/components/ui/card";
 import { RegisterForm } from "./_components/register-form";
@@ -12,26 +13,28 @@ export const metadata: Metadata = {
 
 export default function RegisterPage() {
   return (
-    <div className="mx-auto flex max-w-sm flex-col gap-6 py-10">
-      <div>
-        <h1 className="text-2xl font-semibold text-text">{REGISTER_TEXT.HEADING}</h1>
-        <p className="mt-1 text-sm text-text-secondary">
-          {REGISTER_TEXT.SUBHEADING}
+    <SupportPage compact>
+      <div className="flex flex-col gap-6">
+        <div>
+          <h1 className="text-2xl font-semibold text-text">{REGISTER_TEXT.HEADING}</h1>
+          <p className="mt-1 text-sm text-text-secondary">
+            {REGISTER_TEXT.SUBHEADING}
+          </p>
+        </div>
+
+        <Card>
+          <Suspense fallback={null}>
+            <RegisterForm />
+          </Suspense>
+        </Card>
+
+        <p className="text-center text-sm text-text-secondary">
+          {REGISTER_TEXT.HAVE_ACCOUNT_PROMPT}{" "}
+          <Skiper40Link href={ROUTES.LOGIN} className="font-semibold text-text">
+            {REGISTER_TEXT.LOG_IN_LINK}
+          </Skiper40Link>
         </p>
       </div>
-
-      <Card>
-        <Suspense fallback={null}>
-          <RegisterForm />
-        </Suspense>
-      </Card>
-
-      <p className="text-center text-sm text-text-secondary">
-        {REGISTER_TEXT.HAVE_ACCOUNT_PROMPT}{" "}
-        <Link href={ROUTES.LOGIN} className="text-accent-done hover:underline">
-          {REGISTER_TEXT.LOG_IN_LINK}
-        </Link>
-      </p>
-    </div>
+    </SupportPage>
   );
 }
