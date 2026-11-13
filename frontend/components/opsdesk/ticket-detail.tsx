@@ -59,14 +59,6 @@ function BookingSchedule({
   busy: boolean;
   mutate: Mutation;
 }) {
-  const localTime = (value: string) =>
-    new Date(value).toLocaleString("en-GB", {
-      timeZone: booking.timezone,
-      day: "numeric",
-      month: "short",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
   return (
     <>
       {scheduleFields.map(([field, label]) => {
@@ -76,7 +68,7 @@ function BookingSchedule({
             <CalendarDays size={15} />
             <span>
               {label}
-              <b>{value ? localTime(value) : "Not recorded"}</b>
+              <b>{value ? date(value, booking.timezone) : "Not recorded"}</b>
               {value && <small>{booking.timezone}</small>}
             </span>
           </div>

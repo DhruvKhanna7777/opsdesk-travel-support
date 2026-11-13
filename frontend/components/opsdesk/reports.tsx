@@ -241,9 +241,9 @@ export function Bookings({
                   <dt>Check-in</dt>
                   <dd>
                     <time dateTime={booking.checkInAt}>
-                      {date(booking.checkInAt)}
+                      {date(booking.checkInAt, booking.timezone)}
                     </time>{" "}
-                    (your local time)
+                    ({booking.timezone})
                   </dd>
                 </div>
                 <div>
@@ -298,7 +298,7 @@ export function Bookings({
                       <small>{b.supplier.name}</small>
                     </td>
                     <td>
-                      {date(b.checkInAt)}
+                      {date(b.checkInAt, b.timezone)}
                       <small>{b.timezone}</small>
                     </td>
                     <td>

@@ -239,7 +239,7 @@ function ReviewPanel({
               <p>
                 Cancellation cutoff (LCD){" "}
                 {booking.cancellationCutoffAt
-                  ? `${date(booking.cancellationCutoffAt)} (your local time)`
+                  ? `${date(booking.cancellationCutoffAt, booking.timezone)} (${booking.timezone})`
                   : "not recorded"}
               </p>
             )}
@@ -276,7 +276,7 @@ function ReviewPanel({
           {p.kind === "CREATE" && (
             <p>
               {p.payload.destination} · {p.payload.service} ·{" "}
-              {p.payload.checkInAt} · {p.payload.timezone}
+              {date(p.payload.checkInAt, p.payload.timezone)} · {p.payload.timezone}
             </p>
           )}
           {manager && p.status === "PENDING" ? (
