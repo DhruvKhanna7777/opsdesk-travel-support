@@ -451,3 +451,6 @@ try {
     await pool.end();
   }
 }
+
+// Verify native navigation after the mutating workflow fixtures are cleaned.
+await import("./case-history-browser.mjs");
