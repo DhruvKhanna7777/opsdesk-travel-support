@@ -106,3 +106,6 @@ try {
     await pool.end();
   }
 }
+
+// Check lost-response handling after this suite's agency fixtures are cleaned.
+await import("./ticket-intake-retry-browser.mjs");

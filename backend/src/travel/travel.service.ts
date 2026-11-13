@@ -15,6 +15,7 @@ import { CalendarPolicyDto, SlaPauseDto, EscalationOwnerDto } from './sla.dto';
 import { TravelDirectoryDto } from './travel-directory.dto';
 import {
   BadRequestException,
+  ConflictException,
   ForbiddenException,
   Injectable,
   Logger,
@@ -22,7 +23,7 @@ import {
   OnApplicationBootstrap,
   OnModuleDestroy,
 } from '@nestjs/common';
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { PrismaService } from '../../prisma/prisma.service';
 import { TravelMailService } from './travel-mail.service';
 import { supplierRepliesEnabled } from './resend-mail-reply';
@@ -1223,12 +1224,45 @@ export class TravelService implements OnApplicationBootstrap, OnModuleDestroy {
       const customerId = p.kind === 'CUSTOMER' ? userId : dto.customerId;
       if (!customerId)
         throw new BadRequestException('Select the customer booking.');
+      const reference = dto.bookingReference?.trim().toUpperCase();
+      const fingerprint = createHash('sha256')
+        .update(
+          JSON.stringify({
+            title: dto.title.trim(),
+            description: dto.description.trim(),
+            agencyId,
+            customerId,
+            bookingReference: reference || null,
+            category: dto.category ?? null,
+            priority: dto.priority ?? null,
+            contractId: dto.contractId ?? null,
+          }),
+        )
+        .digest('hex');
+      if (dto.requestId) {
+        const existing = await tx.travelTicketIntake.findUnique({
+          where: {
+            submitterId_requestId: {
+              submitterId: userId,
+              requestId: dto.requestId,
+            },
+          },
+        });
+        if (existing) {
+          // Recheck today's access before exposing or replaying a saved case.
+          const saved = await this.ticket(p, existing.ticketId, tx);
+          if (existing.fingerprint !== fingerprint)
+            throw new ConflictException(
+              `This submission was already saved as ${saved.reference} with different details. Retry the original submission to view it, or start a new ticket.`,
+            );
+          return saved;
+        }
+      }
       const customer = await tx.travelProfile.findFirst({
         where: { userId: customerId, kind: 'CUSTOMER', agencyId },
       });
       if (!customer)
         throw new BadRequestException('Customer is not part of this agency.');
-      const reference = dto.bookingReference?.trim().toUpperCase();
       const booking = reference
         ? await tx.travelBooking.findFirst({
             where: {
@@ -1317,6 +1351,15 @@ export class TravelService implements OnApplicationBootstrap, OnModuleDestroy {
           updatedAt: now,
         },
       });
+      if (dto.requestId)
+        await tx.travelTicketIntake.create({
+          data: {
+            submitterId: userId,
+            requestId: dto.requestId,
+            fingerprint,
+            ticketId: ticket.id,
+          },
+        });
       await tx.travelMessage.create({
         data: {
           ticketId: ticket.id,
