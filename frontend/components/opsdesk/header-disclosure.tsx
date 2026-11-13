@@ -4,13 +4,11 @@ import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 
 export function HeaderDisclosure({
   className,
-  label,
   trigger,
   triggerClassName,
   children,
 }: {
   className: string;
-  label: string;
   trigger: ReactNode;
   triggerClassName: string;
   children: ReactNode;
@@ -54,7 +52,6 @@ export function HeaderDisclosure({
         type="button"
         className={triggerClassName}
         ref={button}
-        aria-label={label}
         aria-expanded={open}
         aria-controls={panelId}
         onClick={() => setOpen(!open)}

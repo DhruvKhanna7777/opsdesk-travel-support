@@ -33,7 +33,7 @@ async function checkHeaderDisclosures(page) {
   await page.getByRole('heading', {name: 'Booking directory', exact: true}).waitFor();
   assert.equal(await workspace.getAttribute('aria-expanded'), 'false');
 
-  const profile = page.getByRole('button', {name: /^Profile for /});
+  const profile = page.getByRole('button', {name: /Profile for /});
   await profile.click();
   const panel = page.locator('.od-profile-picker .od-header-disclosure-panel');
   await panel.getByText('Manager workspace', {exact: true}).waitFor();

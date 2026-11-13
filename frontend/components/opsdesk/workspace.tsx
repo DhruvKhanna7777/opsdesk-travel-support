@@ -273,7 +273,6 @@ export function OpsDeskWorkspace() {
         </Skiper40Link>
         <HeaderDisclosure
           className="od-workspace-picker"
-          label={`Travel operations ${human(data.me.kind)} workspace`}
           triggerClassName="od-workspace-switch"
           trigger={
             <>
@@ -469,9 +468,13 @@ export function OpsDeskWorkspace() {
             </div>
             <HeaderDisclosure
               className="od-profile-picker"
-              label={`Profile for ${data.me.name} (${initials(data.me.name)})`}
               triggerClassName="od-avatar small od-profile-trigger"
-              trigger={initials(data.me.name)}
+              trigger={
+                <>
+                  {initials(data.me.name)}
+                  <span className="sr-only"> Profile for {data.me.name}</span>
+                </>
+              }
             >
               <div className="od-profile-identity">
                 <b>{data.me.name}</b>
