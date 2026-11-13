@@ -1372,6 +1372,7 @@ export class TravelService implements OnApplicationBootstrap, OnModuleDestroy {
       )
         throw new ForbiddenException('Support team action required.');
       const data: Prisma.TravelTicketUncheckedUpdateInput = { updatedAt: now };
+      let regionChanged = false;
       let booking = t.bookingId
         ? await tx.travelBooking.findUnique({ where: { id: t.bookingId } })
         : null;
@@ -1381,7 +1382,11 @@ export class TravelService implements OnApplicationBootstrap, OnModuleDestroy {
             reference: dto.bookingReference.trim().toUpperCase(),
             agencyId: t.agencyId,
             customerId: t.customerId,
-            region: t.region,
+            // A provisional region must not prevent a manager from verifying
+            // an unlinked case. Existing links and regional agents stay scoped.
+            ...(p.kind === 'MANAGER' && !t.bookingId
+              ? {}
+              : { region: t.region }),
           },
         });
         if (!booking)
@@ -1389,6 +1394,67 @@ export class TravelService implements OnApplicationBootstrap, OnModuleDestroy {
             'No accessible booking matches this customer and region.',
           );
         data.bookingId = booking.id;
+        if (booking.region !== t.region) {
+          regionChanged = true;
+          data.region = booking.region;
+          await this.event(
+            tx,
+            id,
+            'REGION_CHANGED',
+            `Region ${t.region} -> ${booking.region} after verifying booking ${booking.reference}.`,
+            userId,
+            now,
+          );
+          if (dto.agentId === undefined) {
+            const agents = (
+              await tx.travelProfile.findMany({
+                where: { kind: 'AGENT' },
+              })
+            ).filter((a) => isOnDuty(this.calendar(a.shiftCalendar), now));
+            const current = agents.find((a) => a.userId === t.agentId);
+            // A covered global owner can retain the case. Capacity limits new
+            // assignments, rather than evicting an already eligible owner.
+            const retained =
+              current &&
+              chooseAgent(
+                [{ ...current, maxActiveCases: null }],
+                booking.region,
+                {},
+                t.category,
+              );
+            let nextOwner: string | null = null;
+            if (active(dto.status ?? t.status)) {
+              if (retained) nextOwner = retained.userId;
+              else {
+                const counts = await tx.travelTicket.groupBy({
+                  by: ['agentId'],
+                  where: {
+                    id: { not: id },
+                    agentId: { not: null },
+                    status: { notIn: ['CLOSED', 'RESOLVED'] },
+                  },
+                  _count: { _all: true },
+                });
+                const loads: Record<string, number> = {};
+                for (const row of counts)
+                  if (row.agentId) loads[row.agentId] = row._count._all;
+                nextOwner =
+                  chooseAgent(agents, booking.region, loads, t.category)
+                    ?.userId ?? null;
+              }
+            }
+            data.agentId = nextOwner;
+            if (nextOwner !== t.agentId)
+              await this.event(
+                tx,
+                id,
+                'ASSIGNED',
+                `Booking verification routed ${t.category} to ${booking.region}; owner ${t.agentId ?? 'unassigned'} -> ${nextOwner ?? 'unassigned'}.`,
+                userId,
+                now,
+              );
+          }
+        }
         data.responseDeadline = t.responseDeadline ?? t.deadline;
         data.deadline = effectiveDeadline(
           t.category,
@@ -1493,7 +1559,10 @@ export class TravelService implements OnApplicationBootstrap, OnModuleDestroy {
           );
         }
       }
-      if (dto.agentId !== undefined && dto.agentId !== t.agentId) {
+      if (
+        dto.agentId !== undefined &&
+        (dto.agentId !== t.agentId || regionChanged)
+      ) {
         if (p.kind !== 'MANAGER' && dto.agentId !== p.userId)
           throw new ForbiddenException(
             'Only a manager can reassign another agent.',
@@ -1510,7 +1579,10 @@ export class TravelService implements OnApplicationBootstrap, OnModuleDestroy {
             agent.status !== 'ACTIVE' ||
             !agent.available ||
             !isOnDuty(this.calendar(agent.shiftCalendar), now) ||
-            ![t.region, 'GLOBAL'].includes(agent.region || ''))
+            ![
+              typeof data.region === 'string' ? data.region : t.region,
+              'GLOBAL',
+            ].includes(agent.region || ''))
         )
           throw new BadRequestException(
             'Choose an available agent in this regional team.',
@@ -1525,7 +1597,12 @@ export class TravelService implements OnApplicationBootstrap, OnModuleDestroy {
           now,
         );
       }
-      return tx.travelTicket.update({ where: { id }, data });
+      const updated = await tx.travelTicket.update({ where: { id }, data });
+      if (regionChanged) {
+        await this.refreshEscalationOwner(tx, updated, now);
+        return tx.travelTicket.findUniqueOrThrow({ where: { id } });
+      }
+      return updated;
     });
   }
   async message(userId: string, id: string, dto: TravelMessageDto) {
