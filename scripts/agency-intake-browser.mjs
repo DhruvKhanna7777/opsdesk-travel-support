@@ -73,13 +73,30 @@ try {
     }
   }
   // The same browser session cannot bypass agency scope by altering the IDs.
-  const denied = await page.context().request.post(new URL("/api/backend/ops/tickets", url).href, {
-    data: { title: "Foreign traveler probe", description: "Must reject cross agency traveler.", customerId: "customer-1", agencyId: "horizon" },
+  // Exercise authorization with the browser's real same-origin cookie handling.
+  // APIRequestContext omits Secure cookies on the HTTP loopback production build.
+  const denied = await page.evaluate(async () => {
+    const response = await fetch("/api/backend/ops/tickets", {
+      method: "POST",
+      credentials: "same-origin",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title: "Foreign traveler probe",
+        description: "Must reject cross agency traveler.",
+        customerId: "customer-1",
+        agencyId: "horizon",
+      }),
+    });
+    return response.status;
   });
-  assert.equal(denied.status(), 400);
-  const foreignDirectory = await page.context().request.get(
-    new URL("/api/backend/ops/booking-requests/customers/horizon", url).href);
-  assert.equal(foreignDirectory.status(), 403);
+  assert.equal(denied, 400);
+  const foreignDirectory = await page.evaluate(async () => {
+    const response = await fetch("/api/backend/ops/booking-requests/customers/horizon", {
+      credentials: "same-origin",
+    });
+    return response.status;
+  });
+  assert.equal(foreignDirectory, 403);
   console.log("PASS: agency unmatched and missing-reference intake, persisted complaint, scoped travelers, booking switch and foreign-traveler denial.");
 } finally {
   await browser?.close();
