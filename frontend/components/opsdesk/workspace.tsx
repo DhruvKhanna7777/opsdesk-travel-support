@@ -80,24 +80,34 @@ export function OpsDeskWorkspace() {
     () => new Set(),
   );
   useEffect(() => {
-    const restoreCase = () => {
-      setSelectedCase(new URL(window.location.href).searchParams.get("case"));
+    const restoreLocation = () => {
+      const params = new URL(window.location.href).searchParams;
+      const nextView = params.get("view");
+      setView(
+        nextView && ["inbox", "bookings", "insights", "manager"].includes(nextView)
+          ? nextView
+          : "inbox",
+      );
+      setSelectedCase(params.get("case"));
     };
     const frame = requestAnimationFrame(() => {
-      restoreCase();
+      restoreLocation();
       if (window.localStorage.getItem("opsdesk-theme") === "dark") setTheme("dark");
     });
-    window.addEventListener("popstate", restoreCase);
+    window.addEventListener("popstate", restoreLocation);
     return () => {
       cancelAnimationFrame(frame);
-      window.removeEventListener("popstate", restoreCase);
+      window.removeEventListener("popstate", restoreLocation);
     };
   }, []);
-  function setSelected(id: string | null) {
+  function setSelected(id: string | null, nextView = view, replace = false) {
     const url = new URL(window.location.href);
     if (id) url.searchParams.set("case", id);
     else url.searchParams.delete("case");
-    window.history.replaceState(null, "", url);
+    if (nextView === "inbox") url.searchParams.delete("view");
+    else url.searchParams.set("view", nextView);
+    if (url.href !== window.location.href)
+      window.history[replace ? "replaceState" : "pushState"](null, "", url);
     setSelectedCase(id);
   }
   const toggleTheme = () => {
@@ -198,7 +208,7 @@ export function OpsDeskWorkspace() {
   const currentPage = queue.data?.page ?? 1;
   function navigate(next: string) {
     setView(next);
-    setSelected(null);
+    setSelected(null, next);
     setSearch("");
     setTab("active");
     setPriority("ALL");
@@ -239,7 +249,7 @@ export function OpsDeskWorkspace() {
   async function logout() {
     await fetch("/api/auth/logout", { method: "POST" });
     setData(null);
-    setSelected(null);
+    setSelected(null, "inbox", true);
     setView("inbox");
     setExpandedHistory(new Set());
   }
