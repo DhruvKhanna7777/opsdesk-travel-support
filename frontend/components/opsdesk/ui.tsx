@@ -70,10 +70,12 @@ export function Modal({
   title,
   children,
   onClose,
+  closeDisabled = false,
 }: {
   title: string;
   children: ReactNode;
   onClose: () => void;
+  closeDisabled?: boolean;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
   const titleId = useId();
@@ -118,7 +120,7 @@ export function Modal({
       }}
       onCancel={(event) => {
         event.preventDefault();
-        onClose();
+        if (!closeDisabled) onClose();
       }}
     >
       <div className="od-modal-head">
@@ -126,7 +128,7 @@ export function Modal({
           <span className="od-eyebrow">OPSDESK WORKSPACE</span>
           <h2 id={titleId}>{title}</h2>
         </div>
-        <button className="od-icon" onClick={onClose} aria-label="Close dialog">
+        <button className="od-icon" onClick={onClose} aria-label="Close dialog" disabled={closeDisabled}>
           <X size={19} />
         </button>
       </div>

@@ -36,12 +36,24 @@ try {
   }
   await fill();
   // Commit the request, then discard its response to simulate a broken network.
+  let releaseResponse;
+  const responseHeld = new Promise((resolve) => { releaseResponse = resolve; });
   await page.route("**/api/backend/ops/tickets", async (route) => {
+    await responseHeld;
     const response = await route.fetch();
     assert.equal(response.status(), 201);
     await route.abort();
   }, { times: 1 });
   await dialog.getByRole("button", { name: "Create & route ticket" }).click();
+  try {
+    await dialog.getByRole("button", { name: "Saving…" }).waitFor();
+    assert(await dialog.getByRole("button", { name: "Close dialog" }).isDisabled());
+    assert(await dialog.getByRole("button", { name: "Cancel", exact: true }).isDisabled());
+    await page.keyboard.press("Escape");
+    assert(await dialog.isVisible());
+  } finally {
+    releaseResponse();
+  }
   await dialog.getByRole("alert").waitFor();
   await dialog.getByLabel("Tell us what happened").fill("Changed details after the original save response was lost.");
   await dialog.getByRole("button", { name: "Create & route ticket" }).click();

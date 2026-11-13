@@ -175,6 +175,7 @@ export function NewTicket({
   onCreate: (body: unknown) => Promise<void>;
 }) {
   const requestId = useRef<string | null>(null);
+  const saving = useRef(false);
   const [title, setTitle] = useState(""),
     [description, setDescription] = useState(""),
     [category, setCategory] = useState(""),
@@ -215,17 +216,22 @@ export function NewTicket({
     title.trim() || description.trim()
       ? classifyTravelIntent(`${title} ${description}`)
       : "";
+  function close() {
+    if (!saving.current) onClose();
+  }
   return (
-    <Modal title="Start a conversation" onClose={onClose}>
+    <Modal title="Start a conversation" onClose={close} closeDisabled={busy}>
       <form
         onSubmit={(e) => {
           e.preventDefault();
+          if (saving.current || busy) return;
           setError("");
           if (agencyIntake && !booking && !customerId) {
             setError("Select the traveler in your agency.");
             return;
           }
           requestId.current ??= crypto.randomUUID();
+          saving.current = true;
           void onCreate({
             requestId: requestId.current,
             title,
@@ -243,7 +249,11 @@ export function NewTicket({
                   bookingReference: submittedReference.trim() || undefined,
                   ...(agencyIntake ? { customerId } : {}),
                 }),
-          }).catch((e) => setError(e.message));
+          })
+            .catch((e) => setError(e.message))
+            .finally(() => {
+              saving.current = false;
+            });
         }}
       >
         <div>
@@ -395,7 +405,7 @@ export function NewTicket({
           </p>
         )}
         <div className="od-modal-actions">
-          <button type="button" className="od-secondary" onClick={onClose}>
+          <button type="button" className="od-secondary" onClick={close} disabled={busy}>
             Cancel
           </button>
           <button className="od-primary" disabled={busy}>
