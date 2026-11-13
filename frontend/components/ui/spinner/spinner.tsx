@@ -7,7 +7,7 @@ export function Spinner({ className, label = "Loading" }: SpinnerProps) {
       <span
         aria-hidden="true"
         className={cn(
-          "h-4 w-4 animate-spin rounded-full border-2 border-text-muted border-t-accent-done",
+          "h-4 w-4 motion-safe:animate-spin rounded-full border-2 border-text-muted border-t-accent-done",
           className,
         )}
       />

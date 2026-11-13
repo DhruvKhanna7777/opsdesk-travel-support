@@ -10,7 +10,7 @@ export function TicketSortControls({
   onSortOrderChange,
 }: TicketSortControlsProps) {
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex flex-wrap items-center gap-2">
       <label htmlFor="ticket-sort-by" className="text-sm text-text-secondary">
         {TICKET_SORT_CONTROLS_TEXT.SORT_LABEL}
       </label>
@@ -29,9 +29,8 @@ export function TicketSortControls({
 
       <button
         type="button"
-        aria-label={sortOrder === "asc" ? TICKET_SORT_CONTROLS_TEXT.SORT_ASCENDING_ARIA : TICKET_SORT_CONTROLS_TEXT.SORT_DESCENDING_ARIA}
         onClick={() => onSortOrderChange(sortOrder === "asc" ? "desc" : "asc")}
-        className="inline-flex shrink-0 cursor-pointer items-center gap-1.5 whitespace-nowrap rounded-md border border-border-strong bg-surface px-3 py-2 text-sm text-text transition-colors hover:border-text-secondary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-secondary"
+        className="inline-flex min-h-11 shrink-0 cursor-pointer items-center gap-1.5 whitespace-nowrap rounded-full border border-border-strong bg-surface px-3 py-2 text-sm text-text transition-colors hover:border-text-secondary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-secondary"
       >
         <span aria-hidden="true">{sortOrder === "asc" ? "↑" : "↓"}</span>
         {sortOrder === "asc" ? TICKET_SORT_CONTROLS_TEXT.ASC : TICKET_SORT_CONTROLS_TEXT.DESC}

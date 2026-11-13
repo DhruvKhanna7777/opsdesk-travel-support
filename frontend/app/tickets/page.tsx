@@ -1,3 +1,4 @@
+import { SupportPage } from "@/components/layout/support-page";
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import { Spinner } from "@/components/ui/spinner";
@@ -10,14 +11,16 @@ export const metadata: Metadata = {
 
 export default function TicketsPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="flex justify-center py-16">
-          <Spinner label={TICKET_LIST_TEXT.LOADING} />
-        </div>
-      }
-    >
-      <TicketListView />
-    </Suspense>
+    <SupportPage>
+      <Suspense
+        fallback={
+          <div className="flex justify-center py-16">
+            <Spinner label={TICKET_LIST_TEXT.LOADING} />
+          </div>
+        }
+      >
+        <TicketListView />
+      </Suspense>
+    </SupportPage>
   );
 }

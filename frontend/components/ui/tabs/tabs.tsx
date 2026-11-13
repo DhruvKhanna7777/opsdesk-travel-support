@@ -40,7 +40,7 @@ export function Tabs({ tabs, activeTab, onChange, className, label }: TabsProps)
     <div
       role="tablist"
       aria-label={label}
-      className={cn("flex gap-1 border-b border-border", className)}
+      className={cn("flex flex-wrap gap-1 border-b border-border", className)}
     >
       {tabs.map((tab, index) => {
         const isActive = tab.id === activeTab;
@@ -57,7 +57,7 @@ export function Tabs({ tabs, activeTab, onChange, className, label }: TabsProps)
             onClick={() => onChange(tab.id)}
             onKeyDown={(event) => handleKeyDown(event, index)}
             className={cn(
-              "relative px-4 py-2.5 text-sm font-medium transition-colors cursor-pointer",
+              "relative min-h-11 px-3 py-2.5 text-sm font-medium transition-colors cursor-pointer sm:px-4",
               "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-active",
               isActive
                 ? "text-text"
