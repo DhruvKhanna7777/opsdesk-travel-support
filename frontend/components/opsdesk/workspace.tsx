@@ -1,6 +1,7 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { SlaSettings } from "./sla-settings";
+import { HeaderDisclosure } from "./header-disclosure";
 import { Skiper40Link } from "@/components/ui/skiper40-link";
 import {
   ArrowDownToLine,
@@ -270,14 +271,35 @@ export function OpsDeskWorkspace() {
             opsdesk<span className="od-brand-dot">.</span>
           </span>
         </Skiper40Link>
-        <div className="od-workspace-switch">
-          <span className="od-workspace-icon">O</span>
-          <div>
-            <b>Travel operations</b>
-            <small>{human(data.me.kind)} workspace</small>
-          </div>
-          <ChevronDown size={15} />
-        </div>
+        <HeaderDisclosure
+          className="od-workspace-picker"
+          label={`Travel operations ${human(data.me.kind)} workspace`}
+          triggerClassName="od-workspace-switch"
+          trigger={
+            <>
+              <span className="od-workspace-icon" aria-hidden="true">O</span>
+              <span>
+                <b>Travel operations</b>
+                <small>{human(data.me.kind)} workspace</small>
+              </span>
+              <ChevronDown size={15} aria-hidden="true" />
+            </>
+          }
+        >
+          {!supplier && nav.map(({ id, label }) => (
+            <button
+              type="button"
+              key={id}
+              aria-current={view === id ? "page" : undefined}
+              onClick={() => navigate(id)}
+            >
+              {label}
+            </button>
+          ))}
+          <button type="button" onClick={() => setShowHelp(true)}>
+            Open workspace guide
+          </button>
+        </HeaderDisclosure>
         <span className="od-nav-label">WORKSPACE</span>
         <nav aria-label="Workspace">
           {supplier ? (
@@ -445,7 +467,24 @@ export function OpsDeskWorkspace() {
                 </div>
               )}
             </div>
-            <span className="od-avatar small">{initials(data.me.name)}</span>
+            <HeaderDisclosure
+              className="od-profile-picker"
+              label={`Profile for ${data.me.name} (${initials(data.me.name)})`}
+              triggerClassName="od-avatar small od-profile-trigger"
+              trigger={initials(data.me.name)}
+            >
+              <div className="od-profile-identity">
+                <b>{data.me.name}</b>
+                <small>{human(data.me.kind)} workspace</small>
+              </div>
+              <Skiper40Link href="/account">Account settings</Skiper40Link>
+              <button type="button" onClick={() => setShowHelp(true)}>
+                Open workspace guide
+              </button>
+              <button type="button" onClick={() => void logout()}>
+                Sign out of workspace
+              </button>
+            </HeaderDisclosure>
           </div>
         </header>
         <main className="od-main">

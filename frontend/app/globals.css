@@ -135,13 +135,19 @@ select:focus {
 .od-sidebar-wordmark .od-brand-dot {
   margin-left: 0;
 }
+.od-workspace-picker {
+  position: relative;
+  margin: 31px 2px 29px;
+}
 .od-workspace-switch {
   display: flex;
   align-items: center;
   gap: 9px;
   border: 1px solid var(--line);
   border-radius: 9px;
-  margin: 31px 2px 29px;
+  width: 100%;
+  background: transparent;
+  text-align: left;
   padding: 11px 9px;
   color: #455c4f;
 }
@@ -157,6 +163,55 @@ select:focus {
 }
 .od-workspace-switch > svg {
   margin-left: auto;
+}
+.od-workspace-switch[aria-expanded="true"] > svg {
+  transform: rotate(180deg);
+}
+.od-profile-picker {
+  position: relative;
+}
+.od-profile-trigger:focus-visible,
+.od-workspace-switch:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+}
+.od-header-disclosure-panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  z-index: 51;
+  min-width: 180px;
+  padding: 5px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: white;
+  box-shadow: 0 10px 30px #17233b22;
+}
+.od-workspace-picker .od-header-disclosure-panel { width: 100%; }
+.od-profile-picker .od-header-disclosure-panel { right: 0; }
+.od-header-disclosure-panel :is(button, a) {
+  display: block;
+  width: 100%;
+  border-radius: 5px;
+  padding: 8px;
+  font-size: 12px;
+  text-align: left;
+}
+.od-header-disclosure-panel :is(button, a):is(:hover, :focus-visible, [aria-current="page"]) {
+  background: #edf2f8;
+}
+.od-profile-identity {
+  display: grid;
+  gap: 2px;
+  padding: 8px;
+  overflow-wrap: anywhere;
+}
+.od-app[data-theme="dark"] .od-header-disclosure-panel { background: #142239; color: #e6efff; }
+.od-app[data-theme="dark"] .od-avatar.od-profile-trigger {
+  background: #352941;
+  color: #f1e4fa;
+}
+.od-app[data-theme="dark"] .od-header-disclosure-panel :is(button, a):is(:hover, :focus-visible, [aria-current="page"]) {
+  background: #273955;
 }
 .od-workspace-icon {
   width: 29px;
@@ -1893,7 +1948,7 @@ select:focus {
   .od-brand-dot {
     display: none;
   }
-  .od-workspace-switch,
+  .od-workspace-picker,
   .od-nav-label,
   .od-sidebar-note,
   .od-sidebar-bottom > button,

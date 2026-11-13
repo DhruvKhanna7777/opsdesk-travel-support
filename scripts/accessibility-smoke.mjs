@@ -24,6 +24,29 @@ async function signIn(name) {
   await page.getByRole('button', {name: 'Notifications', exact: true}).waitFor();
   return page;
 }
+async function checkHeaderDisclosures(page) {
+  const workspace = page.getByRole('button', {name: 'Travel operations Manager workspace'});
+  await workspace.focus();
+  await workspace.press('Enter');
+  assert.equal(await workspace.getAttribute('aria-expanded'), 'true');
+  await page.locator('.od-workspace-picker').getByRole('button', {name: 'Bookings', exact: true}).click();
+  await page.getByRole('heading', {name: 'Booking directory', exact: true}).waitFor();
+  assert.equal(await workspace.getAttribute('aria-expanded'), 'false');
+
+  const profile = page.getByRole('button', {name: /^Profile for /});
+  await profile.click();
+  const panel = page.locator('.od-profile-picker .od-header-disclosure-panel');
+  await panel.getByText('Manager workspace', {exact: true}).waitFor();
+  assert.equal(await panel.getByRole('link', {name: 'Account settings'}).getAttribute('href'), '/account');
+  await panel.getByRole('button', {name: 'Sign out of workspace'}).focus();
+  await page.keyboard.press('Escape');
+  assert.equal(await profile.getAttribute('aria-expanded'), 'false');
+  assert(await profile.evaluate((button) => button === document.activeElement));
+  await profile.click();
+  await page.getByRole('heading', {name: 'Booking directory', exact: true}).click();
+  assert.equal(await profile.getAttribute('aria-expanded'), 'false');
+  await page.getByRole('navigation', {name: 'Workspace'}).getByRole('button', {name: /^All conversations/}).click();
+}
 async function checkRoleKeyboard(page, role) {
   const launchers = ['Workspace guide', 'New ticket', 'Booking requests', 'Booking reviews'];
   for (const name of launchers) {
@@ -63,6 +86,7 @@ try {
   await scan(login, 'login');
   await login.close();
   const manager = await signIn('manager');
+  await checkHeaderDisclosures(manager);
   await scan(manager, 'manager inbox');
   await manager.getByRole('button', {name: 'Switch to dark theme'}).click();
   assert.equal(await manager.locator('.od-app').getAttribute('data-theme'), 'dark');
