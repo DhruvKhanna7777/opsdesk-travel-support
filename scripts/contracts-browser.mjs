@@ -78,6 +78,7 @@ try {
   const selector = dialog.getByLabel("Agency contract", { exact: true });
   await selector.waitFor();
   assert.equal(await selector.getAttribute("required"), "");
+  assert(await dialog.getByRole("button", { name: "Create & route ticket" }).isDisabled());
   await dialog.getByLabel("Subject", { exact: true }).fill(reason + " refund");
   await dialog
     .getByLabel("Tell us what happened", { exact: true })

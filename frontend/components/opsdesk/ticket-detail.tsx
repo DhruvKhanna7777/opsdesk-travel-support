@@ -119,18 +119,18 @@ function BookingSchedule({
   );
 }
 function IntakeContract({
-  agencyId,
+  path,
+  result,
   refresh,
   value,
   onSelect,
 }: {
-  agencyId: string;
+  path: string;
+  result: ReturnType<typeof useOpsResource<{ selectionRequired: boolean }>>;
   refresh: string;
   value: string;
   onSelect: (id: string) => void;
 }) {
-  const path = `contracts?agencyId=${encodeURIComponent(agencyId)}`;
-  const result = useOpsResource<{ selectionRequired: boolean }>(path, refresh);
   if (result.error)
     return (
       <p role="alert">
@@ -175,6 +175,8 @@ export function NewTicket({
   onCreate: (body: unknown) => Promise<void>;
 }) {
   const requestId = useRef<string | null>(null);
+  const saving = useRef(false);
+  const draftRevision = useRef(0);
   const [title, setTitle] = useState(""),
     [description, setDescription] = useState(""),
     [category, setCategory] = useState(""),
@@ -184,8 +186,12 @@ export function NewTicket({
     [contractId, setContractId] = useState(""),
     [submittedReference, setSubmittedReference] = useState(""),
     [error, setError] = useState(""),
-    [exampleUsed, setExampleUsed] = useState(false);
+    [exampleUsed, setExampleUsed] = useState(false),
+    [loadingExample, setLoadingExample] = useState(false);
   async function sample() {
+    const revision = draftRevision.current;
+    setLoadingExample(true);
+    setError("");
     try {
       const r = await fetch("/data/travel-examples.json");
       if (!r.ok)
@@ -201,31 +207,54 @@ export function NewTicket({
         ),
       );
       const example = options[Math.floor(Math.random() * options.length)];
+      if (!example)
+        throw new Error("No travel examples are available. You can write your own complaint.");
+      if (revision !== draftRevision.current || saving.current) return;
       setTitle(example.instruction);
       setDescription(example.instruction);
       setExampleUsed(true);
     } catch (e) {
-      setError((e as Error).message);
+      if (revision === draftRevision.current && !saving.current)
+        setError((e as Error).message);
+    } finally {
+      setLoadingExample(false);
     }
   }
   const [booking, setBooking] = useState<Booking>();
   const agencyIntake = data.me.kind === "AGENCY";
   const allowUnlistedBooking = agencyIntake || data.me.kind === "CUSTOMER";
+  const agencyId = booking?.agencyId || data.me.agencyId;
+  const contractPath = agencyId
+    ? `contracts?agencyId=${encodeURIComponent(agencyId)}`
+    : null;
+  const contractPolicy = useOpsResource<{ selectionRequired: boolean }>(
+    contractPath,
+    data.now,
+  );
+  const contractPending = Boolean(contractPath && (
+    !contractPolicy.data || (contractPolicy.data.selectionRequired && !contractId)
+  ));
   const suggestedIntent =
     title.trim() || description.trim()
       ? classifyTravelIntent(`${title} ${description}`)
       : "";
+  function close() {
+    if (!saving.current) onClose();
+  }
   return (
-    <Modal title="Start a conversation" onClose={onClose}>
+    <Modal title="Start a conversation" onClose={close} closeDisabled={busy}>
       <form
         onSubmit={(e) => {
           e.preventDefault();
+          if (saving.current || busy || contractPending) return;
           setError("");
           if (agencyIntake && !booking && !customerId) {
             setError("Select the traveler in your agency.");
             return;
           }
           requestId.current ??= crypto.randomUUID();
+          draftRevision.current++;
+          saving.current = true;
           void onCreate({
             requestId: requestId.current,
             title,
@@ -243,7 +272,11 @@ export function NewTicket({
                   bookingReference: submittedReference.trim() || undefined,
                   ...(agencyIntake ? { customerId } : {}),
                 }),
-          }).catch((e) => setError(e.message));
+          })
+            .catch((e) => setError(e.message))
+            .finally(() => {
+              saving.current = false;
+            });
         }}
       >
         <div>
@@ -302,10 +335,11 @@ export function NewTicket({
             <small>Support will review references we can’t match.</small>
           </label>
         )}
-        {(booking?.agencyId || data.me.agencyId) && (
+        {contractPath && (
           <IntakeContract
-            key={booking?.agencyId || data.me.agencyId}
-            agencyId={(booking?.agencyId || data.me.agencyId)!}
+            key={contractPath}
+            path={contractPath}
+            result={contractPolicy}
             refresh={data.now}
             value={contractId}
             onSelect={setContractId}
@@ -317,8 +351,9 @@ export function NewTicket({
             type="button"
             className="od-text-button"
             onClick={() => void sample()}
+            disabled={busy || loadingExample}
           >
-            Load a travel example
+            {loadingExample ? "Loading example…" : "Load a travel example"}
           </button>
         </div>
         {exampleUsed && (
@@ -334,7 +369,10 @@ export function NewTicket({
             maxLength={180}
             autoFocus
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={(e) => {
+              draftRevision.current++;
+              setTitle(e.target.value);
+            }}
             required
             placeholder="What can we help with?"
           />
@@ -345,7 +383,10 @@ export function NewTicket({
             minLength={10}
             maxLength={10000}
             value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            onChange={(e) => {
+              draftRevision.current++;
+              setDescription(e.target.value);
+            }}
             required
             rows={5}
             placeholder="Include the issue and the outcome you need."
@@ -395,10 +436,10 @@ export function NewTicket({
           </p>
         )}
         <div className="od-modal-actions">
-          <button type="button" className="od-secondary" onClick={onClose}>
+          <button type="button" className="od-secondary" onClick={close} disabled={busy}>
             Cancel
           </button>
-          <button className="od-primary" disabled={busy}>
+          <button className="od-primary" disabled={busy || contractPending}>
             {busy ? "Saving…" : "Create & route ticket"}
           </button>
         </div>
