@@ -59,6 +59,7 @@ try {
   await panel
     .getByLabel("Check-in (UTC)", { exact: true })
     .fill("2027-02-01T10:00");
+  await panel.getByLabel("Display timezone", { exact: true }).fill("America/New_York");
   await panel
     .getByLabel("Request reason", { exact: true })
     .fill("Browser synthetic booking approval rehearsal");
@@ -83,6 +84,8 @@ try {
     .filter({ hasText: reference })
     .filter({ hasText: "CREATE:" });
   await creation.getByText(/PENDING/).waitFor();
+  assert((await creation.innerText()).includes("1 Feb, 05:00"));
+  assert((await creation.innerText()).includes("America/New_York"));
   const {
     rows: [{ count }],
   } = await pool.query(
@@ -188,3 +191,6 @@ try {
   ]);
   await pool.end();
 }
+
+// Run the related read-only display journeys after request fixtures are cleaned.
+await import("./booking-timezone-browser.mjs");

@@ -15,10 +15,11 @@ export const initials = (s: string) =>
     .map((w) => w[0])
     .slice(0, 2)
     .join("");
-export const date = (s: string) =>
+export const date = (s: string, timeZone?: string) =>
   s.startsWith("9999-")
     ? "Response SLA paused"
     : new Date(s).toLocaleString("en-GB", {
+        timeZone,
         day: "numeric",
         month: "short",
         hour: "2-digit",
