@@ -1,5 +1,10 @@
 # OpsDesk continuation checkpoint — 12 November 2026
 
+## Current UI continuation — 13 November 2026
+
+> Continue OpsDesk in **KrishChadha001/opsdesk-travel-support**. Fetch main and check open PRs and CI, including Chromium and Firefox. Review branch `codex/stitch-ui`, which starts from `3e05c84` through PR #90. Read the Stitch UI guide, handoff, validation record, backlog and README. The user requested the supplied Stitch design on existing app elements. Demo sign-in, workspace chrome, tables, case panels and shared typography/colors were adapted; fonts are served locally with licences. Preserve all real data, authorization, sessions, saved deadlines, idempotency and audit behavior. Check exact recorded validation and review the available desktop reference screens. Do not claim pixel equivalence for unsupplied mobile/account/booking/Insights frames. No backend or live integration behavior was added. Use Node 22.23.x and an isolated synthetic preview; run mutating suites sequentially. Leave merges to collaborators. Deployment remains paused.
+
+
 ## Hosted demo continuation
 
 Main `4a03781` includes the Iteration 1 and TBO workflow features and the fresh-reset evidence. The user plans to continue from another Codex account with connected deployment plugins. Use the [copy-ready deployment/submission handoff](OPSDESK_DEPLOYMENT_HANDOFF.md) first. It records verified state, a staging-only prompt, required evidence and production gates. Check the latest main CI before reporting its result. Sections below retain their historical checkpoints.

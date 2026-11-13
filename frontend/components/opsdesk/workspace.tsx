@@ -85,7 +85,8 @@ export function OpsDeskWorkspace() {
       const params = new URL(window.location.href).searchParams;
       const nextView = params.get("view");
       setView(
-        nextView && ["inbox", "bookings", "insights", "manager"].includes(nextView)
+        nextView &&
+          ["inbox", "bookings", "insights", "manager"].includes(nextView)
           ? nextView
           : "inbox",
       );
@@ -93,7 +94,8 @@ export function OpsDeskWorkspace() {
     };
     const frame = requestAnimationFrame(() => {
       restoreLocation();
-      if (window.localStorage.getItem("opsdesk-theme") === "dark") setTheme("dark");
+      if (window.localStorage.getItem("opsdesk-theme") === "dark")
+        setTheme("dark");
     });
     window.addEventListener("popstate", restoreLocation);
     return () => {
@@ -257,26 +259,14 @@ export function OpsDeskWorkspace() {
   return (
     <div className="od-app" data-theme={theme}>
       <aside className="od-sidebar">
-        <Skiper40Link
-          href="/"
-          className="od-brand"
-          aria-label="OpsDesk home"
-          leadingIcon={
-            <span className="od-brandmark">
-              <Layers3 size={22} aria-hidden="true" />
-            </span>
-          }
-        >
-          <span className="od-sidebar-wordmark">
-            opsdesk<span className="od-brand-dot">.</span>
-          </span>
-        </Skiper40Link>
         <HeaderDisclosure
           className="od-workspace-picker"
           triggerClassName="od-workspace-switch"
           trigger={
             <>
-              <span className="od-workspace-icon" aria-hidden="true">O</span>
+              <span className="od-workspace-icon" aria-hidden="true">
+                O
+              </span>
               <span>
                 <b>Travel operations</b>
                 <small>{human(data.me.kind)} workspace</small>
@@ -285,16 +275,17 @@ export function OpsDeskWorkspace() {
             </>
           }
         >
-          {!supplier && nav.map(({ id, label }) => (
-            <button
-              type="button"
-              key={id}
-              aria-current={view === id ? "page" : undefined}
-              onClick={() => navigate(id)}
-            >
-              {label}
-            </button>
-          ))}
+          {!supplier &&
+            nav.map(({ id, label }) => (
+              <button
+                type="button"
+                key={id}
+                aria-current={view === id ? "page" : undefined}
+                onClick={() => navigate(id)}
+              >
+                {label}
+              </button>
+            ))}
           <button type="button" onClick={() => setShowHelp(true)}>
             Open workspace guide
           </button>
@@ -362,6 +353,19 @@ export function OpsDeskWorkspace() {
       </aside>
       <div className="od-shell">
         <header className="od-topbar">
+          <Skiper40Link
+            href="/"
+            className="od-brand od-topbar-brand"
+            aria-label="OpsDesk home"
+            leadingIcon={
+              <span className="od-brandmark">
+                <Layers3 size={22} aria-hidden="true" />
+              </span>
+            }
+          >
+            <span className="od-sidebar-wordmark">OpsDesk</span>
+          </Skiper40Link>
+
           <div className="od-breadcrumb">
             Workspace <ChevronRight size={14} />
             <b>
@@ -373,9 +377,12 @@ export function OpsDeskWorkspace() {
             </b>
           </div>
           <div className="od-topbar-actions">
-            <button className="od-theme-toggle" onClick={toggleTheme}
+            <button
+              className="od-theme-toggle"
+              onClick={toggleTheme}
               aria-label={`Switch to ${theme === "light" ? "dark" : "light"} theme`}
-              aria-pressed={theme === "dark"}>
+              aria-pressed={theme === "dark"}
+            >
               {theme === "light" ? <Moon size={16} /> : <Sun size={16} />}
               <span>{theme === "light" ? "Dark" : "Light"}</span>
             </button>
@@ -393,9 +400,9 @@ export function OpsDeskWorkspace() {
               </button>
             )}
             {manager && <MailOutbox />}
-            {(manager || data.me.kind === "AGENCY" || data.me.kind === "CUSTOMER") && (
-              <BookingRequests data={data} />
-            )}
+            {(manager ||
+              data.me.kind === "AGENCY" ||
+              data.me.kind === "CUSTOMER") && <BookingRequests data={data} />}
             <div
               className="od-notification-wrap"
               onKeyDown={(event) => {
@@ -528,7 +535,7 @@ export function OpsDeskWorkspace() {
                         ? "THE BIGGER PICTURE"
                         : view === "bookings"
                           ? "EVERY JOURNEY, CONNECTED"
-                        : "TRAVEL SUPPORT"}
+                          : "TRAVEL SUPPORT"}
                     </div>
                   )}
                   <h1
@@ -862,7 +869,11 @@ export function OpsDeskWorkspace() {
                         </thead>
                         <tbody>
                           {rows.map((t) => (
-                            <tr key={t.id} onClick={() => setSelected(t.id)}>
+                            <tr
+                              key={t.id}
+                              data-priority={t.priority}
+                              onClick={() => setSelected(t.id)}
+                            >
                               <td>
                                 <button
                                   className="od-ticket-title"
@@ -995,9 +1006,17 @@ export function OpsDeskWorkspace() {
                   {view === "manager" && data.me.kind === "MANAGER" && (
                     <div className="od-manager-settings">
                       <Membership actorId={data.me.id} />
-                      <RoutingSettings data={data} busy={busy} mutate={mutate} />
+                      <RoutingSettings
+                        data={data}
+                        busy={busy}
+                        mutate={mutate}
+                      />
                       <SlaSettings data={data} busy={busy} mutate={mutate} />
-                      <AgencyResponseSettings data={data} busy={busy} mutate={mutate} />
+                      <AgencyResponseSettings
+                        data={data}
+                        busy={busy}
+                        mutate={mutate}
+                      />
                     </div>
                   )}
                   <div className="od-bottom-note">

@@ -1,3 +1,18 @@
+# Stitch UI adaptation — 14 November 2026
+
+Repository: `KrishChadha001/opsdesk-travel-support`. Started from main `3e05c84` (PR #90), with no open PRs. Starting [main validation 43450020517](https://github.com/KrishChadha001/opsdesk-travel-support/actions/runs/43450020517) passed; the separate release run was skipped. This is starting-baseline evidence, not this branch’s CI result.
+
+- Fresh `npm ci` passed under Node 22.23.0: 1,170 packages added, 1,174 audited; 28 existing audit findings (5 low, 23 moderate). The initial install used the system npm’s Node 24 shim; installation was repeated with the explicit Node 22 executable. No dependency or lockfile changes.
+- Shared, backend and optimized frontend builds passed in the isolated preview (database 55481, API 3181, frontend 3180). All seed data is synthetic. The frontend rebuild after accessibility fixes is pending at this checkpoint.
+- Backend unit checks: **112 tests in 13 suites passed**, exit 0.
+- Changed frontend ESLint passed from the frontend directory. The first invocation from the repository root failed to locate configuration; rerunning from the correct workspace passed. Formatting and whitespace checks passed.
+- Manual desktop inspection in Edge covered sign-in, manager inbox and connected case. Actual screen-reader speech remains unverified.
+- First accessibility run stopped at the old fixed 55px left-rail assumption. The mobile navigation now sits above the header. The check now computes actual rectangle overlap in both axes and still requires viewport containment; it no longer assumes a particular rail width.
+- Second run passed reflow, notification bounds/Escape/focus, booking dialog focus and intake pagination at **320, 375, 640, 900 and 1024px**, then failed on two axe rule/state groups: role-card visible text omitted by a short aria-label, and case-journey metadata contrast (4.29:1). Removed the redundant aria-label so visible card text supplies the name, and darkened the metadata. Final rerun is pending.
+- Full API HTTP, complete Chromium/Firefox workflows and this branch’s hosted checks are not yet recorded as passing. No interrupted or unfinished command is counted as passed.
+
+[Design mapping and scope](OPSDESK_STITCH_UI.md). No backend behavior, schema, live provider or deployment changes. Pixel equivalence is not claimed for different real record content or frames absent from the supplied export. Human speech, independent classifier review, representative performance and live operational acceptance remain open. Deployment stays paused; collaborators decide merging.
+
 # TBO workflow
 
 Fetched main `3b969be` and checked the only open PR, #72 at `41610e8`. [PR #72 validation](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43242581733) was still running at the first check, with API and recovery successful. It subsequently completed successfully, including Chromium, Firefox, startup, load and production audit. This increment is based on #72 so the new intent filter can also apply to its full CSV export.

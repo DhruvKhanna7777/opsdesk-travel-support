@@ -121,11 +121,16 @@ try {
         `${control.name} falls outside the ${width}px viewport: ${JSON.stringify(control)}`);
     }
     await manager.getByRole('button', {name: 'Notifications', exact: true}).click();
-    const notices = await manager.locator('.od-notices').evaluate((panel) => ({
-      left: panel.getBoundingClientRect().left,
-      right: panel.getBoundingClientRect().right,
-    }));
-    assert(notices.left >= 55 && notices.right <= width,
+    const notices = await manager.locator('.od-notices').evaluate((panel) => {
+      const bounds = panel.getBoundingClientRect();
+      const navigation = document.querySelector('.od-sidebar').getBoundingClientRect();
+      return {
+        left: bounds.left, right: bounds.right,
+        overlapsNavigation: bounds.left < navigation.right && bounds.right > navigation.left &&
+          bounds.top < navigation.bottom && bounds.bottom > navigation.top,
+      };
+    });
+    assert(notices.left >= 0 && notices.right <= width && !notices.overlapsNavigation,
       `Notifications overlap navigation or leave the ${width}px viewport: ${JSON.stringify(notices)}`);
     await manager.keyboard.press('Escape');
     await manager.locator('.od-notices').waitFor({state: 'hidden'});
