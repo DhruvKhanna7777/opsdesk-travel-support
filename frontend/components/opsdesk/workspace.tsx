@@ -206,9 +206,9 @@ export function OpsDeskWorkspace() {
     data.agencies.find((a) => a.id === id)?.name || "Agency";
   const rows = queue.data?.items ?? [];
   const currentPage = queue.data?.page ?? 1;
-  function navigate(next: string) {
+  function navigate(next: string, caseId: string | null = null) {
     setView(next);
-    setSelected(null, next);
+    setSelected(caseId, next);
     setSearch("");
     setTab("active");
     setPriority("ALL");
@@ -998,8 +998,7 @@ export function OpsDeskWorkspace() {
               "Ticket saved, linked and routed.",
             );
             setShowNew(false);
-            setView("inbox");
-            setSelected(String(t.id));
+            navigate("inbox", String(t.id));
           }}
         />
       )}

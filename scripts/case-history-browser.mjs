@@ -54,3 +54,5 @@ try {
 } finally {
   await browser.close();
 }
+
+await import("./intake-return-browser.mjs");
