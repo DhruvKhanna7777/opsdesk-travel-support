@@ -1,7 +1,7 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { SlaSettings } from "./sla-settings";
-import Link from "next/link";
+import { Skiper40Link } from "@/components/ui/skiper40-link";
 import {
   ArrowDownToLine,
   ArrowRight,
@@ -256,12 +256,20 @@ export function OpsDeskWorkspace() {
   return (
     <div className="od-app" data-theme={theme}>
       <aside className="od-sidebar">
-        <Link href="/" className="od-brand">
-          <span className="od-brandmark">
-            <Layers3 size={22} />
+        <Skiper40Link
+          href="/"
+          className="od-brand"
+          aria-label="OpsDesk home"
+          leadingIcon={
+            <span className="od-brandmark">
+              <Layers3 size={22} aria-hidden="true" />
+            </span>
+          }
+        >
+          <span className="od-sidebar-wordmark">
+            opsdesk<span className="od-brand-dot">.</span>
           </span>
-          opsdesk<span className="od-brand-dot">.</span>
-        </Link>
+        </Skiper40Link>
         <div className="od-workspace-switch">
           <span className="od-workspace-icon">O</span>
           <div>
@@ -271,9 +279,9 @@ export function OpsDeskWorkspace() {
           <ChevronDown size={15} />
         </div>
         <span className="od-nav-label">WORKSPACE</span>
-        <nav>
+        <nav aria-label="Workspace">
           {supplier ? (
-            <button className="active">
+            <button className="active" aria-current="page">
               <MessageSquare size={18} />
               Supplier conversations<span>{counts.supplierThreads}</span>
             </button>
@@ -282,6 +290,7 @@ export function OpsDeskWorkspace() {
               <button
                 key={n.id}
                 className={view === n.id ? "active" : ""}
+                aria-current={view === n.id ? "page" : undefined}
                 onClick={() => navigate(n.id)}
               >
                 <n.icon size={18} />
@@ -477,7 +486,7 @@ export function OpsDeskWorkspace() {
                         ? "THE BIGGER PICTURE"
                         : view === "bookings"
                           ? "EVERY JOURNEY, CONNECTED"
-                          : "YOUR TRAVEL SUPPORT, IN SYNC"}
+                        : "TRAVEL SUPPORT"}
                     </div>
                   )}
                   <h1
@@ -498,8 +507,8 @@ export function OpsDeskWorkspace() {
                         : view === "bookings"
                           ? "Booking directory"
                           : view === "manager"
-                            ? "A little attention. A big difference."
-                            : "Every conversation. Full context."}
+                            ? "Needs attention"
+                            : "Support inbox"}
                   </h1>
                   <p>
                     {customer
@@ -535,24 +544,6 @@ export function OpsDeskWorkspace() {
                   </button>
                 </div>
               </div>
-              {view === "manager" && data.me.kind === "MANAGER" && (
-                <div className="od-corridor" aria-hidden="true">
-                  <div className="od-corridor-copy">
-                    <span>TRAVEL OPERATIONS</span>
-                    <strong>Every route. One clear view.</strong>
-                  </div>
-                  <div className="od-globe">
-                    <div className="od-globe-core" />
-                    <div className="od-globe-orbit orbit-one" />
-                    <div className="od-globe-orbit orbit-two" />
-                    <div className="od-globe-route route-one" />
-                    <div className="od-globe-route route-two" />
-                    <i className="od-globe-point point-one" />
-                    <i className="od-globe-point point-two" />
-                    <i className="od-globe-point point-three" />
-                  </div>
-                </div>
-              )}
               {view === "bookings" ? (
                 <Bookings
                   data={data}
