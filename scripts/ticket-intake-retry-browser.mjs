@@ -35,6 +35,25 @@ try {
     await dialog.getByLabel("Tell us what happened").fill(description);
   }
   await fill();
+  let releaseExample;
+  const exampleHeld = new Promise((resolve) => { releaseExample = resolve; });
+  await page.route("**/data/travel-examples.json", async (route) => {
+    await exampleHeld;
+    await route.fulfill({ json: { examples: [
+      { instruction: "Please cancel my hotel booking", intent: "cancel_flight" },
+    ] } });
+  }, { times: 1 });
+  await dialog.getByRole("button", { name: "Load a travel example" }).click();
+  try {
+    await dialog.getByRole("button", { name: "Loading example…" }).waitFor();
+    await dialog.getByLabel("Subject", { exact: true }).fill(title + " edited");
+  } finally {
+    releaseExample();
+  }
+  await dialog.getByRole("button", { name: "Load a travel example" }).waitFor();
+  assert.equal(await dialog.getByLabel("Subject", { exact: true }).inputValue(), title + " edited");
+  assert.equal(await dialog.getByLabel("Tell us what happened").inputValue(), description);
+  await dialog.getByLabel("Subject", { exact: true }).fill(title);
   // Commit the request, then discard its response to simulate a broken network.
   let releaseResponse;
   const responseHeld = new Promise((resolve) => { releaseResponse = resolve; });
