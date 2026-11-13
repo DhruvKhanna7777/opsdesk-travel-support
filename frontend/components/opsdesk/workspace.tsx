@@ -1,7 +1,7 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { SlaSettings } from "./sla-settings";
-import Link from "next/link";
+import { Skiper40Link } from "@/components/ui/skiper40-link";
 import {
   ArrowDownToLine,
   ArrowRight,
@@ -256,12 +256,20 @@ export function OpsDeskWorkspace() {
   return (
     <div className="od-app" data-theme={theme}>
       <aside className="od-sidebar">
-        <Link href="/" className="od-brand">
-          <span className="od-brandmark">
-            <Layers3 size={22} />
+        <Skiper40Link
+          href="/"
+          className="od-brand"
+          aria-label="OpsDesk home"
+          leadingIcon={
+            <span className="od-brandmark">
+              <Layers3 size={22} aria-hidden="true" />
+            </span>
+          }
+        >
+          <span className="od-sidebar-wordmark">
+            opsdesk<span className="od-brand-dot">.</span>
           </span>
-          opsdesk<span className="od-brand-dot">.</span>
-        </Link>
+        </Skiper40Link>
         <div className="od-workspace-switch">
           <span className="od-workspace-icon">O</span>
           <div>

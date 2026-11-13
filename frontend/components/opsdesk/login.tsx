@@ -1,6 +1,13 @@
 "use client";
 import { useState } from "react";
-import { ArrowRight, CheckCircle2, Layers3, LoaderCircle } from "lucide-react";
+import {
+  ArrowRight,
+  ArrowUpRight,
+  CheckCircle2,
+  Layers3,
+  LoaderCircle,
+} from "lucide-react";
+import { Skiper40Link } from "@/components/ui/skiper40-link";
 export function OpsLogin({ onLogin }: { onLogin: () => Promise<void> }) {
   const [email, setEmail] = useState("manager@opsdesk.demo"),
     [password, setPassword] = useState("OpsDeskDemo!2026"),
@@ -62,11 +69,18 @@ export function OpsLogin({ onLogin }: { onLogin: () => Promise<void> }) {
             </div>
           </div>
         </div>
-        <small>Built for the moments that matter.</small>
+        <Skiper40Link href="#workspace-sign-in" className="od-login-jump">
+          Go to demo sign-in <ArrowRight size={16} aria-hidden="true" />
+        </Skiper40Link>
       </section>
-      <section className="od-login-form">
+      <section
+        className="od-login-form"
+        id="workspace-sign-in"
+        aria-labelledby="workspace-sign-in-heading"
+        tabIndex={-1}
+      >
         <span className="od-pill">Synthetic demo workspace</span>
-        <h2>Welcome to OpsDesk</h2>
+        <h2 id="workspace-sign-in-heading">Welcome to OpsDesk</h2>
         <p>Sign in to your travel operations workspace.</p>
         <form onSubmit={login}>
           <label>
@@ -129,6 +143,12 @@ export function OpsLogin({ onLogin }: { onLogin: () => Promise<void> }) {
             Each account has server-enforced access to its own workspace.
           </small>
         </div>
+        <Skiper40Link
+          href="https://www.skiper-ui.com/v1/skiper40"
+          className="od-login-credit"
+        >
+          Link animation by Skiper UI <ArrowUpRight size={12} aria-hidden="true" />
+        </Skiper40Link>
       </section>
     </div>
   );
