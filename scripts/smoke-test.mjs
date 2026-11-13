@@ -986,3 +986,6 @@ try {
   );
   await pool.end();
 }
+
+// Exercise booking verification after restoring the primary workflow fixtures.
+await import("./booking-verification-region-smoke.mjs");
