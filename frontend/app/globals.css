@@ -2,22 +2,23 @@
 
 @theme {
   /* Surfaces */
-  --color-bg: #0b0f14;
-  --color-surface: #121821;
-  --color-surface-raised: #171f2a;
-  --color-border: #212a35;
-  --color-border-strong: #2c3846;
+  --color-bg: #faf9f7;
+  --color-action: #17191c;
+  --color-surface: #ffffff;
+  --color-surface-raised: #f2f2f3;
+  --color-border: #e7e3e0;
+  --color-border-strong: #8a8587;
 
   /* Text */
-  --color-text: #e7ecf1;
-  --color-text-secondary: #8a96a6;
-  --color-text-muted: #4a5568;
+  --color-text: #17191c;
+  --color-text-secondary: #53545a;
+  --color-text-muted: #626168;
 
   /* Accents */
-  --color-accent-done: #4fd1c5;
-  --color-accent-active: #f2a93b;
-  --color-accent-danger: #c4524f;
-  --color-accent-danger-strong: #a83f3c;
+  --color-accent-done: #22604d;
+  --color-accent-active: #784815;
+  --color-accent-danger: #a12832;
+  --color-accent-danger-strong: #791c25;
 
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
@@ -1545,7 +1546,7 @@ select:focus {
   z-index: 100;
 }
 .od-error {
-  color: #a06152 !important;
+  color: var(--color-accent-danger) !important;
   background: #fff2ed;
   padding: 12px;
   border-radius: 7px;
@@ -1586,7 +1587,7 @@ select:focus {
   font-size: 13px;
   color: #667061;
 }
-:is(.od-login, .od-app) {
+:root {
   --od-display-font: Georgia, "Times New Roman", serif;
 }
 .od-login {
@@ -1721,7 +1722,7 @@ select:focus {
   color: var(--login-ink);
   margin: 24px 0 10px;
 }
-.od-login-form > p {
+:is(.od-login-form, .od-activation-content) > p {
   font-size: 14px;
   color: var(--login-muted);
   margin-bottom: 28px;
@@ -2467,4 +2468,51 @@ select:focus {
 }
 .od-app[data-theme="dark"] .od-customer-booking-heading svg {
   color: #b8c8ff;
+}
+
+.support-page {
+  min-height: 100svh;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: system-ui, sans-serif;
+}
+.support-header {
+  display: flex;
+  align-items: center;
+  min-height: 68px;
+  padding-inline: clamp(16px, 5vw, 64px);
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+.support-brand {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.045em;
+}
+.support-brand svg {
+  display: inline-block;
+  margin-inline-end: 6px;
+  vertical-align: -0.16em;
+}
+.support-main {
+  width: min(100%, 1120px);
+  margin-inline: auto;
+  padding: clamp(24px, 5vw, 64px) clamp(16px, 4vw, 40px);
+}
+.support-main-compact {
+  max-width: 560px;
+}
+.support-main h1 {
+  font: 400 clamp(36px, 5vw, 60px) / 1.08 var(--od-display-font);
+  letter-spacing: -0.035em;
+  overflow-wrap: anywhere;
+}
+.support-main-compact h1 {
+  font-size: clamp(36px, 5vw, 52px);
+}
+.support-main :is(input:not([type="checkbox"], [type="radio"]), select) {
+  min-height: 44px;
 }

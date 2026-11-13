@@ -29,6 +29,10 @@ export const TurnstileWidget = forwardRef<
   const [scriptReady, setScriptReady] = useState(false);
 
   useEffect(() => {
+    if (!TURNSTILE_SITE_KEY) {
+      onError?.();
+      return;
+    }
     if (!scriptReady || !containerRef.current || widgetIdRef.current) {
       return;
     }
@@ -39,7 +43,7 @@ export const TurnstileWidget = forwardRef<
 
     widgetIdRef.current = window.turnstile.render(containerRef.current, {
       sitekey: TURNSTILE_SITE_KEY,
-      theme: "dark",
+      theme: "light",
       callback: onVerify,
       "expired-callback": () => onExpire?.(),
       "error-callback": () => onError?.(),
@@ -65,6 +69,8 @@ export const TurnstileWidget = forwardRef<
       }
     },
   }));
+
+  if (!TURNSTILE_SITE_KEY) return null;
 
   return (
     <>

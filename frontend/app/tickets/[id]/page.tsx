@@ -1,3 +1,4 @@
+import { SupportPage } from "@/components/layout/support-page";
 import type { Metadata } from "next";
 import { TicketDetailView } from "./_components/ticket-detail-view";
 import { TICKET_DETAIL_TEXT } from "@/lib/constants/text/tickets.text";
@@ -17,8 +18,8 @@ export default async function TicketPage({ params }: TicketPageProps) {
   const { id } = await params;
 
   return (
-    <div className="mx-auto flex max-w-3xl flex-col gap-6">
+    <SupportPage>
       <TicketDetailView ticketId={id} />
-    </div>
+    </SupportPage>
   );
 }

@@ -34,9 +34,9 @@ import { TicketSortControls } from "../ticket-sort-controls";
  */
 const LINK_BUTTON_CLASSES = {
   primary:
-    "inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-colors bg-accent-done text-bg hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-done",
+    "inline-flex items-center justify-center gap-2 min-h-11 rounded-full px-4 py-2 text-sm font-medium transition-colors bg-action text-white hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-done",
   secondary:
-    "inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-colors bg-surface-raised text-text border border-border-strong hover:border-text-secondary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-secondary",
+    "inline-flex items-center justify-center gap-2 min-h-11 rounded-full px-4 py-2 text-sm font-medium transition-colors bg-surface-raised text-text border border-border-strong hover:border-text-secondary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-secondary",
 };
 
 const SORTABLE_FIELD_SET = new Set<string>(TICKET_SORTABLE_FIELDS);
@@ -115,7 +115,7 @@ export function TicketListView() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold text-text">{TICKET_LIST_TEXT.HEADING}</h1>
           <p className="mt-1 text-sm text-text-secondary">

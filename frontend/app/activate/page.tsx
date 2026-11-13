@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
+import { Skiper40Link } from "@/components/ui/skiper40-link";
+import { SupportPageContent } from "@/components/layout/support-page-content";
 import { Layers3 } from "lucide-react";
 import { PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH } from "@helpdesk/shared";
 import { password as passwordSchema } from "@/lib/validation/auth-schemas";
@@ -89,78 +91,84 @@ export default function ActivatePage() {
           </h1>
           <p>Choose your own password to activate your membership.</p>
         </div>
-        <small>Connected support for every journey.</small>
+        <Skiper40Link href="/" className="od-login-jump">
+          Back to OpsDesk
+        </Skiper40Link>
       </section>
       <section className="od-login-form" aria-labelledby="activate-title">
-        <h2 id="activate-title">Activate your membership</h2>
-        {!ready ? (
-          <p role="status">Checking invitation…</p>
-        ) : accepted ? (
-          <>
-            <p role="status">
-              Your membership is active. You can now sign in with your email and
-              password.
-            </p>
-            <Link className="od-primary" href="/">
-              Go to sign in
-            </Link>
-          </>
-        ) : !token ? (
-          <>
-            <p role="alert" className="od-error">
-              No valid invitation was found. Open the full invitation link from
-              your manager, or request a replacement.
-            </p>
-            <Link href="/">Go to sign in</Link>
-          </>
-        ) : (
-          <>
-            <p>
-              This invitation can be used once. Your manager will never see your
-              password.
-            </p>
-            <form onSubmit={accept}>
-              <label>
-                New password
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  minLength={PASSWORD_MIN_LENGTH}
-                  maxLength={PASSWORD_MAX_LENGTH}
-                  autoComplete="new-password"
-                  aria-describedby="password-requirements"
-                  required
-                  disabled={busy}
-                />
-              </label>
-              <p id="password-requirements">
-                Use 8–64 characters, with uppercase and lowercase letters, a
-                number and a special character. No emoji.
+        <SupportPageContent className="od-activation-content">
+          <h2 id="activate-title">Activate your membership</h2>
+          {!ready ? (
+            <p role="status">Checking invitation…</p>
+          ) : accepted ? (
+            <>
+              <p role="status">
+                Your membership is active. You can now sign in with your email and
+                password.
               </p>
-              <label>
-                Confirm password
-                <input
-                  type="password"
-                  value={confirmation}
-                  onChange={(e) => setConfirmation(e.target.value)}
-                  maxLength={PASSWORD_MAX_LENGTH}
-                  autoComplete="new-password"
-                  required
-                  disabled={busy}
-                />
-              </label>
-              {error && (
-                <p role="alert" className="od-error">
-                  {error}
+              <Link className="od-primary" href="/">
+                Go to sign in
+              </Link>
+            </>
+          ) : !token ? (
+            <>
+              <p role="alert" className="od-error">
+                No valid invitation was found. Open the full invitation link from
+                your manager, or request a replacement.
+              </p>
+              <Skiper40Link href="/" className="od-login-jump">
+                Go to sign in
+              </Skiper40Link>
+            </>
+          ) : (
+            <>
+              <p>
+                This invitation can be used once. Your manager will never see your
+                password.
+              </p>
+              <form onSubmit={accept}>
+                <label>
+                  New password
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    minLength={PASSWORD_MIN_LENGTH}
+                    maxLength={PASSWORD_MAX_LENGTH}
+                    autoComplete="new-password"
+                    aria-describedby="password-requirements"
+                    required
+                    disabled={busy}
+                  />
+                </label>
+                <p id="password-requirements">
+                  Use 8–64 characters, with uppercase and lowercase letters, a
+                  number and a special character. No emoji.
                 </p>
-              )}
-              <button className="od-primary" disabled={busy} type="submit">
-                {busy ? "Activating…" : "Activate membership"}
-              </button>
-            </form>
-          </>
-        )}
+                <label>
+                  Confirm password
+                  <input
+                    type="password"
+                    value={confirmation}
+                    onChange={(e) => setConfirmation(e.target.value)}
+                    maxLength={PASSWORD_MAX_LENGTH}
+                    autoComplete="new-password"
+                    required
+                    disabled={busy}
+                  />
+                </label>
+                {error && (
+                  <p role="alert" className="od-error">
+                    {error}
+                  </p>
+                )}
+                <button className="od-primary" disabled={busy} type="submit">
+                  {busy ? "Activating…" : "Activate membership"}
+                </button>
+              </form>
+            </>
+          )}
+        </SupportPageContent>
       </section>
     </main>
   );

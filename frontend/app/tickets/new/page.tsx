@@ -1,3 +1,4 @@
+import { SupportPage } from "@/components/layout/support-page";
 import type { Metadata } from "next";
 import { NewTicketView } from "./_components/new-ticket-view";
 import { NEW_TICKET_TEXT } from "@/lib/constants/text/tickets.text";
@@ -7,5 +8,9 @@ export const metadata: Metadata = {
 };
 
 export default function NewTicketPage() {
-  return <NewTicketView />;
+  return (
+    <SupportPage>
+      <NewTicketView />
+    </SupportPage>
+  );
 }

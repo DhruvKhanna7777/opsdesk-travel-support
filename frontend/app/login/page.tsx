@@ -1,5 +1,6 @@
+import { SupportPage } from "@/components/layout/support-page";
 import { Suspense } from "react";
-import Link from "next/link";
+import { Skiper40Link } from "@/components/ui/skiper40-link";
 import type { Metadata } from "next";
 import { DEMO_USERS, DEMO_PASSWORD } from "@helpdesk/shared";
 import { Card } from "@/components/ui/card";
@@ -30,43 +31,45 @@ const demoAgents = DEMO_USERS.filter((user) => user.role === "AGENT");
 
 export default function LoginPage() {
   return (
-    <div className="mx-auto flex max-w-sm flex-col gap-6 py-10">
-      <div>
-        <h1 className="text-2xl font-semibold text-text">{LOGIN_TEXT.HEADING}</h1>
-        <p className="mt-1 text-sm text-text-secondary">
-          {LOGIN_TEXT.SUBHEADING}
+    <SupportPage compact>
+      <div className="flex flex-col gap-6">
+        <div>
+          <h1 className="text-2xl font-semibold text-text">{LOGIN_TEXT.HEADING}</h1>
+          <p className="mt-1 text-sm text-text-secondary">
+            {LOGIN_TEXT.SUBHEADING}
+          </p>
+        </div>
+
+        <Card>
+          <Suspense fallback={null}>
+            <LoginForm />
+          </Suspense>
+        </Card>
+
+        <p className="text-center text-sm text-text-secondary">
+          {LOGIN_TEXT.NO_ACCOUNT_PROMPT}{" "}
+          <Skiper40Link href={ROUTES.REGISTER} className="font-semibold text-text">
+            {LOGIN_TEXT.CREATE_ONE_LINK}
+          </Skiper40Link>
         </p>
+
+        <div className="flex flex-col gap-1">
+          <p className="text-center text-xs text-text-muted">
+            {LOGIN_TEXT.DEMO_HINT_PREFIX} <code>{demoCustomer.email}</code> /{" "}
+            <code>{DEMO_PASSWORD}</code>.
+          </p>
+          <p className="text-center text-xs text-text-muted">
+            {LOGIN_TEXT.DEMO_HINT_AGENT_PREFIX}{" "}
+            {demoAgents.map((agent, index) => (
+              <span key={agent.id}>
+                <code>{agent.email}</code>
+                {index < demoAgents.length - 1 ? " or " : ""}
+              </span>
+            ))}{" "}
+            / <code>{DEMO_PASSWORD}</code>.
+          </p>
+        </div>
       </div>
-
-      <Card>
-        <Suspense fallback={null}>
-          <LoginForm />
-        </Suspense>
-      </Card>
-
-      <p className="text-center text-sm text-text-secondary">
-        {LOGIN_TEXT.NO_ACCOUNT_PROMPT}{" "}
-        <Link href={ROUTES.REGISTER} className="text-accent-done hover:underline">
-          {LOGIN_TEXT.CREATE_ONE_LINK}
-        </Link>
-      </p>
-
-      <div className="flex flex-col gap-1">
-        <p className="text-center text-xs text-text-muted">
-          {LOGIN_TEXT.DEMO_HINT_PREFIX} <code>{demoCustomer.email}</code> /{" "}
-          <code>{DEMO_PASSWORD}</code>.
-        </p>
-        <p className="text-center text-xs text-text-muted">
-          {LOGIN_TEXT.DEMO_HINT_AGENT_PREFIX}{" "}
-          {demoAgents.map((agent, index) => (
-            <span key={agent.id}>
-              <code>{agent.email}</code>
-              {index < demoAgents.length - 1 ? " or " : ""}
-            </span>
-          ))}{" "}
-          / <code>{DEMO_PASSWORD}</code>.
-        </p>
-      </div>
-    </div>
+    </SupportPage>
   );
 }
