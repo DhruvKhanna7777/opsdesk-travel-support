@@ -48,6 +48,7 @@ All accounts use **OpsDeskDemo!2026**. These are explicit synthetic demo account
 
 - Persistent tickets and messages; separate complaints remain separate records.
 - Exact booking-reference linking within authorized agency/customer boundaries, plus manual verification for missing references.
+- [Agency intake without a listed booking](docs/OPSDESK_AGENCY_INTAKE.md) can select an authorized traveler, save an optional unverified reference, and retain the complaint for support review.
 - Regional queues, availability, least-loaded eligible-agent assignment, manager reassignment and an unassigned queue.
 - Customer replies, staff-only notes and separate supplier conversations with dedicated supplier login.
 - Response deadlines, check-in urgency, manager notifications, idempotent escalation and a persistent manager-only demo clock.

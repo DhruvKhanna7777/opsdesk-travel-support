@@ -179,6 +179,7 @@ export function NewTicket({
     [category, setCategory] = useState(""),
     [priority, setPriority] = useState(""),
     [bookingId, setBookingId] = useState(""),
+    [customerId, setCustomerId] = useState(""),
     [contractId, setContractId] = useState(""),
     [submittedReference, setSubmittedReference] = useState(""),
     [error, setError] = useState(""),
@@ -207,6 +208,8 @@ export function NewTicket({
     }
   }
   const [booking, setBooking] = useState<Booking>();
+  const agencyIntake = data.me.kind === "AGENCY";
+  const allowUnlistedBooking = agencyIntake || data.me.kind === "CUSTOMER";
   const suggestedIntent =
     title.trim() || description.trim()
       ? classifyTravelIntent(`${title} ${description}`)
@@ -217,6 +220,10 @@ export function NewTicket({
         onSubmit={(e) => {
           e.preventDefault();
           setError("");
+          if (agencyIntake && !booking && !customerId) {
+            setError("Select the traveler in your agency.");
+            return;
+          }
           void onCreate({
             title,
             description,
@@ -229,7 +236,10 @@ export function NewTicket({
                   agencyId: booking.agencyId,
                   customerId: booking.customerId,
                 }
-              : { bookingReference: submittedReference.trim() || undefined }),
+              : {
+                  bookingReference: submittedReference.trim() || undefined,
+                  ...(agencyIntake ? { customerId } : {}),
+                }),
           }).catch((e) => setError(e.message));
         }}
       >
@@ -240,10 +250,12 @@ export function NewTicket({
             label="Booking"
             refresh={data.now}
             value={bookingId}
-            required={data.me.kind !== "CUSTOMER"}
+            required={!allowUnlistedBooking}
             onSelect={(id, item) => {
               setBookingId(id);
               setBooking(item);
+              setCustomerId("");
+              setSubmittedReference("");
               if (item?.agencyId !== booking?.agencyId) setContractId("");
             }}
             text={(b) =>
@@ -253,14 +265,33 @@ export function NewTicket({
             <option value="">
               {data.me.kind === "CUSTOMER"
                 ? "My booking is not listed"
-                : "Select a verified booking"}
+                : agencyIntake
+                  ? "Booking is not listed"
+                  : "Select a verified booking"}
             </option>
           </DirectorySelect>
         </div>
-        {data.me.kind === "CUSTOMER" && !booking && (
+        {agencyIntake && !booking && data.me.agencyId && (
+          <div>
+            Traveler
+            <DirectorySelect<{ id: string; name: string }>
+              path={`booking-requests/customers/${encodeURIComponent(data.me.agencyId)}`}
+              label="Traveler"
+              refresh={data.now}
+              value={customerId}
+              onSelect={setCustomerId}
+              text={(person) => person.name}
+              required
+            >
+              <option value="">Select a traveler in your agency</option>
+            </DirectorySelect>
+          </div>
+        )}
+        {allowUnlistedBooking && !booking && (
           <label>
             Booking reference (TBOH, optional)
             <input
+              aria-label="Booking reference (TBOH, optional)"
               maxLength={60}
               value={submittedReference}
               onChange={(e) => setSubmittedReference(e.target.value)}
