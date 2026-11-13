@@ -6,9 +6,12 @@ import {
   CheckCircle2,
   Layers3,
   LoaderCircle,
+  Plane,
 } from "lucide-react";
+import { motion, useReducedMotion } from "motion/react";
 import { Skiper40Link } from "@/components/ui/skiper40-link";
 export function OpsLogin({ onLogin }: { onLogin: () => Promise<void> }) {
+  const reduceMotion = useReducedMotion();
   const [email, setEmail] = useState("manager@opsdesk.demo"),
     [password, setPassword] = useState("OpsDeskDemo!2026"),
     [busy, setBusy] = useState(false),
@@ -49,11 +52,17 @@ export function OpsLogin({ onLogin }: { onLogin: () => Promise<void> }) {
             connected support.
           </h1>
           <p>
-            The booking, the backstory, the next step.
-            <br />
-            Give every traveler a team that knows the whole story.
+            Track bookings, supplier conversations, and time-sensitive cases in one workspace.
           </p>
-          <div className="od-login-card">
+          <motion.div
+            className="od-login-card"
+            initial={reduceMotion ? false : { y: 8 }}
+            animate={{ y: 0 }}
+            transition={{ duration: reduceMotion ? 0 : 0.24, ease: "easeOut" }}
+          >
+            <div className="od-login-case-label">
+              <Plane size={15} aria-hidden="true" /> Example support case
+            </div>
             <div className="od-flex">
               <span className="od-avatar">MS</span>
               <div>
@@ -67,7 +76,7 @@ export function OpsLogin({ onLogin }: { onLogin: () => Promise<void> }) {
               <CheckCircle2 size={16} /> Previous conversations linked{" "}
               <span>→</span> Right team assigned
             </div>
-          </div>
+          </motion.div>
         </div>
         <Skiper40Link href="#workspace-sign-in" className="od-login-jump">
           Go to demo sign-in <ArrowRight size={16} aria-hidden="true" />
@@ -81,12 +90,13 @@ export function OpsLogin({ onLogin }: { onLogin: () => Promise<void> }) {
       >
         <span className="od-pill">Synthetic demo workspace</span>
         <h2 id="workspace-sign-in-heading">Welcome to OpsDesk</h2>
-        <p>Sign in to your travel operations workspace.</p>
-        <form onSubmit={login}>
+        <p>Use the prefilled demo account or choose a role below.</p>
+        <form onSubmit={login} aria-busy={busy}>
           <label>
             Email address
             <input
               type="email"
+              autoComplete="username"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -96,6 +106,7 @@ export function OpsLogin({ onLogin }: { onLogin: () => Promise<void> }) {
             Password
             <input
               type="password"
+              autoComplete="current-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -106,9 +117,9 @@ export function OpsLogin({ onLogin }: { onLogin: () => Promise<void> }) {
               {error}
             </p>
           )}
-          <button className="od-primary" disabled={busy}>
+          <button className="od-primary" type="submit" disabled={busy}>
             {busy ? (
-              <LoaderCircle size={17} className="od-spin" />
+              <><LoaderCircle size={17} className="od-spin" aria-hidden="true" /> Signing in…</>
             ) : (
               <>
                 Sign in to workspace <ArrowRight size={17} />
@@ -128,6 +139,9 @@ export function OpsLogin({ onLogin }: { onLogin: () => Promise<void> }) {
             ].map(([label, id]) => (
               <button
                 key={id}
+                type="button"
+                aria-pressed={email === `${id}@opsdesk.demo`}
+                disabled={busy}
                 onClick={() => {
                   setEmail(`${id}@opsdesk.demo`);
                   setPassword("OpsDeskDemo!2026");
