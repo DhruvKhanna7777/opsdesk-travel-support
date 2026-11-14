@@ -845,3 +845,88 @@ body,
 .od-app[data-theme="light"] .od-trajectory-heading > span {
   color: #5d5e62;
 }
+
+/* ReUI-inspired resource states, filter chips, and grouped pagination. */
+.od-empty-icon {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border: 1px solid #e5dfd7;
+  border-radius: 14px;
+  background: #efeeeb;
+  color: #5d4c40;
+}
+
+.od-app[data-theme="dark"] .od-empty-icon {
+  background: #233e78;
+  border-color: #40516e;
+  color: #e6edff;
+}
+
+.od-filter-chips,
+.od-page-controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.od-filter-chips {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.od-filter-chips button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  border: 1px solid #d9cfc6;
+  border-radius: 8px;
+  padding: 5px 9px;
+  background: #f6efe9;
+  color: #513a30;
+  font-size: 12px;
+}
+
+.od-filter-chips button:hover {
+  background: #eedfd2;
+}
+
+.od-app[data-theme="dark"] .od-filter-chips button {
+  background: #213252;
+  border-color: #40516e;
+  color: #e6edff;
+}
+
+.od-app[data-theme="dark"] .od-filter-chips button:hover {
+  background: #2a4068;
+}
+
+.od-page-controls > span {
+  font-variant-numeric: tabular-nums;
+}
+
+.od-loading-rows {
+  padding: 14px;
+}
+
+.od-loading-rows > div {
+  display: grid;
+  gap: 12px;
+}
+
+.od-loading-rows > div > span {
+  height: 18px;
+  border-radius: 6px;
+  background: #efeeeb;
+}
+
+.od-loading-rows > div > span:nth-child(2) { width: 86%; }
+.od-loading-rows > div > span:nth-child(3) { width: 72%; }
+
+.od-app[data-theme="dark"] .od-loading-rows > div > span {
+  background: #263957;
+}

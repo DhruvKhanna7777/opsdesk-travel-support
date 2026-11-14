@@ -1,4 +1,5 @@
 "use client";
+import { EmptyState, LoadingRows } from "./resource-ui";
 import { useOpsPage, PageControls } from "./paged-data";
 import { ArrowUpRight, BookOpen, Search } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -318,11 +319,9 @@ export function Bookings({
         </div>
       )}
       {bookings.data && !filtered.length && (
-        <div className="od-empty">
-          <BookOpen size={28} />
-          <h3>No matching bookings</h3>
-          <p>Try another booking reference or destination.</p>
-        </div>
+        <EmptyState icon={BookOpen} title="No matching bookings">
+          Try another booking reference or destination.
+        </EmptyState>
       )}
     </section>
   );
@@ -359,7 +358,7 @@ export function Insights({ onSelect }: { onSelect: (id: string) => void }) {
         {error}
       </p>
     );
-  if (!report) return <p role="status">Loading insights…</p>;
+  if (!report) return <LoadingRows label="Loading insights" />;
   const categoryCounts = categories.map((category) => ({
     label: human(category),
     value:
