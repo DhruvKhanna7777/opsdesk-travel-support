@@ -778,6 +778,7 @@ export function TicketDetail({
             <div className="od-tabs">
               <button
                 className={tab === "conversation" ? "active" : ""}
+                aria-pressed={tab === "conversation"}
                 onClick={() => setTab("conversation")}
               >
                 Conversation
@@ -785,6 +786,7 @@ export function TicketDetail({
               {staff && (
                 <button
                   className={tab === "supplier" ? "active" : ""}
+                  aria-pressed={tab === "supplier"}
                   onClick={() => setTab("supplier")}
                 >
                   Supplier threads
@@ -792,6 +794,7 @@ export function TicketDetail({
               )}
               <button
                 className={tab === "activity" ? "active" : ""}
+                aria-pressed={tab === "activity"}
                 onClick={() => setTab("activity")}
               >
                 Activity

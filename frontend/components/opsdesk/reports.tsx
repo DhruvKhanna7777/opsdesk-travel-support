@@ -205,7 +205,7 @@ export function Bookings({
   );
   const filtered = bookings.data?.items ?? [];
   return (
-    <section className="od-panel">
+    <section className="od-panel" data-motion-panel>
       <div className="od-filters">
         <label className="od-search">
           <Search size={17} />

@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import { ButtonPointerHighlight } from "@/components/ui/button-pointer-highlight";
 import { Providers } from "./providers";
 import "./globals.css";
 import "./stitch.css";
+import "./motion.css";
 export const metadata: Metadata = {
   title: "OpsDesk | Travel support, connected",
   description:
@@ -14,6 +16,7 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <Providers>{children}</Providers>
+        <ButtonPointerHighlight />
       </body>
     </html>
   );
