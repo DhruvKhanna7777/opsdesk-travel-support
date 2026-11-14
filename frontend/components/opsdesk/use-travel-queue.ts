@@ -21,12 +21,13 @@ export function useTravelQueue(
     Object.entries(filters).filter(([, value]) => value && value !== "ALL"),
   ).toString();
   const key = userId ? `${userId}:${filterKey}` : "";
-  const [navigation, setNavigation] = useState({ key: "", page: 1 });
+  const [navigation, setNavigation] = useState({ key: "", page: 1, attempt: 0 });
   const page = navigation.key === key ? navigation.page : 1;
   const query = `${filterKey}&page=${page}`;
-  const resultKey = `${key}:${page}`;
+  const resultKey = `${key}:${page}:${navigation.attempt}`;
   const [result, setResult] = useState<{
     key: string;
+    scope: string;
     data?: QueueRows;
     error?: string;
   }>();
@@ -37,29 +38,37 @@ export function useTravelQueue(
     const timer = setTimeout(() => {
       void request(`queue?${query}`)
         .then((data: QueueRows) => {
-          if (!cancelled) setResult({ key: resultKey, data });
+          if (!cancelled) setResult({ key: resultKey, scope: key, data });
         })
         .catch((cause: unknown) => {
           if (!cancelled)
-            setResult({
+            setResult((previous) => ({
               key: resultKey,
+              scope: key,
+              data: previous?.scope === key ? previous.data : undefined,
               error:
                 cause instanceof Error
                   ? cause.message
                   : "Could not load the inbox.",
-            });
+            }));
         });
     }, 150);
     return () => {
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [enabled, userId, query, resultKey, refreshKey]);
+  }, [enabled, userId, key, query, resultKey, refreshKey]);
 
   return {
     filters: filterKey,
-    data: result?.key === resultKey ? result.data : undefined,
+    data: result?.scope === key ? result.data : undefined,
+    loading: enabled && Boolean(userId) && result?.key !== resultKey,
     error: result?.key === resultKey ? result.error : undefined,
-    goToPage: (next: number) => setNavigation({ key, page: next }),
+    goToPage: (next: number) =>
+      setNavigation((current) => ({
+        key,
+        page: next,
+        attempt: current.attempt + 1,
+      })),
   };
 }

@@ -1,4 +1,5 @@
 "use client";
+import { SmoothCaret } from "@/components/ui/smooth-caret";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { SlaSettings } from "./sla-settings";
 import { HeaderDisclosure } from "./header-disclosure";
@@ -527,7 +528,7 @@ export function OpsDeskWorkspace() {
             />
           ) : (
             <>
-              <div className="od-page-heading">
+              <div className="od-page-heading" key={view}>
                 <div>
                   {!customer && (
                     <div className="od-eyebrow">
@@ -719,6 +720,7 @@ export function OpsDeskWorkspace() {
                         <button
                           key={id}
                           className={tab === id ? "active" : ""}
+                          aria-pressed={tab === id}
                           onClick={() => {
                             setTab(String(id));
                             setStatus("ALL");
@@ -743,6 +745,7 @@ export function OpsDeskWorkspace() {
                           value={search}
                           onChange={(e) => setSearch(e.target.value)}
                         />
+                        <SmoothCaret />
                       </label>
                       <select
                         aria-label="Filter intent"
@@ -854,7 +857,10 @@ export function OpsDeskWorkspace() {
                         </select>
                       </div>
                     )}
-                    <div className="od-table-wrap">
+                    <div
+                      className="od-table-wrap"
+                      aria-busy={queue.loading}
+                    >
                       <table className="od-table">
                         <thead>
                           <tr>
@@ -867,7 +873,10 @@ export function OpsDeskWorkspace() {
                             <th />
                           </tr>
                         </thead>
-                        <tbody>
+                        <tbody
+                          key={`${queue.filters}:${currentPage}`}
+                          data-motion-panel
+                        >
                           {rows.map((t) => (
                             <tr
                               key={t.id}
@@ -943,11 +952,11 @@ export function OpsDeskWorkspace() {
                           {queue.error}
                         </p>
                       )}
-                      {!queue.data && !queue.error && (
+                      {queue.loading && !queue.data && (
                         <p role="status">Loading conversations…</p>
                       )}
                       {queue.data && queue.data.total === 0 && (
-                        <div className="od-empty">
+                        <div className="od-empty" data-motion-panel>
                           <Inbox size={30} />
                           <h3>No conversations here</h3>
                           <p>Try another filter or create a new ticket.</p>
@@ -981,17 +990,25 @@ export function OpsDeskWorkspace() {
                           <button
                             className="od-secondary"
                             disabled={currentPage === 1}
-                            onClick={() => queue.goToPage(currentPage - 1)}
+                            aria-disabled={queue.loading}
+                            onClick={() => {
+                              if (!queue.loading)
+                                queue.goToPage(currentPage - 1);
+                            }}
                           >
                             Previous page
                           </button>
-                          <span>
+                          <span aria-live="polite">
                             Page {currentPage} of {queue.data.totalPages}
                           </span>
                           <button
                             className="od-secondary"
                             disabled={currentPage >= queue.data.totalPages}
-                            onClick={() => queue.goToPage(currentPage + 1)}
+                            aria-disabled={queue.loading}
+                            onClick={() => {
+                              if (!queue.loading)
+                                queue.goToPage(currentPage + 1);
+                            }}
                           >
                             Next page
                           </button>
