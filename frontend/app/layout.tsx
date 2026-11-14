@@ -4,6 +4,7 @@ import { Providers } from "./providers";
 import "./globals.css";
 import "./stitch.css";
 import "./motion.css";
+import "./corners.css";
 export const metadata: Metadata = {
   title: "OpsDesk | Travel support, connected",
   description:

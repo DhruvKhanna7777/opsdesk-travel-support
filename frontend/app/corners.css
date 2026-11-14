@@ -1,0 +1,27 @@
+/* Continuous corners inspired by Skiper UI's Skiper63. */
+@supports (corner-shape: squircle) {
+  :where(
+    button,
+    [role="button"],
+    input,
+    select,
+    textarea,
+    dialog,
+    .od-panel,
+    .od-stat,
+    .od-notices,
+    .od-toast,
+    .od-message,
+    .od-supplier-conversation,
+    .od-customer-booking,
+    .od-login-form,
+    .od-login-preview,
+    .od-primary,
+    .od-secondary,
+    .od-sliding-indicator,
+    [class*="rounded"]
+  ),
+  .od-sliding-group > button::before {
+    corner-shape: squircle;
+  }
+}
