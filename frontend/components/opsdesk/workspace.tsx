@@ -1,5 +1,6 @@
 "use client";
 import { SlidingIndicator } from "@/components/ui/sliding-indicator";
+import { EmptyState, LoadingRows, Pagination } from "./resource-ui";
 import { SmoothCaret } from "@/components/ui/smooth-caret";
 import { useCallback, useEffect, useRef, useState, type MouseEvent } from "react";
 import { flushSync } from "react-dom";
@@ -245,6 +246,16 @@ export function OpsDeskWorkspace() {
     data.agencies.find((a) => a.id === id)?.name || "Agency";
   const rows = queue.data?.items ?? [];
   const currentPage = queue.data?.page ?? 1;
+  const appliedFilters = [
+    { label: "Search", value: search.trim(), clear: () => setSearch("") },
+    { label: "Intent", value: intent === "ALL" ? "" : human(intent), clear: () => setIntent("ALL") },
+    { label: "Priority", value: priority === "ALL" ? "" : human(priority), clear: () => setPriority("ALL") },
+    { label: "Region", value: region === "ALL" ? "" : human(region), clear: () => setRegion("ALL") },
+    { label: "Status", value: status === "ALL" ? "" : human(status), clear: () => setStatus("ALL") },
+    { label: "Owner", value: owner === "ALL" ? "" : owner === "UNASSIGNED" ? "Unassigned" : person(owner), clear: () => setOwner("ALL") },
+    { label: "Deadline", value: deadline === "ALL" ? "" : deadline === "NEXT_DAY" ? "Due within 24 hours" : human(deadline), clear: () => setDeadline("ALL") },
+    { label: "Escalations", value: em ? "EM only" : "", clear: () => setEm(false) },
+  ].filter(({ value }) => value);
   function navigate(next: string, caseId: string | null = null) {
     setView(next);
     setSelected(caseId, next);
@@ -894,6 +905,23 @@ export function OpsDeskWorkspace() {
                         </select>
                       </div>
                     )}
+                    {appliedFilters.length > 0 && (
+                      <div className="od-filter-chips" role="group" aria-label="Applied filters">
+                        {appliedFilters.map(({ label, value, clear }) => (
+                          <button
+                            type="button"
+                            key={label}
+                            aria-label={`Remove ${label.toLowerCase()} filter`}
+                            onClick={clear}
+                          >
+                            {label}: {value} <X size={13} aria-hidden />
+                          </button>
+                        ))}
+                        <button type="button" onClick={() => appliedFilters.forEach(({ clear }) => clear())}>
+                          Reset applied filters
+                        </button>
+                      </div>
+                    )}
                     <div
                       className="od-table-wrap"
                       aria-busy={queue.loading}
@@ -990,14 +1018,14 @@ export function OpsDeskWorkspace() {
                         </p>
                       )}
                       {queue.loading && !queue.data && (
-                        <p role="status">Loading conversations…</p>
+                        <LoadingRows label="Loading conversations" />
                       )}
                       {queue.data && queue.data.total === 0 && (
-                        <div className="od-empty" data-motion-panel>
-                          <Inbox size={30} />
-                          <h3>No conversations here</h3>
-                          <p>Try another filter or create a new ticket.</p>
-                          <button
+                        <EmptyState
+                          icon={Inbox}
+                          title="No conversations here"
+                          action={
+                            <button
                             className="od-secondary"
                             onClick={() => {
                               setPriority("ALL");
@@ -1013,7 +1041,10 @@ export function OpsDeskWorkspace() {
                           >
                             Clear filters
                           </button>
-                        </div>
+                          }
+                        >
+                          Try another filter or create a new ticket.
+                        </EmptyState>
                       )}
                     </div>
                     <div className="od-table-footer">
@@ -1023,32 +1054,18 @@ export function OpsDeskWorkspace() {
                           : "Conversations"}
                       </span>
                       {queue.data && queue.data.totalPages > 1 && (
-                        <nav className="od-flex" aria-label="Inbox pages">
-                          <button
-                            className="od-secondary"
-                            disabled={currentPage === 1}
-                            aria-disabled={queue.loading}
-                            onClick={() => {
-                              if (!queue.loading)
-                                queue.goToPage(currentPage - 1);
-                            }}
+                        <nav aria-label="Inbox pages">
+                          <Pagination
+                            previous="Previous page"
+                            next="Next page"
+                            atStart={currentPage === 1}
+                            atEnd={currentPage >= queue.data.totalPages}
+                            pending={queue.loading}
+                            onPrevious={() => queue.goToPage(currentPage - 1)}
+                            onNext={() => queue.goToPage(currentPage + 1)}
                           >
-                            Previous page
-                          </button>
-                          <span aria-live="polite">
                             Page {currentPage} of {queue.data.totalPages}
-                          </span>
-                          <button
-                            className="od-secondary"
-                            disabled={currentPage >= queue.data.totalPages}
-                            aria-disabled={queue.loading}
-                            onClick={() => {
-                              if (!queue.loading)
-                                queue.goToPage(currentPage + 1);
-                            }}
-                          >
-                            Next page
-                          </button>
+                          </Pagination>
                         </nav>
                       )}
                       <span>

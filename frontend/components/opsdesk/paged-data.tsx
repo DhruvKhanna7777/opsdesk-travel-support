@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { LoadingRows, Pagination } from "./resource-ui";
 import { request } from "./ui";
 
 export type Page<T> = {
@@ -77,32 +78,23 @@ export function PageControls<T>({
         </button>
       </p>
     );
-  if (!resource.data) return <p role="status">Loading {label}…</p>;
+  if (!resource.data) return <LoadingRows label={`Loading ${label}`} />;
   const { page, totalPages, total } = resource.data;
   return (
     <nav className="od-flex od-space od-pagination" aria-label={`${label} pagination`}>
-      <span>
-        {total} {total === 1 ? singularLabel ?? label : label} · Page {page} of {totalPages}
-      </span>
-      {totalPages > 1 && (
-        <>
-          <button
-            type="button"
-            className="od-secondary"
-            disabled={page <= 1}
-            onClick={() => resource.go(page - 1)}
-          >
-            Newer {label}
-          </button>
-          <button
-            type="button"
-            className="od-secondary"
-            disabled={page >= totalPages}
-            onClick={() => resource.go(page + 1)}
-          >
-            Older {label}
-          </button>
-        </>
+      {totalPages > 1 ? (
+        <Pagination
+          previous={`Newer ${label}`}
+          next={`Older ${label}`}
+          atStart={page <= 1}
+          atEnd={page >= totalPages}
+          onPrevious={() => resource.go(page - 1)}
+          onNext={() => resource.go(page + 1)}
+        >
+          {total} {total === 1 ? singularLabel ?? label : label} · Page {page} of {totalPages}
+        </Pagination>
+      ) : (
+        <span>{total} {total === 1 ? singularLabel ?? label : label}</span>
       )}
     </nav>
   );

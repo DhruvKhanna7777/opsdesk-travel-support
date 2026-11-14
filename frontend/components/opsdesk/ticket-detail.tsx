@@ -1,4 +1,5 @@
 "use client";
+import { EmptyState, LoadingRows } from "./resource-ui";
 import { SlidingIndicator } from "@/components/ui/sliding-indicator";
 import { DirectorySelect } from "./directory-select";
 import { Attachments } from "./attachments";
@@ -496,7 +497,7 @@ export function OnDemandTicket({
         </button>
       </p>
     );
-  if (!detail.data) return <p role="status">Loading case…</p>;
+  if (!detail.data) return <LoadingRows label="Loading case" />;
   return (
     <TicketDetail
       ticket={detail.data}
@@ -931,14 +932,9 @@ export function TicketDetail({
                     />
                   ))
                 ) : (
-                  <div className="od-empty">
-                    <MessageSquare size={28} />
-                    <h3>No supplier conversations yet</h3>
-                    <p>
-                      Contact the supplier to keep their updates connected to
-                      this case.
-                    </p>
-                  </div>
+                  <EmptyState icon={MessageSquare} title="No supplier conversations yet">
+                    Contact the supplier to keep their updates connected to this case.
+                  </EmptyState>
                 )}
               </div>
             )}
@@ -1511,14 +1507,9 @@ export function SupplierDesk({
             />
           ))
         ) : (
-          <div className="od-panel od-empty">
-            <MessageSquare size={32} />
-            <h3>No conversations shared yet</h3>
-            <p>
-              Support agents can contact your supplier from their booking
-              workspace.
-            </p>
-          </div>
+          <EmptyState icon={MessageSquare} title="No conversations shared yet" panel>
+            Support agents can contact your supplier from their booking workspace.
+          </EmptyState>
         )}
       </div>
     </>
