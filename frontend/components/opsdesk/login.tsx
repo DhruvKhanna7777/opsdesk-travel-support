@@ -231,6 +231,10 @@ export function OpsLogin({ onLogin }: { onLogin: () => Promise<void> }) {
           Great trips deserve connected support. Explore with fictional records;
           each role’s access is enforced by the server.
         </p>
+        <div className="od-preview-parallax" aria-hidden="true">
+          <span className="od-preview-parallax-grid" />
+          <span className="od-preview-parallax-orbit" />
+        </div>
       </aside>
     </main>
   );
