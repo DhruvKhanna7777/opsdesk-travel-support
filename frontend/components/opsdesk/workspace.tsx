@@ -1,4 +1,5 @@
 "use client";
+import { SlidingIndicator } from "@/components/ui/sliding-indicator";
 import { SmoothCaret } from "@/components/ui/smooth-caret";
 import { useCallback, useEffect, useRef, useState, type MouseEvent } from "react";
 import { flushSync } from "react-dom";
@@ -326,7 +327,7 @@ export function OpsDeskWorkspace() {
           </button>
         </HeaderDisclosure>
         <span className="od-nav-label">WORKSPACE</span>
-        <nav aria-label="Workspace">
+        <nav aria-label="Workspace" className={supplier ? undefined : "od-sliding-group"}>
           {supplier ? (
             <button className="active" aria-current="page">
               <MessageSquare size={18} />
@@ -340,6 +341,7 @@ export function OpsDeskWorkspace() {
                 aria-current={view === n.id ? "page" : undefined}
                 onClick={() => navigate(n.id)}
               >
+                {view === n.id && <SlidingIndicator id="workspace-navigation" />}
                 <n.icon size={18} />
                 {n.label}
                 {n.count > 0 && <span>{n.count}</span>}
@@ -741,7 +743,7 @@ export function OpsDeskWorkspace() {
                     </div>
                   )}
                   <section className="od-panel od-inbox">
-                    <div className="od-tabs">
+                    <div className="od-tabs od-sliding-group">
                       {[
                         ["active", "Active", counts.open],
                         ["waiting", "Awaiting supplier", counts.waiting],
@@ -760,6 +762,7 @@ export function OpsDeskWorkspace() {
                             setStatus("ALL");
                           }}
                         >
+                          {tab === id && <SlidingIndicator id="inbox-status" />}
                           {label}
                           <span>{count}</span>
                         </button>

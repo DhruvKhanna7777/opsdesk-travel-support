@@ -1,4 +1,5 @@
-import { useRef } from "react";
+import { SlidingIndicator } from "@/components/ui/sliding-indicator";
+import { useId, useRef } from "react";
 import { cn } from "@/lib/utils";
 import type { TabsProps } from "./tabs.types";
 
@@ -14,6 +15,7 @@ import type { TabsProps } from "./tabs.types";
  * reaching for a new color.
  */
 export function Tabs({ tabs, activeTab, onChange, className, label }: TabsProps) {
+  const indicatorId = useId();
   const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
 
   const focusAndSelect = (id: string) => {
@@ -40,7 +42,7 @@ export function Tabs({ tabs, activeTab, onChange, className, label }: TabsProps)
     <div
       role="tablist"
       aria-label={label}
-      className={cn("flex flex-wrap gap-1 border-b border-border", className)}
+      className={cn("od-sliding-underline flex flex-wrap gap-1 border-b border-border", className)}
     >
       {tabs.map((tab, index) => {
         const isActive = tab.id === activeTab;
@@ -66,10 +68,7 @@ export function Tabs({ tabs, activeTab, onChange, className, label }: TabsProps)
           >
             {tab.label}
             {isActive && (
-              <span
-                aria-hidden="true"
-                className="absolute inset-x-0 -bottom-px h-0.5 rounded-full bg-accent-active"
-              />
+              <SlidingIndicator id={indicatorId} />
             )}
           </button>
         );

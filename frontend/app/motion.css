@@ -16,7 +16,7 @@
   }
 
   .od-table tbody tr,
-  .od-tabs button > span {
+  .od-tabs button > span:not(.od-sliding-indicator) {
     transition: background-color 160ms var(--od-motion-standard),
       color 160ms var(--od-motion-standard);
   }
@@ -105,6 +105,70 @@
   margin-top: -0.5em;
   background-color: currentColor;
   pointer-events: none;
+}
+
+/* Keep the indicator between the inactive tab surfaces and their labels. */
+.od-sliding-group {
+  isolation: isolate;
+}
+
+.od-sliding-group > button {
+  position: relative;
+  background: transparent !important;
+}
+
+.od-sliding-group > button::before {
+  position: absolute;
+  z-index: -2;
+  inset: 0;
+  border-radius: inherit;
+  content: "";
+}
+
+.od-app[data-theme="light"] .od-tabs.od-sliding-group > button::before {
+  background: #efeeeb;
+}
+
+.od-app[data-theme="light"] .od-sidebar .od-sliding-group > button:hover::before {
+  background: #eae8e5;
+}
+
+.od-sliding-group > button > .od-sliding-indicator {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  padding: 0;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.od-app[data-theme="light"] .od-tabs.od-sliding-group .od-sliding-indicator {
+  background: #17191c;
+}
+
+.od-app[data-theme="light"] .od-sidebar .od-sliding-indicator {
+  background: #fff;
+}
+
+.od-app[data-theme="dark"] .od-sliding-group .od-sliding-indicator {
+  background: #233e78;
+}
+
+.od-sliding-underline .od-sliding-indicator {
+  position: absolute;
+  inset: auto 0 -1px;
+  height: 2px;
+  border-radius: 9999px;
+  background: var(--color-accent-active);
+  pointer-events: none;
+}
+
+.od-app[data-theme="dark"] .od-sliding-group > button::before {
+  background: #213252;
+}
+
+.od-app[data-theme="dark"] .od-sidebar .od-sliding-group > button:hover::before {
+  background: #2a4068;
 }
 
 @media (prefers-reduced-motion: no-preference) {
