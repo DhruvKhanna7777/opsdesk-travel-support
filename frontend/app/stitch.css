@@ -930,3 +930,63 @@ body,
 .od-app[data-theme="dark"] .od-loading-rows > div > span {
   background: #263957;
 }
+
+/* Layered scroll depth adapted from Keith Clark's Pure CSS Parallax Websites.
+   https://blog.keithclark.co.uk/pure-css-parallax-websites/ */
+.od-editorial-login .od-login-story {
+  position: relative;
+  isolation: isolate;
+}
+
+.od-preview-parallax {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  overflow: clip;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.od-preview-parallax-grid {
+  position: absolute;
+  inset: -12% 0;
+  background:
+    radial-gradient(ellipse at 85% 30%, #efd5c4 0%, transparent 55%),
+    radial-gradient(circle, #b38d76 1px, transparent 1.4px) 0 0 / 24px 24px;
+  opacity: 0.28;
+}
+
+.od-preview-parallax-orbit {
+  position: absolute;
+  inset: 8% -32% auto 26%;
+  height: 66%;
+  border: 1px dashed #bc8d75;
+  border-radius: 50%;
+  rotate: -22deg;
+  opacity: 0.45;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .od-editorial-login { overflow: clip; }
+
+    .od-editorial-login .od-login-story {
+      view-timeline-name: --od-preview;
+      view-timeline-axis: block;
+    }
+
+    .od-preview-parallax-grid,
+    .od-preview-parallax-orbit {
+      animation: od-preview-depth linear both;
+      animation-timeline: --od-preview;
+    }
+
+    .od-preview-parallax-grid { --od-preview-travel: 8%; }
+    .od-preview-parallax-orbit { --od-preview-travel: -20%; }
+
+    @keyframes od-preview-depth {
+      from { translate: 0 0; }
+      to { translate: 0 var(--od-preview-travel); }
+    }
+  }
+}
