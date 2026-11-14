@@ -53,6 +53,10 @@ flowchart LR
 
 The browser uses Next.js server routes to reach the API. Travel endpoints live under `/ops/*`. PostgreSQL stores cases, booking context, messages, policies, and audit history. The local launcher also uses PostgreSQL-backed session revocation and rate-limit counters; production requires Redis.
 
+## 🎨 UI reference
+
+The existing workspace follows the supplied [Stitch design](https://stitch.google.com/projects/17554885696707810205): warm paper surfaces, Newsreader headings, Inter controls, peach case highlights and compact operational spacing. Fonts are served locally. See the [design mapping and limitations](docs/OPSDESK_STITCH_UI.md).
+
 ## 📸 Screenshots
 
 Static screenshots use synthetic records.

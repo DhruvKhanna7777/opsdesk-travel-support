@@ -1,5 +1,10 @@
 # OpsDesk developer handoff
 
+## Stitch appearance — 13 November 2026
+
+The current UI increment targets **KrishChadha001/opsdesk-travel-support**, as explicitly requested by the user. Starting main is `3e05c84` through PR #90. Existing branches and worktrees were preserved in a separate clone. [Design mapping and scope](OPSDESK_STITCH_UI.md) documents the supplied reference, local fonts, demo role cards, workspace spacing and typography. Authentication, record scope and all existing actions remain wired to the original services. Check the new validation entry and PR before merging; older repository/checkpoint descriptions below are historical. Deployment remains paused.
+
+
 ## TBO workflow
 
 This follow-up uses the Iteration 1 export and is stacked on [PR #72](https://github.com/DhruvKhanna7777/opsdesk-travel-support/pull/72). The parent [hosted validation](https://github.com/DhruvKhanna7777/opsdesk-travel-support/actions/runs/43242581733) passed, including Chromium and Firefox. The TBO follow-up adds TBOH/LCD labels, intent filtering, and a scoped EM escalation action and manager queue filter. It documents prototype ticket retention. [Workflow](OPSDESK_TBO_WORKFLOW.md) · [Validation](OPSDESK_VALIDATION.md#tbo-workflow)

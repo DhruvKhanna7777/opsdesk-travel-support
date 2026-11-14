@@ -1,5 +1,10 @@
 # OpsDesk — prioritized remaining work
 
+## Stitch UI follow-up — 13 November 2026
+
+Review the appearance PR in **KrishChadha001/opsdesk-travel-support** against the four supplied desktop references. [Design mapping](OPSDESK_STITCH_UI.md). Mobile, booking, Insights and account frames were not present in the supplied export; these use responsive adaptations and shared tokens. A separate marketing homepage remains outside this existing-screen adaptation. Obtain additional approved frames before claiming exact matching for those screens. Keep independent speech, human classifier, representative performance and live-provider acceptance open. Deployment remains paused.
+
+
 ## TBO workflow and submission
 
 Review the [TBO workflow follow-up](OPSDESK_TBO_WORKFLOW.md) after its Iteration 1 parent. Next complete a fresh setup and demo reset, Linux smoke, journeys A–E, the short walkthrough, architecture and cost comparison, and demo evidence. Production ticket retention requires owner approval. Deployment remains paused.

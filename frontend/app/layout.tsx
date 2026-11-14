@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Providers } from "./providers";
 import "./globals.css";
+import "./stitch.css";
 export const metadata: Metadata = {
   title: "OpsDesk | Travel support, connected",
   description:

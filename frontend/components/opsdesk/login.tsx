@@ -4,7 +4,6 @@ import {
   ArrowRight,
   ArrowUpRight,
   CheckCircle2,
-  Layers3,
   LoaderCircle,
   Plane,
 } from "lucide-react";
@@ -35,108 +34,64 @@ export function OpsLogin({ onLogin }: { onLogin: () => Promise<void> }) {
       setBusy(false);
     }
   }
+  const roles = [
+    [
+      "Manager",
+      "manager",
+      "Full access",
+      "Oversee response deadlines, team routing and escalations.",
+    ],
+    [
+      "Asia agent",
+      "asia",
+      "Regional queue",
+      "Handle assigned conversations and urgent travel support in Asia.",
+    ],
+    [
+      "Agency",
+      "agency",
+      "Agency portal",
+      "Manage your agency’s bookings, support cases and booking requests.",
+    ],
+    [
+      "Traveler",
+      "maya",
+      "Maya Sen",
+      "Find your bookings, follow your cases and contact the team.",
+    ],
+    [
+      "Supplier",
+      "supplier",
+      "Partner desk",
+      "Reply to the supplier conversations shared with your team.",
+    ],
+  ];
   return (
-    <div className="od-login">
-      <section className="od-login-story">
-        <div className="od-brand">
-          <span className="od-brandmark">
-            <Layers3 size={23} />
-          </span>
-          opsdesk<span className="od-brand-dot">.</span>
-        </div>
-        <div>
-          <span className="od-eyebrow">EVERY JOURNEY. ONE CONVERSATION.</span>
-          <h1>
-            Great trips deserve
-            <br />
-            connected support.
-          </h1>
-          <p>
-            Track bookings, supplier conversations, and time-sensitive cases in one workspace.
-          </p>
-          <motion.div
-            className="od-login-card"
-            initial={reduceMotion ? false : { y: 8 }}
-            animate={{ y: 0 }}
-            transition={{ duration: reduceMotion ? 0 : 0.24, ease: "easeOut" }}
-          >
-            <div className="od-login-case-label">
-              <Plane size={15} aria-hidden="true" /> Example support case
-            </div>
-            <div className="od-flex">
-              <span className="od-avatar">MS</span>
-              <div>
-                <b>Maya Sen</b>
-                <small>Bali · Booking BK-1042</small>
-              </div>
-              <span className="od-pill">Connected history</span>
-            </div>
-            <p>“We arrive tomorrow. Has the hotel confirmed our booking?”</p>
-            <div className="od-login-timeline">
-              <CheckCircle2 size={16} /> Previous conversations linked{" "}
-              <span>→</span> Right team assigned
-            </div>
-          </motion.div>
-        </div>
-        <Skiper40Link href="#workspace-sign-in" className="od-login-jump">
-          Go to demo sign-in <ArrowRight size={16} aria-hidden="true" />
-        </Skiper40Link>
-      </section>
+    <main className="od-login od-editorial-login">
       <section
         className="od-login-form"
         id="workspace-sign-in"
         aria-labelledby="workspace-sign-in-heading"
         tabIndex={-1}
       >
-        <span className="od-pill">Synthetic demo workspace</span>
-        <h2 id="workspace-sign-in-heading">Welcome to OpsDesk</h2>
-        <p>Use the prefilled demo account or choose a role below.</p>
-        <form onSubmit={login} aria-busy={busy}>
-          <label>
-            Email address
-            <input
-              type="email"
-              autoComplete="username"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </label>
-          <label>
-            Password
-            <input
-              type="password"
-              autoComplete="current-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </label>
-          {error && (
-            <p className="od-error" role="alert">
-              {error}
-            </p>
-          )}
-          <button className="od-primary" type="submit" disabled={busy}>
-            {busy ? (
-              <><LoaderCircle size={17} className="od-spin" aria-hidden="true" /> Signing in…</>
-            ) : (
-              <>
-                Sign in to workspace <ArrowRight size={17} />
-              </>
-            )}
-          </button>
-        </form>
+        <div className="od-login-masthead">
+          <span className="od-editorial-wordmark">OpsDesk</span>
+          <span className="od-eyebrow">TRAVEL SUPPORT</span>
+          <span className="od-pill">Synthetic demo workspace</span>
+        </div>
+        <h1 id="workspace-sign-in-heading">
+          Step into connected
+          <br />
+          travel operations.
+        </h1>
+        <p>
+          Choose a role to explore booking-linked cases, supplier conversations
+          and response deadlines.
+        </p>
         <div className="od-demo-accounts">
-          <span className="od-eyebrow">EXPLORE A ROLE</span>
+          <span className="sr-only">Explore a role</span>
           <div>
-            {[
-              ["Manager", "manager"],
-              ["Asia agent", "asia"],
-              ["Agency", "agency"],
-              ["Traveler", "maya"],
-              ["Supplier", "supplier"],
-            ].map(([label, id]) => (
+            {roles.map(([label, id, badge, description], index) => (
               <button
                 key={id}
                 type="button"
@@ -147,23 +102,136 @@ export function OpsLogin({ onLogin }: { onLogin: () => Promise<void> }) {
                   setPassword("OpsDeskDemo!2026");
                 }}
               >
-                {label}
+                <span className="od-role-dot" aria-hidden="true" />
+                <span className="od-role-copy">
+                  <span>
+                    <b>{label}</b>
+                    <em>{badge}</em>
+                  </span>
+                  <small>{description}</small>
+                </span>
+                <span className="od-role-number" aria-hidden="true">
+                  0{index + 1}
+                </span>
               </button>
             ))}
           </div>
-          <small>
-            Demo password: OpsDeskDemo!2026
-            <br />
-            Each account has server-enforced access to its own workspace.
-          </small>
         </div>
-        <Skiper40Link
-          href="https://www.skiper-ui.com/v1/skiper40"
-          className="od-login-credit"
-        >
-          Link animation by Skiper UI <ArrowUpRight size={12} aria-hidden="true" />
-        </Skiper40Link>
+        <form onSubmit={login} aria-busy={busy}>
+          <div className="od-login-fields">
+            <label>
+              Email address
+              <input
+                type="email"
+                autoComplete="username"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </label>
+            <label>
+              Password
+              <input
+                type="password"
+                autoComplete="current-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </label>
+          </div>
+          {error && (
+            <p className="od-error" role="alert">
+              {error}
+            </p>
+          )}
+          <div className="od-login-actions">
+            <button className="od-primary" type="submit" disabled={busy}>
+              {busy ? (
+                <>
+                  <LoaderCircle
+                    size={17}
+                    className="od-spin"
+                    aria-hidden="true"
+                  />{" "}
+                  Signing in…
+                </>
+              ) : (
+                <>
+                  Sign in to workspace{" "}
+                  <ArrowRight size={17} aria-hidden="true" />
+                </>
+              )}
+            </button>
+            <Skiper40Link href="/login">
+              Use your account <ArrowUpRight size={15} aria-hidden="true" />
+            </Skiper40Link>
+          </div>
+        </form>
       </section>
-    </div>
+      <aside
+        className="od-login-story"
+        aria-label="Example connected support case"
+      >
+        <div className="od-login-preview-label">
+          <span className="od-eyebrow">CONNECTED CASE PREVIEW</span>
+          <span className="od-pill">Synthetic example</span>
+        </div>
+        <motion.div
+          className="od-login-card"
+          initial={reduceMotion ? false : { y: 8 }}
+          animate={{ y: 0 }}
+          transition={{ duration: reduceMotion ? 0 : 0.24, ease: "easeOut" }}
+        >
+          <div className="od-login-case-label">
+            <Plane size={15} aria-hidden="true" /> BOOKING-LINKED SUPPORT
+          </div>
+          <h2>Case #BK-1042</h2>
+          <div className="od-preview-message">
+            <small>Traveler message · Maya Sen</small>
+            <p>“We arrive tomorrow. Has the hotel confirmed our booking?”</p>
+          </div>
+          <div className="od-flex">
+            <span className="od-avatar">MS</span>
+            <div>
+              <b>Maya Sen</b>
+              <small>Bali · Booking BK-1042</small>
+            </div>
+          </div>
+          <div className="od-preview-facts">
+            <div>
+              <small>Booking context</small>
+              <b>Connected history</b>
+            </div>
+            <div>
+              <small>Team ownership</small>
+              <b>Assigned specialist</b>
+            </div>
+          </div>
+          <div className="od-login-timeline">
+            <CheckCircle2 size={16} aria-hidden="true" /> Previous conversations
+            linked
+          </div>
+        </motion.div>
+        <div className="od-login-proof">
+          <div>
+            <b>One case</b>
+            <span>Booking and history</span>
+          </div>
+          <div>
+            <b>Five roles</b>
+            <span>Scoped workspaces</span>
+          </div>
+          <div>
+            <b>One trail</b>
+            <span>Audited activity</span>
+          </div>
+        </div>
+        <p className="od-login-footnote">
+          Great trips deserve connected support. Explore with fictional records;
+          each role’s access is enforced by the server.
+        </p>
+      </aside>
+    </main>
   );
 }
