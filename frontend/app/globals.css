@@ -255,7 +255,7 @@ select:focus {
 .od-sidebar nav button:hover {
   background: #f0f5f1;
 }
-.od-sidebar nav button span {
+.od-sidebar nav button span:not(.od-sliding-indicator) {
   margin-left: auto;
   background: #e1e8e3;
   min-width: 21px;
@@ -742,7 +742,7 @@ select:focus {
   color: #327b55;
   font-weight: 600;
 }
-.od-tabs button > span {
+.od-tabs button > span:not(.od-sliding-indicator) {
   font-size: 10px;
   background: #f0f3ef;
   color: #667066;
@@ -750,7 +750,7 @@ select:focus {
   line-height: 17px;
   border-radius: 4px;
 }
-.od-tabs button.active > span {
+.od-tabs button.active > span:not(.od-sliding-indicator) {
   background: #e7f0e7;
   color: #44654b;
 }
@@ -1966,7 +1966,7 @@ select:focus {
     padding: 12px 0;
     position: relative;
   }
-  .od-sidebar nav button span {
+  .od-sidebar nav button span:not(.od-sliding-indicator) {
     position: absolute;
     top: 0;
     right: 0;

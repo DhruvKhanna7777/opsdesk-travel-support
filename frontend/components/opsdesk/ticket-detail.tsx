@@ -1,4 +1,5 @@
 "use client";
+import { SlidingIndicator } from "@/components/ui/sliding-indicator";
 import { DirectorySelect } from "./directory-select";
 import { Attachments } from "./attachments";
 import { TicketSlaControls } from "./sla-settings";
@@ -775,12 +776,13 @@ export function TicketDetail({
             </small>
           </section>
           <section className="od-panel">
-            <div className="od-tabs">
+            <div className="od-tabs od-sliding-group">
               <button
                 className={tab === "conversation" ? "active" : ""}
                 aria-pressed={tab === "conversation"}
                 onClick={() => setTab("conversation")}
               >
+                {tab === "conversation" && <SlidingIndicator id="ticket-detail" />}
                 Conversation
               </button>
               {staff && (
@@ -789,6 +791,7 @@ export function TicketDetail({
                   aria-pressed={tab === "supplier"}
                   onClick={() => setTab("supplier")}
                 >
+                  {tab === "supplier" && <SlidingIndicator id="ticket-detail" />}
                   Supplier threads
                 </button>
               )}
@@ -797,6 +800,7 @@ export function TicketDetail({
                 aria-pressed={tab === "activity"}
                 onClick={() => setTab("activity")}
               >
+                {tab === "activity" && <SlidingIndicator id="ticket-detail" />}
                 Activity
               </button>
             </div>
