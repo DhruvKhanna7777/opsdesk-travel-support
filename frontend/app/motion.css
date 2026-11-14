@@ -106,3 +106,20 @@
   background-color: currentColor;
   pointer-events: none;
 }
+
+@media (prefers-reduced-motion: no-preference) {
+  html.od-theme-transition::view-transition-old(root),
+  html.od-theme-transition::view-transition-new(root) {
+    mix-blend-mode: normal;
+    animation: none;
+  }
+
+  html.od-theme-transition::view-transition-new(root) {
+    animation: od-theme-reveal 320ms var(--od-motion-enter) both;
+  }
+
+  @keyframes od-theme-reveal {
+    from { clip-path: circle(0 at var(--od-theme-origin)); }
+    to { clip-path: circle(var(--od-theme-radius) at var(--od-theme-origin)); }
+  }
+}
