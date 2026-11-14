@@ -1,6 +1,7 @@
 "use client";
 import { SmoothCaret } from "@/components/ui/smooth-caret";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type MouseEvent } from "react";
+import { flushSync } from "react-dom";
 import { SlaSettings } from "./sla-settings";
 import { HeaderDisclosure } from "./header-disclosure";
 import { Skiper40Link } from "@/components/ui/skiper40-link";
@@ -57,6 +58,7 @@ import {
 export function OpsDeskWorkspace() {
   const noticesButton = useRef<HTMLButtonElement>(null);
   const focusCustomerHeading = useRef(false);
+  const themeTransition = useRef<ViewTransition | null>(null);
   const [data, setData] = useState<Workspace | null>(null),
     [ready, setReady] = useState(false),
     [error, setError] = useState(""),
@@ -114,13 +116,45 @@ export function OpsDeskWorkspace() {
       window.history[replace ? "replaceState" : "pushState"](null, "", url);
     setSelectedCase(id);
   }
-  const toggleTheme = () => {
-    setTheme((current) => {
-      const next = current === "light" ? "dark" : "light";
-      window.localStorage.setItem("opsdesk-theme", next);
-      return next;
-    });
-  };
+  function toggleTheme(event: MouseEvent<HTMLButtonElement>) {
+    if (themeTransition.current) return;
+    const next = theme === "light" ? "dark" : "light";
+    const applyTheme = () => setTheme(next);
+    window.localStorage.setItem("opsdesk-theme", next);
+
+    if (
+      !document.startViewTransition ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      applyTheme();
+      return;
+    }
+
+    // Circular reveal adapted from Skiper UI's Skiper26 (skiper-ui.com/v1/skiper26),
+    // inspired by rudrodip/theme-toggle-effect.
+    const { left, top, width, height } = event.currentTarget.getBoundingClientRect();
+    const x = left + width / 2;
+    const y = top + height / 2;
+    const radius = Math.hypot(
+      Math.max(x, window.innerWidth - x),
+      Math.max(y, window.innerHeight - y),
+    );
+    const root = document.documentElement;
+    root.style.setProperty("--od-theme-origin", `${x}px ${y}px`);
+    root.style.setProperty("--od-theme-radius", `${radius}px`);
+    root.classList.add("od-theme-transition");
+
+    const transition = document.startViewTransition(() => flushSync(applyTheme));
+    themeTransition.current = transition;
+    const cleanup = () => {
+      themeTransition.current = null;
+      root.classList.remove("od-theme-transition");
+      root.style.removeProperty("--od-theme-origin");
+      root.style.removeProperty("--od-theme-radius");
+    };
+    void transition.ready.catch(() => {});
+    void transition.finished.then(cleanup, cleanup);
+  }
   const queue = useTravelQueue(
     data?.me.id,
     Boolean(
